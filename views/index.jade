@@ -1,0 +1,20 @@
+extends layout
+
+block content
+
+  - var instances = [{"name": "First one", "id": 1}, {"name": "secondwan", "id": 2}, {"name": "thirdone", "id": 3}];
+
+  h1= title
+  p Welcome to #{title}
+
+  p Create a new instance
+  button(type='button', onclick='createInstance()') Create
+  
+  h1 Instances
+
+  div
+    ul
+      for instance in instances
+        li
+          button(type='button', onclick='joinInstance("#{instance.id}")') #{instance.name}
+
