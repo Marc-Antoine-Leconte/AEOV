@@ -8,8 +8,8 @@ const sequelize = new Sequelize(
     process.env.DB_PASSWORD,
     {
         host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 1433,
-        dialect: 'mssql',
+        port: process.env.DB_PORT,
+        dialect: process.env.DIALECT,
         dialectOptions: {
             options: {
                 encrypt: true,

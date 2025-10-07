@@ -9,11 +9,11 @@ function model(sequelize) {
             primaryKey: true,
         },
         mode: {
-            type: DataTypes.STRING(30),
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
         name: {
-            type: DataTypes.STRING(30),
+            type: DataTypes.STRING(100),
             allowNull: false
         },
     };
