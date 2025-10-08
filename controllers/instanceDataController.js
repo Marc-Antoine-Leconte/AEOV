@@ -1,10 +1,10 @@
-const { Instance } = require('../config/database');
+const { InstanceData } = require('../config/database');
 
-class InstanceController {
-  getAllInstances = async (req, res) => {
+class InstanceDataController {
+  getAllInstanceData = async (req, res) => {
         try {
-            const instances = await Instance.findAll();
-            res.json(instances);
+            const instanceData = await InstanceData.findAll();
+            res.json(instanceData);
         }
         catch (error) {
             console.log(error);
@@ -15,16 +15,16 @@ class InstanceController {
         }
     }
 
-    getInstanceById = async (req, res) => {
+    getInstanceDataById = async (req, res) => {
         try {
-            const instance = await Instance.findByPk(req.params.id);
-            if (!instance) {
+            const instanceData = await InstanceData.findByPk(req.params.id);
+            if (!instanceData) {
                 return res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found"
+                    message: "InstanceData not found"
                 })
             }
-            res.json(instance);
+            res.json(instanceData);
         }
         catch (error) {
             console.log(error);
@@ -35,15 +35,18 @@ class InstanceController {
         }
     }
 
-    createInstance = async (req, res) => {
+    createInstanceData = async (req, res) => {
         try {
             const instanceData = {
-                mode: req.body.mode,
-                name: req.body.name
+                gameState: req.body.gameState,
+                currentPlayerId: req.body.currentPlayerId,
+                maxPlayers: req.body.maxPlayers,
+                ownerId: req.body.ownerId,
+                rounds: req.body.rounds
             };
-            var createdInstance = await Instance.create(instanceData);
+            var createdInstanceData = await InstanceData.create(instanceData);
             res.status(201)
-                .json(createdInstance);
+                .json(createdInstanceData);
         } catch (error) {
             console.log(error);
             res.status(500)
@@ -54,20 +57,20 @@ class InstanceController {
         }
     }
 
-    updateInstance = async (req, res) => {
+    updateInstanceData = async (req, res) => {
         try {
-            const existingInstance = await Instance.findByPk(req.params.id);
-            if (!existingInstance) {
+            const existingInstanceData = await InstanceData.findByPk(req.params.id);
+            if (!existingInstanceData) {
                return res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found."
+                    message: "InstanceData not found."
                 });
             }
-            const instanceToUpdate = {
+            const instanceDataToUpdate = {
                 mode: req.body.mode,
                 name: req.body.name
             };
-            await Instance.update(instanceToUpdate, {
+            await InstanceData.update(instanceDataToUpdate, {
                 where: {
                     id: req.params.id
                 }
@@ -83,18 +86,18 @@ class InstanceController {
         }
     }
 
-    deleteInstance = async (req, res) => {
+    deleteInstanceData = async (req, res) => {
         try {
             const id = req.params.id;
-            const instance = await Instance.findByPk(id);
-            if (!instance) {
+            const instanceData = await Instance.findByPk(id);
+            if (!instanceData) {
                 res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found"
+                    message: "InstanceData not found"
                 });
             }
-            instance.destroy();
-            instance.save();
+            instanceData.destroy();
+            instanceData.save();
             res.status(204).send();
         }
         catch (error) {
@@ -107,4 +110,4 @@ class InstanceController {
     }
 }
 
-module.exports = new InstanceController();
+module.exports = new InstanceDataController();

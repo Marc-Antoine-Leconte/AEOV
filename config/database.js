@@ -1,6 +1,9 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 const instanceModel = require('../models/instance')
+const instanceDataModel = require('../models/instanceData')
+const instancePlayerModel = require('../models/instancePlayer')
+const playerModel = require('../models/player')
 
 const sequelize = new Sequelize(
     process.env.DB_NAME,
@@ -22,6 +25,8 @@ const sequelize = new Sequelize(
 const db = {};
 db.Sequelize = sequelize;
 db.Instance = instanceModel(sequelize);
-
+db.InstanceData = instanceDataModel(sequelize);
+db.InstancePlayer = instancePlayerModel(sequelize);
+db.Player = playerModel(sequelize);
 
 module.exports = db;

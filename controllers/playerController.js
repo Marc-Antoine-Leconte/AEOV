@@ -1,10 +1,10 @@
-const { Instance } = require('../config/database');
+const { Player } = require('../config/database');
 
-class InstanceController {
-  getAllInstances = async (req, res) => {
+class PlayerController {
+  getAllPlayers = async (req, res) => {
         try {
-            const instances = await Instance.findAll();
-            res.json(instances);
+            const players = await Player.findAll();
+            res.json(players);
         }
         catch (error) {
             console.log(error);
@@ -15,16 +15,16 @@ class InstanceController {
         }
     }
 
-    getInstanceById = async (req, res) => {
+    getPlayerById = async (req, res) => {
         try {
-            const instance = await Instance.findByPk(req.params.id);
-            if (!instance) {
+            const player = await Player.findByPk(req.params.id);
+            if (!player) {
                 return res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found"
+                    message: "Player not found"
                 })
             }
-            res.json(instance);
+            res.json(player);
         }
         catch (error) {
             console.log(error);
@@ -35,15 +35,15 @@ class InstanceController {
         }
     }
 
-    createInstance = async (req, res) => {
+    createPlayer = async (req, res) => {
         try {
-            const instanceData = {
-                mode: req.body.mode,
-                name: req.body.name
+            const playerData = {
+                username: req.body.username,
+                status: req.body.status
             };
-            var createdInstance = await Instance.create(instanceData);
+            var createdPlayer = await Player.create(playerData);
             res.status(201)
-                .json(createdInstance);
+                .json(createdPlayer);
         } catch (error) {
             console.log(error);
             res.status(500)
@@ -54,20 +54,20 @@ class InstanceController {
         }
     }
 
-    updateInstance = async (req, res) => {
+    updatePlayer = async (req, res) => {
         try {
-            const existingInstance = await Instance.findByPk(req.params.id);
-            if (!existingInstance) {
+            const existingPlayer = await Player.findByPk(req.params.id);
+            if (!existingPlayer) {
                return res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found."
+                    message: "Player not found."
                 });
             }
-            const instanceToUpdate = {
-                mode: req.body.mode,
-                name: req.body.name
+            const playerToUpdate = {
+                username: req.body.username,
+                status: req.body.status
             };
-            await Instance.update(instanceToUpdate, {
+            await Player.update(playerToUpdate, {
                 where: {
                     id: req.params.id
                 }
@@ -83,18 +83,18 @@ class InstanceController {
         }
     }
 
-    deleteInstance = async (req, res) => {
+    deletePlayer = async (req, res) => {
         try {
             const id = req.params.id;
-            const instance = await Instance.findByPk(id);
-            if (!instance) {
+            const player = await Player.findByPk(id);
+            if (!player) {
                 res.status(404).json({
                     statusCode: 404,
-                    message: "Instance not found"
+                    message: "Player not found"
                 });
             }
-            instance.destroy();
-            instance.save();
+            player.destroy();
+            player.save();
             res.status(204).send();
         }
         catch (error) {
@@ -107,4 +107,4 @@ class InstanceController {
     }
 }
 
-module.exports = new InstanceController();
+module.exports = new PlayerController();
