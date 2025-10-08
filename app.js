@@ -17,7 +17,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(logger('dev'));
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "script-src": ["'self'", "'sha256-t4hrt/shI2RwfCP1tEJaQhtZRY5CE2e+X7jwYfSODV0='"],
+      },
+    },
+  }),
+);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
