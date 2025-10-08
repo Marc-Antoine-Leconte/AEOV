@@ -16,5 +16,5 @@ block content
     ul
       for instance in instances
         li
-          button(type='button', onclick='joinInstance("#{instance.id}")') #{instance.name}
+          button(type='button', class="select-instance-button", id="#{instance.id}", value="#{instance.name}") #{instance.name}
 

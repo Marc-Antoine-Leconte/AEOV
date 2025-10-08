@@ -28,8 +28,48 @@ var server = http.createServer(app);
 const { Server } = require('socket.io')
 const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 })
 
+const visitors = {};
+
+// A VISITOR CONNECTS TO THE SERVER
 io.on('connection', (socket) => {
   console.log('a user connected');
+
+  visitors[socket.id] = {
+    name: "boby",
+    isInInstance: "false",
+    instanceId: "",
+  };
+
+  console.log('Current visitors:', visitors);
+
+  // A PLAYER JOIN AN INSTANCE
+  socket.on('playerJoinInstance', ({name, instanceId}) => {
+    console.log('user ' + name + ' joined the instance ' + instanceId);
+
+    const playersInInstance = ["boby", "johny"];
+    const instanceData = {
+      gameState: "waitingForPlayers",
+      currentPlayer: "boby",
+      players: {
+        "1": { name: "boby", status: "ready" },
+        "2": { name: "johny", status: "notReady" },
+      },
+      id: instanceId,
+      name: "firstOne",
+      mode: "",
+      maxPlayers: 4,
+      owner: "boby",
+      rounds: 3,
+      settings: {},
+    }
+
+    for (const id in visitors) {
+      if (playersInInstance.includes(visitors[id].name)) {
+        io.to(id).emit('updateInstanceStatus', instanceData);
+      }
+    }
+  });
+
 });
 
 /**
