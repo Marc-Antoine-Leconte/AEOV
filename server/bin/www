@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('../../app');
 var debug = require('debug')('aeov:server');
 var http = require('http');
 
@@ -41,6 +41,14 @@ io.on('connection', (socket) => {
   };
 
   console.log('Current visitors:', visitors);
+
+  // A VISITOR DISCONNECTS FROM THE SERVER
+  socket.on('disconnect', (reason) => {
+    console.log(reason)
+    console.log('user ' + socket.id + ":" + visitors[socket.id].name + ' disconnected');
+    
+    delete visitors[socket.id]
+  })
 
   // A PLAYER JOIN AN INSTANCE
   socket.on('playerJoinInstance', ({name, instanceId}) => {

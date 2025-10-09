@@ -2,17 +2,17 @@ const { DataTypes } = require('sequelize');
 
 function model(sequelize) {
     const attributes = {
-        Id: {
+        id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
         },
-        username: {
+        mode: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        status: {
+        name: {
             type: DataTypes.STRING(100),
             allowNull: false
         },
@@ -23,7 +23,7 @@ function model(sequelize) {
         // don't add the timestamp attributes (updatedAt, createdAt)
         timestamps: false,
     };
-    return sequelize.define("player", attributes, options);
+    return sequelize.define("instance", attributes, options);
 }
 
 module.exports = model;

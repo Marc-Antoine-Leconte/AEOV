@@ -1,4 +1,4 @@
-const { InstancePlayer } = require('../config/database');
+const { InstancePlayer } = require('../../config/database');
 
 class InstancePlayerController {
   getAllInstancePlayers = async (req, res) => {
@@ -17,7 +17,7 @@ class InstancePlayerController {
 
     getInstancePlayerById = async (req, res) => {
         try {
-            const instancePlayer = await InstancePlayers.findByPk(req.params.id);
+            const instancePlayer = await InstancePlayer.findByPk(req.params.id);
             if (!instancePlayer) {
                 return res.status(404).json({
                     statusCode: 404,

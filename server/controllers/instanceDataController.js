@@ -1,4 +1,4 @@
-const { InstanceData } = require('../config/database');
+const { InstanceData } = require('../../config/database');
 
 class InstanceDataController {
   getAllInstanceData = async (req, res) => {
@@ -67,8 +67,11 @@ class InstanceDataController {
                 });
             }
             const instanceDataToUpdate = {
-                mode: req.body.mode,
-                name: req.body.name
+                gameState: req.body.gameState,
+                currentPlayerId: req.body.currentPlayerId,
+                maxPlayers: req.body.maxPlayers,
+                ownerId: req.body.ownerId,
+                rounds: req.body.rounds
             };
             await InstanceData.update(instanceDataToUpdate, {
                 where: {

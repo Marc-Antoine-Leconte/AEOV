@@ -46,8 +46,11 @@ socket.on('updateInstanceStatus', (instanceStatus) => {
 
 function createInstance() {
     alert('Create Instance button clicked!');
-    // Add your create instance logic here
     console.log('Creating new instance...');
+
+    const instanceNameInput = document.getElementById("new-instance-name");
+    const instanceName = instanceNameInput.value || "Une super partie !";
+    console.log('# Instance Name =>', instanceName);
 }
 
 function joinInstance() {
@@ -63,28 +66,5 @@ function joinInstance() {
         socket.emit('playerJoinInstance', { name: currentPlayer.name, instanceId: instanceId });
         console.log('done');
     }
-}
-
-let btn = document.querySelectorAll('.select-instance-button');
-for (i = 0; i < btn.length; i++) {
-    btn[i].addEventListener('click', joinInstance);
-}
-
-function searchInstance() {
-    const instanceCode = document.getElementById('instanceCode').value;
-    
-    if (!instanceCode.trim()) {
-        alert('Please enter an instance code');
-        return;
-    }
-    
-    alert(`Searching for instance: ${instanceCode}`);
-    console.log('Searching for instance:', instanceCode);
-    
-    // Add your search logic here
-    // Example: Make an AJAX request to search for the instance
-    // fetch(`/search-instance/${instanceCode}`)
-    //     .then(response => response.json())
-    //     .then(data => console.log(data));
 }
 
