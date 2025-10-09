@@ -1,5 +1,5 @@
 function DisplayInstanceList() {
-    fetchAllInstances().then((data) => {
+    fetchAllInstancesFromAPI().then((data) => {
         const instanceList = document.getElementById("instance-list");
         instanceList.innerHTML = ""; // Clear existing content
 

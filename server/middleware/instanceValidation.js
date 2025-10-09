@@ -23,9 +23,9 @@ const validateInstance = (req, res, next) => {
                 message: "Validation failed",
                 errors: error.details.map(detail => detail.message)
             });
+    } else {
+        next();
     }
-
-    next();
 }
 
 const validateInstanceUpdate = (req, res, next) => {

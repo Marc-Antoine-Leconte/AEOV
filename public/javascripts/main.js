@@ -51,6 +51,16 @@ function createInstance() {
     const instanceNameInput = document.getElementById("new-instance-name");
     const instanceName = instanceNameInput.value || "Une super partie !";
     console.log('# Instance Name =>', instanceName);
+
+    createInstanceFromAPI({ name: instanceName }).then((data) => {
+        console.log('# createInstanceFromAPI - data =>', data);
+        if (data.error || data.message) {
+            alert("Une erreur est survenue lors de la création de l'instance : " + data.message);
+            return
+        }
+
+        DisplayInstanceList();
+    });
 }
 
 function joinInstance() {
