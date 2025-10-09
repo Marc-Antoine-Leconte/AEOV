@@ -1,67 +1,88 @@
 const { Player } = require('../config/database');
 
 class PlayerController {
-  getAllPlayers = async (req, res) => {
+  getAllPlayers = async (req, res, allowTransmit = true) => {
         try {
             const players = await Player.findAll();
-            res.json(players);
+            if (allowTransmit) {
+                res.json(players);
+            }
+            return players;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    getPlayerById = async (req, res) => {
+    getPlayerById = async (req, res, allowTransmit = true) => {
         try {
             const player = await Player.findByPk(req.params.id);
             if (!player) {
-                return res.status(404).json({
-                    statusCode: 404,
-                    message: "Player not found"
-                })
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Player not found"
+                    });
+                }
+                return;
             }
             res.json(player);
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    createPlayer = async (req, res) => {
+    createPlayer = async (req, res, allowTransmit = true) => {
         try {
             const playerData = {
                 username: req.body.username,
                 status: req.body.status
             };
             var createdPlayer = await Player.create(playerData);
-            res.status(201)
-                .json(createdPlayer);
+            if (allowTransmit) {
+                res.status(201)
+                    .json(createdPlayer);
+            }
+            return createdPlayer;
         } catch (error) {
             console.log(error);
-            res.status(500)
-                .json({
-                    statusCode: 500,
-                    message: "Internal server error"
-                });
+            if (allowTransmit) {
+                res.status(500)
+                    .json({
+                        statusCode: 500,
+                        message: "Internal server error"
+                    });
+            }
+            return;
         }
     }
 
-    updatePlayer = async (req, res) => {
+    updatePlayer = async (req, res, allowTransmit = true) => {
         try {
             const existingPlayer = await Player.findByPk(req.params.id);
             if (!existingPlayer) {
-               return res.status(404).json({
-                    statusCode: 404,
-                    message: "Player not found."
-                });
+               if (allowTransmit) {
+                   res.status(404).json({
+                       statusCode: 404,
+                       message: "Player not found."
+                   });
+               }
+               return;
             }
             const playerToUpdate = {
                 username: req.body.username,
@@ -72,37 +93,52 @@ class PlayerController {
                     id: req.params.id
                 }
             });
-            res.status(204).send();
+            if (allowTransmit) {
+                res.status(204).send();
+            }
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    deletePlayer = async (req, res) => {
+    deletePlayer = async (req, res, allowTransmit = true) => {
         try {
             const id = req.params.id;
             const player = await Player.findByPk(id);
             if (!player) {
-                res.status(404).json({
-                    statusCode: 404,
-                    message: "Player not found"
-                });
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Player not found"
+                    });
+                }
+                return;
             }
             player.destroy();
             player.save();
-            res.status(204).send();
+            if (allowTransmit) {
+                res.status(204).send();
+            }
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 }

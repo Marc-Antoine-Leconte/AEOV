@@ -6,7 +6,8 @@ const currentInstance = {
     players: {}
 };
 const currentPlayer = {
-    name: "boby"
+    name: "boby",
+    id: 1
 };
 
 // REGULAR INSTANCE UPDATE
@@ -44,37 +45,41 @@ socket.on('updateInstanceStatus', (instanceStatus) => {
 //     }
 // });
 
-function createInstance() {
-    alert('Create Instance button clicked!');
+function connectToInstance(instanceId) {
+    console.log('Connecting to instance:', instanceId);
+    socket.emit('playerJoinInstance', { name: currentPlayer.name, instanceId: instanceId });
+    
+    redirectToUrl('/game');
+}
+
+function createInstance(instanceName, instanceMode) {
     console.log('Creating new instance...');
-
-    const instanceNameInput = document.getElementById("new-instance-name");
-    const instanceName = instanceNameInput.value || "Une super partie !";
     console.log('# Instance Name =>', instanceName);
+    console.log('# Instance Mode =>', instanceMode);
 
-    createInstanceFromAPI({ name: instanceName }).then((data) => {
+    createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayer.id }).then((data) => {
         console.log('# createInstanceFromAPI - data =>', data);
-        if (data.error || data.message) {
+        if (data.error) {
             alert("Une erreur est survenue lors de la création de l'instance : " + data.message);
             return
         }
 
-        DisplayInstanceList();
+        console.log('Instance created successfully:', data);
+        connectToInstance(data.id);
     });
 }
 
-function joinInstance() {
-    console.log (this);
-    const instanceName = this.value;
-    const instanceId = this.id;
-    const confirmed = confirm(`Do you want to join instance: ${instanceName}?`);
+function joinInstance(instanceId) {
+    console.log('Joining instance:', instanceId);
+    console.log('# Instance ID =>', instanceId);
     
-    if (confirmed) {
-        console.log('Joining instance:', instanceName);
-        console.log('# instance ID =>', instanceId);
-        console.log(socket);
-        socket.emit('playerJoinInstance', { name: currentPlayer.name, instanceId: instanceId });
-        console.log('done');
-    }
+    joinInstanceFromAPI(instanceId).then((data) => {
+        if (data.error) {
+            alert("Une erreur est survenue au moment de rejoindre l'instance : " + data.message);
+            return
+        } else {
+            connectToInstance(instanceId);
+        }
+    });
 }
 

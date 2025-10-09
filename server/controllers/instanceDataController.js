@@ -1,43 +1,107 @@
-const { InstanceData } = require('../../config/database');
+const { InstanceData } = require('../config/database');
+const { Sequelize } = require('sequelize');
 
 class InstanceDataController {
-  getAllInstanceData = async (req, res) => {
+  getAllInstanceData = async (req, res, allowTransmit = true) => {
+    console.log('@getAllInstanceData req => ', req.body);
         try {
             const instanceData = await InstanceData.findAll();
-            res.json(instanceData);
+            if (allowTransmit) {
+                res.json(instanceData);
+            }
+            return instanceData;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    getInstanceDataById = async (req, res) => {
+    getInstanceDataById = async (req, res, allowTransmit = true) => {
+        console.log('@getInstanceDataById req => ', req.body);
         try {
             const instanceData = await InstanceData.findByPk(req.params.id);
             if (!instanceData) {
-                return res.status(404).json({
+                if (allowTransmit) {
+                    res.status(404).json({
                     statusCode: 404,
                     message: "InstanceData not found"
-                })
+                    });
+                }
+                return;
             }
             res.json(instanceData);
+            return instanceData;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    createInstanceData = async (req, res) => {
+    getExtendedInstanceDataById = async (req, res, allowTransmit = true) => {
+        console.log('@getExtendedInstanceDataById req => ', req.body);
+        try {
+            const extendedInstanceData = await InstanceData.findOne({
+                 where: { instanceId: req.body.instanceId },
+                 attributes: {
+                    include: [
+                    [
+                        Sequelize.literal(`(
+                                    SELECT COUNT(*)
+                                    FROM instancePlayer AS ip
+                                    WHERE ip.instanceId = instanceData.instanceId
+                                )`),
+                        'playerCount',
+                    ],
+                    ],
+                }, 
+                });
+
+            console.log('---extendedInstanceData => ', extendedInstanceData);
+
+            if (!extendedInstanceData) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                    statusCode: 404,
+                    message: "ExtendedInstanceData not found"
+                    });
+                }
+                return;
+            }
+            if (allowTransmit)
+                res.json(extendedInstanceData);
+            return extendedInstanceData;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
+    createInstanceData = async (req, res, allowTransmit = true) => {
+        console.log('@createInstanceData req => ', req.body);
         try {
             const instanceData = {
+                instanceId: req.body.instanceId,
                 gameState: req.body.gameState,
                 currentPlayerId: req.body.currentPlayerId,
                 maxPlayers: req.body.maxPlayers,
@@ -45,26 +109,36 @@ class InstanceDataController {
                 rounds: req.body.rounds
             };
             var createdInstanceData = await InstanceData.create(instanceData);
-            res.status(201)
-                .json(createdInstanceData);
+            if (allowTransmit) {
+                res.status(201)
+                    .json(createdInstanceData);
+            }
+            return createdInstanceData;
         } catch (error) {
             console.log(error);
-            res.status(500)
-                .json({
-                    statusCode: 500,
-                    message: "Internal server error"
-                });
+            if (allowTransmit) {
+                res.status(500)
+                    .json({
+                        statusCode: 500,
+                        message: "Internal server error"
+                    });
+            }
+            return;
         }
     }
 
-    updateInstanceData = async (req, res) => {
+    updateInstanceData = async (req, res, allowTransmit = true) => {
+        console.log('@updateInstanceData req => ', req.body);
         try {
             const existingInstanceData = await InstanceData.findByPk(req.params.id);
             if (!existingInstanceData) {
-               return res.status(404).json({
-                    statusCode: 404,
-                    message: "InstanceData not found."
-                });
+               if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "InstanceData not found."
+                    });
+                }
+                return;
             }
             const instanceDataToUpdate = {
                 gameState: req.body.gameState,
@@ -78,37 +152,51 @@ class InstanceDataController {
                     id: req.params.id
                 }
             });
-            res.status(204).send();
+            if (allowTransmit)
+                res.status(204).send();
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    deleteInstanceData = async (req, res) => {
+    deleteInstanceData = async (req, res, allowTransmit = true) => {
+        console.log('@deleteInstanceData req => ', req.body);
         try {
             const id = req.params.id;
             const instanceData = await Instance.findByPk(id);
             if (!instanceData) {
-                res.status(404).json({
-                    statusCode: 404,
-                    message: "InstanceData not found"
-                });
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "InstanceData not found"
+                    });
+                }
+                return;
             }
             instanceData.destroy();
             instanceData.save();
-            res.status(204).send();
+            if (allowTransmit)
+                res.status(204).send();
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 }

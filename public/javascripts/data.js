@@ -3,6 +3,7 @@ const currentProtocol = "http://";
 const dummyInstancePath = "/instance/dummy";
 const allInstancesPath = "/instance/list";
 const newInstancePath = "/instance/new";
+const joinInstancePath = "/instance/join";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -38,7 +39,7 @@ async function postDataToAPI(url, data) {
     console.log(result);
     return result;
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return error;
   }
 }
@@ -53,7 +54,17 @@ async function fetchAllInstancesFromAPI() {
   return await fetchDataFromAPI(url);
 }
 
-async function createInstanceFromAPI({name, mode = "pvp"}) {
+async function createInstanceFromAPI({name, ownerId, mode = "pvp", maxPlayers = 8}) {
   const url = `${currentProtocol}${currentUrl}${newInstancePath}`;
-  return await postDataToAPI(url, { name, mode });
+  return await postDataToAPI(url, { name, mode, maxPlayers, ownerId });
+}
+
+async function joinInstanceFromAPI(instanceId, playerName) {
+  const url = `${currentProtocol}${currentUrl}${joinInstancePath}`;
+  return await postDataToAPI(url, { instanceId, playerName });
+}
+
+async function redirectToUrl(newPath) {
+  const url = `${currentProtocol}${currentUrl}${newPath}`;
+  return await fetchDataFromAPI(url);
 }

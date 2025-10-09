@@ -10,6 +10,7 @@ const { Sequelize } = require('./server/config/database');
 var indexRouter = require('./server/routes/index');
 var usersRouter = require('./server/routes/users');
 var instanceRouter = require('./server/routes/instance');
+var gameRouter = require('./server/routes/game');
 
 var app = express(); 
 
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/instance', instanceRouter);
+app.use('/game', gameRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -51,7 +53,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', { title: res.status, message: err.message });
 });
 
 const connectDb = async () => {

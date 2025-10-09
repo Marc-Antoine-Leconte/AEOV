@@ -26,6 +26,7 @@ const instanceDataSchema = Joi.object({
 });
 
 const validateInstanceData = (req, res, next) => {
+    console.log('$$ validateInstanceData req => ', req.body);
     const { error } = instanceDataSchema.validate(req.body);
 
     if (error) {
@@ -41,6 +42,8 @@ const validateInstanceData = (req, res, next) => {
 }
 
 const validateInstanceDataUpdate = (req, res, next) => {
+    console.log('$$ validateInstanceDataUpdate req => ', req.body);
+
     const updateSchema = instanceDataSchema.fork(['gameState', 'currentPlayerId', 'maxPlayers', 'ownerId', 'rounds'], (schema) => schema.optional());
     const { error } = updateSchema.validate(req.body);
 

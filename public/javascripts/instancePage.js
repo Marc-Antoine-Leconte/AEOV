@@ -1,3 +1,20 @@
+function onJoinInstanceButtonClick() {
+    console.log (this);
+    const confirmed = confirm(`Do you want to join instance: ${this.value}?`);
+    
+    if (confirmed) {
+        console.log('Joining instance ', this.value)
+        joinInstance(this.id)
+    }
+}
+
+function onCreateInstanceButtonClick() {
+    alert('Create Instance button clicked!');
+    const instanceNameInput = document.getElementById("new-instance-name");
+    const instanceName = instanceNameInput.value || "Une super partie !";
+    createInstance(instanceName, "pvp");
+}
+
 function DisplayInstanceList() {
     fetchAllInstancesFromAPI().then((data) => {
         const instanceList = document.getElementById("instance-list");
@@ -30,7 +47,7 @@ function DisplayInstanceList() {
             button.id = instance.id;
             button.value = instance.name;
             button.textContent = instance.name;
-            button.addEventListener('click', joinInstance);
+            button.addEventListener('click', onJoinInstanceButtonClick);
 
             listItem.appendChild(button);
             instanceList.appendChild(listItem);
@@ -40,7 +57,7 @@ function DisplayInstanceList() {
 
 function InitCreateInstanceButton() {
     const createInstanceBtn = document.getElementById("create-instance-button");
-    createInstanceBtn.addEventListener('click', createInstance);
+    createInstanceBtn.addEventListener('click', onCreateInstanceButtonClick);
 }
 
 DisplayInstanceList();

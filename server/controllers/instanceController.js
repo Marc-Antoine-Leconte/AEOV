@@ -1,67 +1,123 @@
 const { Instance } = require('../config/database');
+const { deleteInstanceData, createInstanceData } = require('./instanceDataController');
+const { deleteInstancePlayerByInstanceAndPlayer, createInstancePlayer } = require('./instancePlayerController');
 
 class InstanceController {
-  getAllInstances = async (req, res) => {
+  getAllInstances = async (req, res, allowTransmit = true) => {
+     console.log('@getAllInstances req => ', req.body);
         try {
             const instances = await Instance.findAll();
-            res.json(instances);
+            if (allowTransmit)
+                res.json(instances);
+            return instances;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit)
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            return;
         }
     }
 
-    getInstanceById = async (req, res) => {
+    getInstanceById = async (req, res, allowTransmit = true) => {
+        console.log('@getInstanceById req => ', req.body);
         try {
-            const instance = await Instance.findByPk(req.params.id);
+            const instance = await Instance.findByPk(req.body.instanceId);
             if (!instance) {
-                return res.status(404).json({
-                    statusCode: 404,
-                    message: "Instance not found"
-                })
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Instance not found"
+                    })
+                }
+                return;
             }
-            res.json(instance);
+            if (allowTransmit)
+                res.json(instance);
+            return instance;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    createInstance = async (req, res) => {
+    createInstance = async (req, res, allowTransmit = true) => {
+         console.log('@createInstance req => ', req.body);
         try {
             const instanceData = {
                 mode: req.body.mode,
                 name: req.body.name
             };
             var createdInstance = await Instance.create(instanceData);
-            res.status(201)
-                .json(createdInstance);
+            
+            console.log('---createdInstance => ', createdInstance);
+
+            var createdInstanceData = await createInstanceData({...req, body: { ...req.body, 
+                instanceId: createdInstance.dataValues.id,
+                gameState: 'waiting',
+                currentPlayerId: req.body.ownerId,
+                maxPlayers: req.body.maxPlayers,
+                ownerId: req.body.ownerId,
+                rounds: 0
+            }}, res, false);
+
+            var createdInstancePlayer = await createInstancePlayer({...req, body: { ...req.body, 
+                instanceId: createdInstance.dataValues.id,
+                playerId: req.body.ownerId
+            }}, res, false);
+
+            if (!createdInstanceData || !createdInstancePlayer) {
+                await deleteInstance(req, res, allowTransmit);
+                if (createdInstanceData)
+                    await deleteInstanceData(req, res, allowTransmit);
+                if (createdInstancePlayer)
+                    await deleteInstancePlayerByInstanceAndPlayer({...req, body: { ...req.body, 
+                        instanceId: createdInstance.id,
+                        playerId: req.body.ownerId
+                    }}, res, allowTransmit);
+                return;
+            }
+
+            if (allowTransmit) {
+                res.status(201)
+                    .json(createdInstance);
+            }
+            return createdInstance;
         } catch (error) {
             console.log(error);
-            res.status(500)
-                .json({
-                    statusCode: 500,
-                    message: "Internal server error"
-                });
+            if (allowTransmit) {
+                res.status(500)
+                    .json({
+                        statusCode: 500,
+                        message: "Internal server error"
+                    });
+            }
+            return;
         }
     }
 
-    updateInstance = async (req, res) => {
+    updateInstance = async (req, res, allowTransmit = true) => {
+         console.log('@updateInstanceById req => ', req.body);
         try {
             const existingInstance = await Instance.findByPk(req.params.id);
             if (!existingInstance) {
-               return res.status(404).json({
-                    statusCode: 404,
-                    message: "Instance not found."
-                });
+               if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Instance not found."
+                    });
+                }
+                return;
             }
             const instanceToUpdate = {
                 mode: req.body.mode,
@@ -72,37 +128,53 @@ class InstanceController {
                     id: req.params.id
                 }
             });
-            res.status(204).send();
+            if (allowTransmit) {
+                res.status(204).send();
+            }
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 
-    deleteInstance = async (req, res) => {
+    deleteInstance = async (req, res, allowTransmit = true) => {
+         console.log('@deleteInstanceById req => ', req.body);
         try {
             const id = req.params.id;
             const instance = await Instance.findByPk(id);
             if (!instance) {
-                res.status(404).json({
-                    statusCode: 404,
-                    message: "Instance not found"
-                });
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Instance not found"
+                        });
+                    }
+                return;
             }
             instance.destroy();
             instance.save();
-            res.status(204).send();
+            if (allowTransmit) {
+                res.status(204).send();
+            }
+            return true;
         }
         catch (error) {
             console.log(error);
-            res.status(500).json({
-                statusCode: 500,
-                message: "Internal server error"
-            });
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
         }
     }
 }

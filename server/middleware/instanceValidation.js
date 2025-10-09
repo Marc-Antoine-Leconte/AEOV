@@ -14,7 +14,8 @@ const instanceSchema = Joi.object({
 });
 
 const validateInstance = (req, res, next) => {
-    const { error } = instanceSchema.validate(req.body);
+    console.log('$$ validateInstance req.body => ', req.body);
+    const { error } = instanceSchema.validate({mode: req.body.mode, name: req.body.name});
 
     if (error) {
         res.status(400)

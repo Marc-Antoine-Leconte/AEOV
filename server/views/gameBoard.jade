@@ -1,0 +1,52 @@
+extends layout
+
+block content
+  
+  h1 Plateau de jeu
+
+block content
+  div(id="game-board-connection-container", hidden=false)
+    div(id="game-board-loading-message") En attente du début de la partie...
+    div(id="game-board-player-list-container", hidden=true)
+      h2 Liste des joueurs
+      ul(id="game-board-player-list")
+
+    div(id="game-board-start-button", hidden=true)
+      button(type='button', id='start-game-button') Démarrer la partie
+
+  div(id="game-board-instance-data-error-container", hidden=true)
+    p(id="game-board-instance-data-error-message")
+
+  div(id="game-board-container", hidden=true)
+    div(id="game-board-info")
+      p(id="game-board-instance-name-title") Nom de la partie : 
+      p(id="game-board-instance-name")
+
+      p(id="game-board-instance-mode-title") Mode de la partie : 
+      p(id="game-board-instance-mode")
+
+      p(id="game-board-owner-title") Administrateur : 
+      p(id="game-board-owner")
+
+      p(id="game-board-status-title") Statut de la partie : 
+      p(id="game-board-status")
+
+      p(id="game-board-current-turn-title") Tour actuel : 
+      p(id="game-board-current-turn")
+
+      p(id="game-board-current-player-title") Joueur en train de jouer : 
+      p(id="game-board-current-player")
+
+    div(id="game-board")
+      // Le plateau de jeu sera généré ici par JavaScript
+
+    div(id="game-board-controls", hidden=true)
+      button(type='button', id='end-turn-button') Terminer le tour
+      button(type='button', id='collect-resource-button') Collecter une ressource
+      button(type='button', id='fight-button') Combattre
+      button(type='button', id='construct-building-button') Construire un bâtiment
+      button(type='button', id='craft-tool-button') Fabriquer un équipement
+
+    div(id="game-log")
+      h2 Journal de la partie
+      ul(id="game-log-messages")
