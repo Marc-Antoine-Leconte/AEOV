@@ -5,12 +5,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
 const { Sequelize } = require('./server/config/database');
 
 var indexRouter = require('./server/routes/index');
-var usersRouter = require('./server/routes/users');
+var playerRouter = require('./server/routes/player');
 var instanceRouter = require('./server/routes/instance');
 var gameRouter = require('./server/routes/game');
+var instanceDataRouter = require('./server/routes/instanceData');
 
 var app = express(); 
 
@@ -21,11 +23,12 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        "script-src": ["'self'", "'sha256-t4hrt/shI2RwfCP1tEJaQhtZRY5CE2e+X7jwYfSODV0='"],
-      },
-    },
+     contentSecurityPolicy: false,
+    // contentSecurityPolicy: {
+    //   directives: {
+    //     "script-src": ["'self'", "'sha256-t4hrt/shI2RwfCP1tEJaQhtZRY5CE2e+X7jwYfSODV0='"],
+    //   },
+    // },
   }),
 );
 
@@ -34,9 +37,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/player', playerRouter);
+app.use('/instancedata', instanceDataRouter);
 app.use('/instance', instanceRouter);
 app.use('/game', gameRouter);
 
@@ -53,7 +58,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error', { title: res.status, message: err.message });
+  res.render('error', { title: "Error", message: err.message });
 });
 
 const connectDb = async () => {

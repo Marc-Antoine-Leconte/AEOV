@@ -1,41 +1,47 @@
 extends layout
 
-block content
-  
+block content  
   h1 Plateau de jeu
 
-block content
+  button(type='button', id='disconnect-button') Déconnexion
+  button(type='button', id='leave-instance-button') Quitter la partie
+
   div(id="game-board-connection-container", hidden=false)
-    div(id="game-board-loading-message") En attente du début de la partie...
+    p(id="game-board-loading-message") En attente du début de la partie...
     div(id="game-board-player-list-container", hidden=true)
       h2 Liste des joueurs
       ul(id="game-board-player-list")
 
-    div(id="game-board-start-button", hidden=true)
-      button(type='button', id='start-game-button') Démarrer la partie
+    button(type='button', id='ready-button') Prêt à jouer
+    button(type='button', id='start-game-button', hidden=true) Démarrer la partie
 
-  div(id="game-board-instance-data-error-container", hidden=true)
-    p(id="game-board-instance-data-error-message")
+  div(id="game-board-instance-data-error-message", hidden=true)
 
   div(id="game-board-container", hidden=true)
     div(id="game-board-info")
-      p(id="game-board-instance-name-title") Nom de la partie : 
-      p(id="game-board-instance-name")
+      p
+        span(id="game-board-instance-name-title") Nom de la partie : 
+        span(id="game-board-instance-name")
 
-      p(id="game-board-instance-mode-title") Mode de la partie : 
-      p(id="game-board-instance-mode")
+      p
+        span(id="game-board-instance-mode-title") Mode de la partie : 
+        span(id="game-board-instance-mode")
 
-      p(id="game-board-owner-title") Administrateur : 
-      p(id="game-board-owner")
+      p
+        span(id="game-board-owner-title") Administrateur : 
+        span(id="game-board-owner")
 
-      p(id="game-board-status-title") Statut de la partie : 
-      p(id="game-board-status")
+      p
+        span(id="game-board-status-title") Statut de la partie : 
+        span(id="game-board-status")
 
-      p(id="game-board-current-turn-title") Tour actuel : 
-      p(id="game-board-current-turn")
+      p
+        span(id="game-board-current-turn-title") Tour actuel : 
+        span(id="game-board-current-turn")
 
-      p(id="game-board-current-player-title") Joueur en train de jouer : 
-      p(id="game-board-current-player")
+      p
+        span(id="game-board-current-player-title") Joueur en train de jouer : 
+        span(id="game-board-current-player")
 
     div(id="game-board")
       // Le plateau de jeu sera généré ici par JavaScript
@@ -50,3 +56,7 @@ block content
     div(id="game-log")
       h2 Journal de la partie
       ul(id="game-log-messages")
+
+  script(src='/javascripts/drawGameBoard.js')
+  script(src='/javascripts/socketConnection.js')
+  script(src='/javascripts/gameBoardPage.js')

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  button(type='button', id='back-to-menu-button') Retour Menu
+
+  p Créer un compte
+  input(type="text", id="player-name-input", placeholder="Nom du joueur")
+  input(type="text", id="password-name-input", placeholder="Mot de passe")
+  button(type='button', id='subscribe-user-button') S'inscrire
+  p(id="player-subscribe-error-message", hidden=true)
+
+  script(src='/javascripts/subscribePage.js')

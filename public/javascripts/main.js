@@ -1,54 +1,40 @@
 // Button click functions for AEOV application
 
-const socket = io()
+function onGoBackToMenuButtonClick() {
+    redirectToUrl("/");
+}
 
-const currentInstance = {
-    players: {}
-};
-const currentPlayer = {
-    name: "boby",
-    id: 1
-};
+function setGoBackToMenuButtonListener() {
+    const backToMenuBtn = document.getElementById("back-to-menu-button");
+    backToMenuBtn.addEventListener('click', onGoBackToMenuButtonClick);
+}
 
-// REGULAR INSTANCE UPDATE
-socket.on('updateInstanceStatus', (instanceStatus) => {
-    console.log('Instance Status:', instanceStatus);
+function onDisconnectButtonClick() {
+    deleteCookie("currentPlayerId");
+    deleteCookie("currentPlayerName");
+    redirectToUrl("/");
+}
 
-    currentInstance.gameState = instanceStatus.gameState;
-    currentInstance.currentPlayer = instanceStatus.currentPlayer;
+function setDisconnectButtonListener() {
+    const disconnectBtn = document.getElementById("disconnect-button");
+    disconnectBtn.addEventListener('click', onDisconnectButtonClick);
+}
 
-    for (const id in instanceStatus.players) {
-        const backEndPlayer = instanceStatus.players[id]
+function onLeaveInstanceButtonClick(event) {
+    deleteCookie("currentInstanceId");
+    redirectToUrl("/home");
+}
 
-        if (!currentInstance.players[id]) {
-            currentInstance.players[id] = {
-                name: backEndPlayer.name,
-                status: backEndPlayer.status
-            };
-        }
-    }
-    console.log('Current Instance State:', currentInstance);
-});
+function setLeaveInstanceButtonListener() {
+    const leaveInstanceBtn = document.getElementById("leave-instance-button");
+    leaveInstanceBtn.addEventListener('click', onLeaveInstanceButtonClick);
+}
 
-// RECEIVED WHEN THE GAME IS ON
-// socket.on('startGame', (backEndPlayers) => {
-//     console.log('Players in the instance:', backEndPlayers);
-
-//     for (const id in backEndPlayers) {
-//         const backEndPlayer = backEndPlayers[id]
-
-//         if (!players[id]) {
-//             players[id] = new Player({
-//                 name: backEndPlayer.name,
-//             })
-//         }
-//     }
-// });
-
-function connectToInstance(instanceId) {
-    console.log('Connecting to instance:', instanceId);
-    socket.emit('playerJoinInstance', { name: currentPlayer.name, instanceId: instanceId });
+function goToGameBoard(instanceId, instanceName) {
+    console.log('Connecting to instance:', instanceName);
     
+    setCookie("currentInstanceId", instanceId, 1);
+    setCookie("currentInstanceName", instanceName, 1);
     redirectToUrl('/game');
 }
 
@@ -57,7 +43,9 @@ function createInstance(instanceName, instanceMode) {
     console.log('# Instance Name =>', instanceName);
     console.log('# Instance Mode =>', instanceMode);
 
-    createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayer.id }).then((data) => {
+    const currentPlayerId = getCookie("currentPlayerId");
+
+    createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayerId }).then((data) => {
         console.log('# createInstanceFromAPI - data =>', data);
         if (data.error) {
             alert("Une erreur est survenue lors de la création de l'instance : " + data.message);
@@ -65,7 +53,7 @@ function createInstance(instanceName, instanceMode) {
         }
 
         console.log('Instance created successfully:', data);
-        connectToInstance(data.id);
+        goToGameBoard(data.id, data.name);
     });
 }
 
@@ -74,12 +62,39 @@ function joinInstance(instanceId) {
     console.log('# Instance ID =>', instanceId);
     
     joinInstanceFromAPI(instanceId).then((data) => {
-        if (data.error) {
+        if (data.message || data.error) {
             alert("Une erreur est survenue au moment de rejoindre l'instance : " + data.message);
             return
         } else {
-            connectToInstance(instanceId);
+            console.log('# joinInstanceFromAPI - data =>', data);
+            goToGameBoard(data.id, data.name);
         }
     });
 }
 
+function fetchInstanceData(instanceId) {
+    return fetchInstanceDataFromAPI(instanceId)
+}
+
+function authenticatePlayer(playerName, password) {
+    return authenticatePlayerFromAPI(playerName, password)
+}
+
+function subscribePlayer(playerName, password) {
+    return createPlayerFromAPI(playerName, password)
+}
+
+function DisplayUserInfo() {
+    const userNameComp = document.getElementById("user-name");
+    const userIdComp = document.getElementById("user-id");
+    const instanceIdComp = document.getElementById("instance-id");
+
+    if (userNameComp)
+        userNameComp.innerHTML = getCookie("currentPlayerName");
+    if (userIdComp)
+        userIdComp.innerHTML = getCookie("currentPlayerId");
+    if (instanceIdComp)
+        instanceIdComp.innerHTML = getCookie("currentInstanceId");
+}
+
+DisplayUserInfo();

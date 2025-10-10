@@ -1,0 +1,19 @@
+extends layout
+
+block content  
+  h1= title
+  p Welcome to #{title}
+  button(type='button', id='disconnect-button') Déconnexion
+
+  p Créer une nouvelle partie
+  button(type='button', id='create-instance-button') Créer une nouvelle partie
+  input(type="text", id="new-instance-name", placeholder="Nom de la partie")
+  
+  h1 Parties en cours
+
+  div
+    ul(id="instance-list")
+    p(id="instance-list-error", hidden=true)
+    p(id="instance-list-empty-message", hidden=true) Aucune partie actuellement en cours
+
+  script(src='/javascripts/homePage.js')

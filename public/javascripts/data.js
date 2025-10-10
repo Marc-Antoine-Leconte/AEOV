@@ -4,6 +4,9 @@ const dummyInstancePath = "/instance/dummy";
 const allInstancesPath = "/instance/list";
 const newInstancePath = "/instance/new";
 const joinInstancePath = "/instance/join";
+const instanceDataPath = "/instancedata";
+const playerAuthentificationPath = "/player/authenticate";
+const playerCreationPath = "/player/create";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -66,5 +69,20 @@ async function joinInstanceFromAPI(instanceId, playerName) {
 
 async function redirectToUrl(newPath) {
   const url = `${currentProtocol}${currentUrl}${newPath}`;
+  window.location.href = url;
+}
+
+async function fetchInstanceDataFromAPI(instanceId) {
+  const url = `${currentProtocol}${currentUrl}${instanceDataPath}?instanceId=${instanceId}`;
   return await fetchDataFromAPI(url);
+}
+
+async function authenticatePlayerFromAPI(playerName, password) {
+  const url = `${currentProtocol}${currentUrl}${playerAuthentificationPath}`;
+  return await postDataToAPI(url, { name: playerName, password: password });
+}
+
+async function createPlayerFromAPI(playerName, password) {
+  const url = `${currentProtocol}${currentUrl}${playerCreationPath}`;
+  return await postDataToAPI(url, { name: playerName, password: password });
 }

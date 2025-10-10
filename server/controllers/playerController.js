@@ -1,4 +1,5 @@
 const { Player } = require('../config/database');
+const bcrypt = require('bcrypt');
 
 class PlayerController {
   getAllPlayers = async (req, res, allowTransmit = true) => {
@@ -33,7 +34,60 @@ class PlayerController {
                 }
                 return;
             }
-            res.json(player);
+            if (allowTransmit) {
+                res.json(player);
+            }
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
+    authenticatePlayer = async (req, res, allowTransmit = true) => {
+        console.log('# authenticatePlayer - req.body => ', req.body);
+        try {
+            const { name, password } = req.body;
+
+            const players = await Player.findAll({ where: { name: name } });
+
+            if (!players || players.length <= 0) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Player not found"
+                    });
+                }
+                return;
+            }
+
+            var player = null;
+            players.forEach(element => {
+                const isPasswordValid = bcrypt.compareSync(password, element.password);
+                if (isPasswordValid) {
+                    player = element;
+                }
+            });
+
+            if (!player) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Player not found"
+                    });
+                }
+                return;
+            }
+            if (allowTransmit) {
+                res.json(player);
+            }
+            return player;
         }
         catch (error) {
             console.log(error);
@@ -48,10 +102,13 @@ class PlayerController {
     }
 
     createPlayer = async (req, res, allowTransmit = true) => {
+        const { name, password } = req.body;
+        const hashedPassword = bcrypt.hashSync(password, 12);
+
         try {
             const playerData = {
-                username: req.body.username,
-                status: req.body.status
+                name: name,
+                password: hashedPassword
             };
             var createdPlayer = await Player.create(playerData);
             if (allowTransmit) {
@@ -73,6 +130,9 @@ class PlayerController {
     }
 
     updatePlayer = async (req, res, allowTransmit = true) => {
+        const { name, password, id } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 12);
+
         try {
             const existingPlayer = await Player.findByPk(req.params.id);
             if (!existingPlayer) {
@@ -85,12 +145,12 @@ class PlayerController {
                return;
             }
             const playerToUpdate = {
-                username: req.body.username,
-                status: req.body.status
+                name: name,
+                password: hashedPassword
             };
             await Player.update(playerToUpdate, {
                 where: {
-                    id: req.params.id
+                    id: id
                 }
             });
             if (allowTransmit) {

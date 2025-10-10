@@ -29,55 +29,104 @@ const { Server } = require('socket.io')
 const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 })
 
 const visitors = {};
+const instances = {};
 
 // A VISITOR CONNECTS TO THE SERVER
 io.on('connection', (socket) => {
   console.log('a user connected');
 
   visitors[socket.id] = {
-    name: "no name" + Math.floor(Math.random() * 1000),
-    isInInstance: "false",
-    instanceId: "",
+    name: "user" + Math.floor(Math.random() * 1000)
   };
 
   console.log('Current visitors:', visitors);
 
   // A VISITOR DISCONNECTS FROM THE SERVER
   socket.on('disconnect', (reason) => {
-    console.log(reason)
-    console.log('user ' + socket.id + ":" + visitors[socket.id].name + ' disconnected');
+    console.log('user ' + socket.id + ":" + visitors[socket.id].name + ' disconnected :', reason);
     
     delete visitors[socket.id]
   })
 
-  // A PLAYER JOIN AN INSTANCE
-  socket.on('playerJoinInstance', ({name, instanceId}) => {
-    console.log('user ' + name + ' joined the instance ' + instanceId);
+  // A PLAYER JOINED AN INSTANCE
+  socket.on('playerJoin', (data) => {
+    console.log('visitor ' + socket.id + ' joined instance ' + data.instanceId + ' as player ' + data.playerName);
+    visitors[socket.id].name = data.playerName;
+    visitors[socket.id].id = data.playerId;
 
-    const playersInInstance = ["boby", "johny"];
-    const instanceData = {
-      gameState: "waitingForPlayers",
-      currentPlayer: "boby",
-      players: {
-        "1": { name: "boby", status: "ready" },
-        "2": { name: "johny", status: "notReady" },
-      },
-      id: instanceId,
-      name: "firstOne",
-      mode: "",
-      maxPlayers: 4,
-      owner: "boby",
-      rounds: 3,
+    if (!instances[data.instanceId]) {
+      instances[data.instanceId] = {
+        instanceStatus: {
+          gameStarted: false,
+          waitingForPlayers: true,
+          id: data.instanceId,
+        },
+        playerList: {}
+      }
     }
 
-    for (const id in visitors) {
-      if (playersInInstance.includes(visitors[id].name)) {
-        io.to(id).emit('updateInstanceStatus', instanceData);
+    instances[data.instanceId].playerList[data.playerId] = {
+      ready: false,
+      name: data.playerName,
+      id: data.playerId,
+      visitorId: socket.id,
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const visitorId = instances[data.instanceId].playerList[playerId].visitorId
+      if (visitors[visitorId]) {
+        io.to(visitorId).emit('updateInstanceStatus', instances[data.instanceId].instanceStatus);
       }
     }
   });
 
-});
+ 
+  socket.on('playerReadyToPlay', (userData) => {
+    const playerId = visitors[socket.id].id;
+    if (!playerId) {
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const player = instances[userData.instanceId].playerList[playerId];
+    if (!player) {
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    instances[userData.instanceId].playerList[playerId].ready = true;
+    instances[userData.instanceId].playerList[playerId].civilization = userData.civilization;
+    instances[userData.instanceId].playerList[playerId].color = userData.color;
+
+    for (const otherPlayerId in instances[userData.instanceId].playerList) {
+      const visitorId = instances[data.instanceId].playerList[otherPlayerId].visitorId
+      if (visitors[visitorId]) {
+        io.to(visitorId).emit('updateInstanceStatus', instances[data.instanceId].instanceStatus);
+      }
+    }
+  });
+
+    socket.on('ownerStartGame', (userData) => {
+      const playerId = visitors[socket.id].id;
+      if (!playerId) {
+        return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+      }
+
+      const player = instances[userData.instanceId].playerList[playerId];
+      if (!player) {
+        return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+      }
+
+      instances[userData.instanceId].instanceStatus.gameStarted = true;
+      instances[userData.instanceId].instanceStatus.waitingForPlayers = false;
+
+      for (const playerId in instances[userData.instanceId].playerList) {
+        const visitorId = instances[userData.instanceId].playerList[playerId].visitorId;
+        if (visitors[visitorId]) {
+          io.to(visitorId).emit('updateInstanceStatus', instances[userData.instanceId].instanceStatus);
+        }
+      }
+    });
+
+  });
 
 /**
  * Listen on provided port, on all network interfaces.

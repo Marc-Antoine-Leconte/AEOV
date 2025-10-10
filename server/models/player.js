@@ -8,11 +8,11 @@ function model(sequelize) {
             autoIncrement: true,
             primaryKey: true,
         },
-        username: {
+        name: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        status: {
+        password: {
             type: DataTypes.STRING(100),
             allowNull: false
         },

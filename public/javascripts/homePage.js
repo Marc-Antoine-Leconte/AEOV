@@ -18,6 +18,9 @@ function onCreateInstanceButtonClick() {
 function DisplayInstanceList() {
     fetchAllInstancesFromAPI().then((data) => {
         const instanceList = document.getElementById("instance-list");
+        if (!instanceList) {
+            return;
+        }
         instanceList.innerHTML = ""; // Clear existing content
 
         console.log("#DisplayInstanceList - data =>", data);
@@ -57,8 +60,14 @@ function DisplayInstanceList() {
 
 function InitCreateInstanceButton() {
     const createInstanceBtn = document.getElementById("create-instance-button");
+    if (!createInstanceBtn) {
+        return;
+    }
     createInstanceBtn.addEventListener('click', onCreateInstanceButtonClick);
 }
 
 DisplayInstanceList();
 InitCreateInstanceButton();
+setDisconnectButtonListener();
+DisplayUserInfo();
+

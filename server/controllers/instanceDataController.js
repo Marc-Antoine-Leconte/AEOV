@@ -24,9 +24,9 @@ class InstanceDataController {
     }
 
     getInstanceDataById = async (req, res, allowTransmit = true) => {
-        console.log('@getInstanceDataById req => ', req.body);
+        console.log('@getInstanceDataById req.query => ', req.query);
         try {
-            const instanceData = await InstanceData.findByPk(req.params.id);
+            const instanceData = await InstanceData.findByPk(req.query.instanceId);
             if (!instanceData) {
                 if (allowTransmit) {
                     res.status(404).json({
@@ -36,7 +36,9 @@ class InstanceDataController {
                 }
                 return;
             }
-            res.json(instanceData);
+            if (allowTransmit) {
+                res.json(instanceData);
+            }
             return instanceData;
         }
         catch (error) {
