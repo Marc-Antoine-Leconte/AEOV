@@ -50,6 +50,7 @@ io.on('connection', (socket) => {
 
   // A PLAYER JOINED AN INSTANCE
   socket.on('playerJoin', (data) => {
+    console.log("[player join]")
     console.log('visitor ' + socket.id + ' joined instance ' + data.instanceId + ' as player ' + data.playerName);
     visitors[socket.id].name = data.playerName;
     visitors[socket.id].id = data.playerId;
@@ -59,7 +60,8 @@ io.on('connection', (socket) => {
         instanceStatus: {
           gameStarted: false,
           waitingForPlayers: true,
-          id: data.instanceId,
+          instanceId: data.instanceId,
+          instanceName: data.instanceName,
         },
         playerList: {}
       }
@@ -82,6 +84,7 @@ io.on('connection', (socket) => {
 
  
   socket.on('playerReadyToPlay', (userData) => {
+    console.log("[player Ready To Play]")
     const playerId = visitors[socket.id].id;
     if (!playerId) {
       return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
@@ -105,6 +108,7 @@ io.on('connection', (socket) => {
   });
 
     socket.on('ownerStartGame', (userData) => {
+      console.log("[owner start Game]")
       const playerId = visitors[socket.id].id;
       if (!playerId) {
         return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");

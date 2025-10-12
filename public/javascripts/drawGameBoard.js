@@ -7,8 +7,26 @@ function DrawStartGameButton() {
     }
 }
 
+function DrawPlayerControls() {
+    const instanceStatus = currentInstance.instanceStatus;
+
+    const gameBoardControlsComp = document.getElementById("game-board-controls");
+    if (!instanceStatus || !instanceStatus.id || instanceStatus.gameStarted === false) {
+        console.log('# No need to display controls');
+        gameBoardControlsComp.hidden = true;
+        return;
+    }
+
+    gameBoardControlsComp.hidden = false;
+}
+
 function DrawInstanceData() {
-    const data = currentInstance;
+    const data = currentInstance.data;
+
+    if (!data) {
+        console.log('# No instance data to display');
+        return;
+    }
 
     const gameBoardContainer = document.getElementById("game-board-container");
     gameBoardContainer.hidden = false;
@@ -33,7 +51,9 @@ function DrawInstanceData() {
 function DrawInstanceWaitingScreen() {
     const waitingScreen = document.getElementById("game-board-connection-container");
 
-    if (!currentInstance || !currentInstance.id || currentInstance.status != "waiting") {
+    const instanceStatus = currentInstance.instanceStatus;
+
+    if (!instanceStatus || !instanceStatus.id || instanceStatus.waitingForPlayers === false) {
         console.log('# No need to display waiting screen');
         waitingScreen.hidden = true;
         return;
@@ -47,3 +67,5 @@ function DrawGameBoardScreen() {
     DrawStartGameButton();
     DrawInstanceWaitingScreen();
 }
+
+DrawGameBoardScreen();

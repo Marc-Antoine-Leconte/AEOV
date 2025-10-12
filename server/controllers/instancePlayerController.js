@@ -21,6 +21,57 @@ class InstancePlayerController {
         }
     }
 
+    getCountInstancePlayersByInstanceId = async (req, res, allowTransmit = true) => {
+        try {
+            const count = await InstancePlayer.count({ where: { instanceId: req.body.instanceId } });
+            if (allowTransmit) {
+                res.json({ count });
+            }
+            return count;
+        } catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
+    getInstancePlayerByPlayerAndInstance = async (req, res, allowTransmit = true) => {
+        try {
+            const instancePlayer = await InstancePlayer.findOne({
+                where: {
+                    playerId: req.body.playerId,
+                    instanceId: req.body.instanceId
+                }
+            });
+            if (!instancePlayer) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "InstancePlayer not found"
+                    });
+                }
+                return;
+            }
+            if (allowTransmit)
+                res.json(instancePlayer);
+            return instancePlayer;
+        } catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
     getInstancePlayerById = async (req, res, allowTransmit = true) => {
         try {
             const instancePlayer = await InstancePlayer.findByPk(req.params.id);

@@ -59,21 +59,21 @@ function createInstance(instanceName, instanceMode) {
 
 function joinInstance(instanceId) {
     console.log('Joining instance:', instanceId);
-    console.log('# Instance ID =>', instanceId);
+    playerId = getCookie("currentPlayerId");
     
-    joinInstanceFromAPI(instanceId).then((data) => {
+    joinInstanceFromAPI(instanceId, playerId).then((data) => {
         if (data.message || data.error) {
             alert("Une erreur est survenue au moment de rejoindre l'instance : " + data.message);
             return
         } else {
-            console.log('# joinInstanceFromAPI - data =>', data);
+            console.log('# join instance Success', data);
             goToGameBoard(data.id, data.name);
         }
     });
 }
 
-function fetchInstanceData(instanceId) {
-    return fetchInstanceDataFromAPI(instanceId)
+function fetchInstance(instanceId) {
+    return fetchInstanceFromAPI(instanceId)
 }
 
 function authenticatePlayer(playerName, password) {

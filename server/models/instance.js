@@ -16,6 +16,26 @@ function model(sequelize) {
             type: DataTypes.STRING(100),
             allowNull: false
         },
+        gameState: {
+            type: DataTypes.STRING(100),
+            allowNull: false
+        },
+        currentPlayerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        maxPlayers: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        ownerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        rounds: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
     };
 
     const options = {

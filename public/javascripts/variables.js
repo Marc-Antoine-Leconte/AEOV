@@ -1,3 +1,4 @@
-const currentInstance = {
-    players: {}
+let currentInstance = {
+    instanceStatus: {},
+    playerList: {}
 };

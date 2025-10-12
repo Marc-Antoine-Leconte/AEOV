@@ -10,6 +10,26 @@ const instanceSchema = Joi.object({
     name: Joi.string()
         .min(1)
         .max(30)
+        .required(),
+    gameState: Joi.string()
+        .valid('waiting', 'in-progress', 'completed')
+        .required(),
+    currentPlayerId: Joi.number()
+        .integer()
+        .min(1)
+        .required(),
+    maxPlayers: Joi.number()
+        .integer()
+        .min(1)
+        .max(8)
+        .required(),
+    ownerId: Joi.number()
+        .integer()
+        .min(1)
+        .required(),
+    rounds: Joi.number()
+        .integer()
+        .min(0)
         .required()
 });
 

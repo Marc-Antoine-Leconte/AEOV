@@ -11,6 +11,43 @@ const instancePlayerSchema = Joi.object({
         .integer()
         .min(1)
         .required(),
+    civilization: Joi.string()
+        .valid('roman', 'viking', 'egyptian', 'medieval', 'greek'),
+    color: Joi.string()
+        .valid('red', 'blue', 'purple', 'green', 'yellow', 'orange', 'pink', 'brown', 'aqua'),
+    gold: Joi.number()
+        .integer()
+        .min(0),
+    food: Joi.number()
+        .integer()
+        .min(0),
+    wood: Joi.number()
+        .integer()
+        .min(0),
+    stone: Joi.number()
+        .integer()
+        .min(0),
+    iron: Joi.number()
+        .integer()
+        .min(0),
+    diamond: Joi.number()
+        .integer()
+        .min(0),
+    army: Joi.number()
+        .integer()
+        .min(0),
+    population: Joi.number()
+        .integer()
+        .min(0),
+    tool: Joi.number()
+        .integer()
+        .min(0),
+    weapons: Joi.number()
+        .integer()
+        .min(0),
+    armor: Joi.number()
+        .integer()
+        .min(0),
 });
 
 const validateInstancePlayer = (req, res, next) => {
@@ -29,7 +66,7 @@ const validateInstancePlayer = (req, res, next) => {
 }
 
 const validateInstancePlayerUpdate = (req, res, next) => {
-    const updateSchema = instancePlayerSchema.fork(['playerId', 'instanceId'], (schema) => schema.optional());
+    const updateSchema = instancePlayerSchema.fork(['playerId', 'instanceId', 'gold', 'food', 'wood', 'stone', 'iron', 'diamond', 'army', 'population', 'tool', 'weapons', 'armor'], (schema) => schema.optional());
     const { error } = updateSchema.validate(req.body);
 
     if (error) {

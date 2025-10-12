@@ -25,7 +25,7 @@ const sequelize = new Sequelize(
 const db = {};
 db.Sequelize = sequelize;
 db.Instance = instanceModel(sequelize);
-db.InstanceData = instanceDataModel(sequelize);
+//db.InstanceData = instanceDataModel(sequelize);
 db.InstancePlayer = instancePlayerModel(sequelize);
 db.Player = playerModel(sequelize);
 

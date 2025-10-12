@@ -1,8 +1,17 @@
 
 function DisplayInstanceData() {
-    fetchInstanceData("1").then((data) => {
+    const instanceId = getCookie("currentInstanceId");
+
+    if (!instanceId) {
+        console.error('No instance ID found in cookies.');
+        return;
+    }
+    fetchInstance(instanceId).then((data) => {
         console.log("# DisplayInstanceData - data =>", data);
 
+        currentInstance.data = { ...currentInstance.data, ...data };
+
+        console.log('||> Current Instance Data:', currentInstance);
         const instanceDataErrorComp = document.getElementById("game-board-instance-data-error-message");
         if (data.error || data.length == 0 || !data) {
             instanceDataErrorComp.innerHTML = "Une erreur est survenue lors de la récupération de l'instance : <b>" + data.message + "</b>";
@@ -52,7 +61,7 @@ function InitGameBoardPage() {
         return;
     }
 
-    joinInstanceSocket();
+    //joinInstanceSocket();
     setDisconnectButtonListener();
     setLeaveInstanceButtonListener();
     setStartGameButtonListener();

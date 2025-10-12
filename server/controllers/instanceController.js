@@ -24,8 +24,10 @@ class InstanceController {
 
     getInstanceById = async (req, res, allowTransmit = true) => {
         console.log('@getInstanceById req => ', req.body);
+
+        const instanceId = req.body.instanceId || req.params.instanceId || req.query.instanceId;
         try {
-            const instance = await Instance.findByPk(req.body.instanceId);
+            const instance = await Instance.findByPk(instanceId);
             if (!instance) {
                 if (allowTransmit) {
                     res.status(404).json({

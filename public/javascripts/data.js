@@ -1,11 +1,10 @@
 const currentUrl = "localhost:3000";
 const currentProtocol = "http://";
-const dummyInstancePath = "/instance/dummy";
 const allInstancesPath = "/instance/list";
 const newInstancePath = "/instance/new";
 const joinInstancePath = "/instance/join";
-const instanceDataPath = "/instancedata";
-const playerAuthentificationPath = "/player/authenticate";
+const instancePath = "/instance";
+const playerAuthenticationPath = "/player/authenticate";
 const playerCreationPath = "/player/create";
 
 async function fetchDataFromAPI(url) {
@@ -47,11 +46,6 @@ async function postDataToAPI(url, data) {
   }
 }
 
-async function fetchDummyInstancesFromAPI() {
-  const url = `${currentProtocol}${currentUrl}${dummyInstancePath}`;
-  return await fetchDataFromAPI(url);
-}
-
 async function fetchAllInstancesFromAPI() {
   const url = `${currentProtocol}${currentUrl}${allInstancesPath}`;
   return await fetchDataFromAPI(url);
@@ -62,9 +56,9 @@ async function createInstanceFromAPI({name, ownerId, mode = "pvp", maxPlayers = 
   return await postDataToAPI(url, { name, mode, maxPlayers, ownerId });
 }
 
-async function joinInstanceFromAPI(instanceId, playerName) {
+async function joinInstanceFromAPI(instanceId, playerId) {
   const url = `${currentProtocol}${currentUrl}${joinInstancePath}`;
-  return await postDataToAPI(url, { instanceId, playerName });
+  return await postDataToAPI(url, { instanceId, playerId });
 }
 
 async function redirectToUrl(newPath) {
@@ -72,13 +66,13 @@ async function redirectToUrl(newPath) {
   window.location.href = url;
 }
 
-async function fetchInstanceDataFromAPI(instanceId) {
-  const url = `${currentProtocol}${currentUrl}${instanceDataPath}?instanceId=${instanceId}`;
+async function fetchInstanceFromAPI(instanceId) {
+  const url = `${currentProtocol}${currentUrl}${instancePath}?instanceId=${instanceId}`;
   return await fetchDataFromAPI(url);
 }
 
 async function authenticatePlayerFromAPI(playerName, password) {
-  const url = `${currentProtocol}${currentUrl}${playerAuthentificationPath}`;
+  const url = `${currentProtocol}${currentUrl}${playerAuthenticationPath}`;
   return await postDataToAPI(url, { name: playerName, password: password });
 }
 

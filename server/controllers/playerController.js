@@ -24,7 +24,9 @@ class PlayerController {
 
     getPlayerById = async (req, res, allowTransmit = true) => {
         try {
-            const player = await Player.findByPk(req.params.id);
+            console.log('# getPlayerById - req.body => ', req.body);
+            const id = req.body.playerId;
+            const player = await Player.findByPk(id);
             if (!player) {
                 if (allowTransmit) {
                     res.status(404).json({
@@ -37,6 +39,7 @@ class PlayerController {
             if (allowTransmit) {
                 res.json(player);
             }
+            return player;
         }
         catch (error) {
             console.log(error);
