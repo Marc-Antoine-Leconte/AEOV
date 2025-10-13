@@ -1,3 +1,4 @@
+const { col } = require('sequelize');
 const { InstancePlayer } = require('../config/database');
 
 class InstancePlayerController {
@@ -72,20 +73,24 @@ class InstancePlayerController {
         }
     }
 
-    getInstancePlayerById = async (req, res, allowTransmit = true) => {
+    getInstancePlayersByInstanceId = async (req, res, allowTransmit = true) => {
         try {
-            const instancePlayer = await InstancePlayer.findByPk(req.params.id);
-            if (!instancePlayer) {
+            const instancePlayers = await InstancePlayer.findAll({
+                where: {
+                    instanceId: req.body.instanceId
+                }
+            });
+            if (!instancePlayers) {
                 if (allowTransmit) {
                     return res.status(404).json({
                         statusCode: 404,
-                        message: "InstancePlayer not found"
+                        message: "InstancePlayers not found"
                     });
                 }
             }
             if (allowTransmit)
-                res.json(instancePlayer);
-            return instancePlayer;
+                res.json(instancePlayers);
+            return instancePlayers;
         }
         catch (error) {
             console.log(error);
@@ -124,9 +129,25 @@ class InstancePlayerController {
         }
     }
 
+    updateInstancePlayerByServer = async (req, res) => {
+        try {
+            await InstancePlayer.update(req.body, {
+                where: {
+                    playerId: req.body.playerId,
+                    instanceId: req.body.instanceId
+                }
+            });
+            return true;
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
+    }
+
     updateInstancePlayer = async (req, res, allowTransmit = true) => {
         try {
-            const existingInstancePlayer = await InstancePlayer.findByPk(req.params.id);
+            const existingInstancePlayer = await InstancePlayer.getInstancePlayerByPlayerAndInstance(req, res, false);
             if (!existingInstancePlayer) {
                if (allowTransmit) {
                    return res.status(404).json({
@@ -136,13 +157,15 @@ class InstancePlayerController {
                }
                return;
             }
-            const instancePlayerToUpdate = {
-                playerId: req.body.playerId,
-                instanceId: req.body.instanceId
+            const instancePlayerToUpdate = { 
+                ...existingInstancePlayer.dataValues,
+                civilization: req.body.civilization,
+                color: req.body.color
             };
             await InstancePlayer.update(instancePlayerToUpdate, {
                 where: {
-                    id: req.params.id
+                    playerId: req.body.playerId,
+                    instanceId: req.body.instanceId
                 }
             });
             if (allowTransmit) {

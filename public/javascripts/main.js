@@ -32,29 +32,28 @@ function setLeaveInstanceButtonListener() {
 
 function goToGameBoard(instanceId, instanceName) {
     console.log('Connecting to instance:', instanceName);
-    
+    console.log('Instance ID:', instanceId);
+
     setCookie("currentInstanceId", instanceId, 1);
     setCookie("currentInstanceName", instanceName, 1);
     redirectToUrl('/game');
 }
 
-function createInstance(instanceName, instanceMode) {
+async function createInstance(instanceName, instanceMode) {
     console.log('Creating new instance...');
     console.log('# Instance Name =>', instanceName);
     console.log('# Instance Mode =>', instanceMode);
 
     const currentPlayerId = getCookie("currentPlayerId");
 
-    createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayerId }).then((data) => {
-        console.log('# createInstanceFromAPI - data =>', data);
-        if (data.error) {
-            alert("Une erreur est survenue lors de la création de l'instance : " + data.message);
-            return
-        }
+    const createdInstance = await createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayerId });
+    if (createdInstance.message) {
+        alert("Une erreur est survenue lors de la création de l'instance : " + createdInstance.message);
+    } else {
+        console.log('Instance created successfully:', createdInstance);
+    }
 
-        console.log('Instance created successfully:', data);
-        goToGameBoard(data.id, data.name);
-    });
+    return createdInstance
 }
 
 function joinInstance(instanceId) {

@@ -8,11 +8,25 @@ function onJoinInstanceButtonClick() {
     }
 }
 
-function onCreateInstanceButtonClick() {
+async function onCreateInstanceButtonClick() {
+    const instanceCreationErrorMessage = document.getElementById("instance-creation-error-message");
+    instanceCreationErrorMessage.hidden = true;
+    
     alert('Create Instance button clicked!');
     const instanceNameInput = document.getElementById("new-instance-name");
     const instanceName = instanceNameInput.value || "Une super partie !";
-    createInstance(instanceName, "pvp");
+    
+    createInstance(instanceName, "pvp").then((createdInstance) => { 
+        if (createdInstance.message) {
+            console.log('# Error creating instance:', createdInstance.message);
+            instanceCreationErrorMessage.innerHTML = "Une erreur est survenue lors de la création de l'instance : <b>" + createdInstance.message + "</b>";
+            instanceCreationErrorMessage.hidden = false;
+            return
+        }
+
+        goToGameBoard(createdInstance.id, createdInstance.name);
+    });
+    
 }
 
 function DisplayInstanceList() {

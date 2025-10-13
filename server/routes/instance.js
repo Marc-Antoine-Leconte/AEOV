@@ -16,7 +16,8 @@ router.get('/list', async function (req, res) {
 /* CREATE a new instances */
 router.post('/new', validateInstance, async function (req, res) {
     console.log('NEW INSTANCE req.body => ', req.body)
-    await createInstance(req, res);
+
+    createInstance(req, res);
 });
 
 /* JOIN a new instances */

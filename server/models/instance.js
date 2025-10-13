@@ -18,23 +18,26 @@ function model(sequelize) {
         },
         gameState: {
             type: DataTypes.STRING(100),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 'waiting'
         },
         currentPlayerId: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: true
         },
         maxPlayers: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            defaultValue: 8
         },
         ownerId: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
         },
         rounds: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0
         },
     };
 

@@ -58,36 +58,28 @@ class InstanceController {
         try {
             const instanceData = {
                 mode: req.body.mode,
-                name: req.body.name
+                name: req.body.name,
+                ownerId: req.body.ownerId,
+                maxPlayers: req.body.maxPlayers
             };
+
             var createdInstance = await Instance.create(instanceData);
-            
+            if (!createdInstance) {
+                console.log('Instance cannot be created');
+                if (allowTransmit) {
+                    res.status(400)
+                        .json({
+                            statusCode: 400,
+                            message: "Instance cannot be created"
+                        });
+                    }
+            }
+
             console.log('---createdInstance => ', createdInstance);
 
-            var createdInstanceData = await createInstanceData({...req, body: { ...req.body, 
-                instanceId: createdInstance.dataValues.id,
-                gameState: 'waiting',
-                currentPlayerId: req.body.ownerId,
-                maxPlayers: req.body.maxPlayers,
-                ownerId: req.body.ownerId,
-                rounds: 0
-            }}, res, false);
-
-            var createdInstancePlayer = await createInstancePlayer({...req, body: { ...req.body, 
-                instanceId: createdInstance.dataValues.id,
-                playerId: req.body.ownerId
-            }}, res, false);
-
-            if (!createdInstanceData || !createdInstancePlayer) {
-                await deleteInstance(req, res, allowTransmit);
-                if (createdInstanceData)
-                    await deleteInstanceData(req, res, allowTransmit);
-                if (createdInstancePlayer)
-                    await deleteInstancePlayerByInstanceAndPlayer({...req, body: { ...req.body, 
-                        instanceId: createdInstance.id,
-                        playerId: req.body.ownerId
-                    }}, res, allowTransmit);
-                return;
+            var createdInstancePlayer = await createInstancePlayer(req, res, false);
+            if (!createdInstancePlayer) {
+                console.log('InstancePlayer cannot be created');
             }
 
             if (allowTransmit) {
@@ -108,41 +100,18 @@ class InstanceController {
         }
     }
 
-    updateInstance = async (req, res, allowTransmit = true) => {
-         console.log('@updateInstanceById req => ', req.body);
+    updateInstance = async (req, res, data) => {
+        console.log('@updateInstanceById req => ', data);
         try {
-            const existingInstance = await Instance.findByPk(req.params.id);
-            if (!existingInstance) {
-               if (allowTransmit) {
-                    res.status(404).json({
-                        statusCode: 404,
-                        message: "Instance not found."
-                    });
-                }
-                return;
-            }
-            const instanceToUpdate = {
-                mode: req.body.mode,
-                name: req.body.name
-            };
-            await Instance.update(instanceToUpdate, {
+            await Instance.update(data, {
                 where: {
-                    id: req.params.id
+                    id: data.id
                 }
             });
-            if (allowTransmit) {
-                res.status(204).send();
-            }
             return true;
         }
         catch (error) {
             console.log(error);
-            if (allowTransmit) {
-                res.status(500).json({
-                    statusCode: 500,
-                    message: "Internal server error"
-                });
-            }
             return;
         }
     }
