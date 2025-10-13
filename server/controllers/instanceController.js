@@ -1,6 +1,5 @@
 const { Instance } = require('../config/database');
-const { deleteInstanceData, createInstanceData } = require('./instanceDataController');
-const { deleteInstancePlayerByInstanceAndPlayer, createInstancePlayer } = require('./instancePlayerController');
+const { createInstancePlayer } = require('./instancePlayerController');
 
 class InstanceController {
   getAllInstances = async (req, res, allowTransmit = true) => {
@@ -77,7 +76,7 @@ class InstanceController {
 
             console.log('---createdInstance => ', createdInstance);
 
-            var createdInstancePlayer = await createInstancePlayer(req, res, false);
+            var createdInstancePlayer = await createInstancePlayer({ ...req, body: {...req.body, instanceId: createdInstance.id, playerId: createdInstance.ownerId }}, res, false);
             if (!createdInstancePlayer) {
                 console.log('InstancePlayer cannot be created');
             }

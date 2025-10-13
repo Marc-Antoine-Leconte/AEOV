@@ -12,7 +12,6 @@ var indexRouter = require('./server/routes/index');
 var playerRouter = require('./server/routes/player');
 var instanceRouter = require('./server/routes/instance');
 var gameRouter = require('./server/routes/game');
-//var instanceDataRouter = require('./server/routes/instanceData');
 
 var app = express(); 
 
@@ -41,7 +40,6 @@ app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 app.use('/player', playerRouter);
-//app.use('/instancedata', instanceDataRouter);
 app.use('/instance', instanceRouter);
 app.use('/game', gameRouter);
 

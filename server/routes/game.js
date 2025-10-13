@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
 
 /* POST set Player ready to play. */
 router.post('/readyToPlay', async function(req, res, next) {
-  const { civilization, color, instanceId, playeId } = req.body;
+  const { civilization, color, instanceId, playerId } = req.body;
   console.log('# Player join game');
 
   const player = await getPlayerById(req, res, false);

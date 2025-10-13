@@ -147,7 +147,7 @@ class InstancePlayerController {
 
     updateInstancePlayer = async (req, res, allowTransmit = true) => {
         try {
-            const existingInstancePlayer = await InstancePlayer.getInstancePlayerByPlayerAndInstance(req, res, false);
+            const existingInstancePlayer = await this.getInstancePlayerByPlayerAndInstance(req, res, false);
             if (!existingInstancePlayer) {
                if (allowTransmit) {
                    return res.status(404).json({

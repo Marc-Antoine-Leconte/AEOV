@@ -83,6 +83,12 @@ function subscribePlayer(playerName, password) {
     return createPlayerFromAPI(playerName, password)
 }
 
+function setPlayerReadyToPlay(civilization, color) {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

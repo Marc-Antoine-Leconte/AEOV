@@ -1,24 +1,44 @@
 extends layout
 
 block content  
-  h1 Plateau de jeu
 
   button(type='button', id='disconnect-button') Déconnexion
   button(type='button', id='leave-instance-button') Quitter la partie
 
   div(id="game-board-connection-container", hidden=false)
+    h1 Connexion
     p(id="game-board-loading-message") En attente du début de la partie...
     div(id="game-board-player-list-container", hidden=true)
       h2 Liste des joueurs
       ul(id="game-board-player-list")
 
+    select(id="game-board-player-civilization-select", name="Choisissez une civilisation")
+      option(value="roman", selected="selected") Empire Romain
+      option(value="viking") Peuples Viking
+      option(value="egyptian") Nation Egyptienne
+      option(value="medieval") Royaume Médiéval
+      option(value="greek") Cités Grecques
+
+    select(id="game-board-player-color-select", name="Choisissez une couleur")
+      option(value="red", selected="selected") Rouge
+      option(value="blue") Bleu
+      option(value="purple") Violet
+      option(value="green") Vert
+      option(value="yellow") Jaune
+      option(value="orange") Orange
+      option(value="pink") Rose
+      option(value="brown") Marron
+      option(value="aqua") Aqua
+
     button(type='button', id='ready-button') Prêt à jouer
     button(type='button', id='start-game-button') Démarrer la partie
-
+    
   div(id="game-board-instance-data-error-message", hidden=true)
 
-  div(id="game-board-container", hidden=true)
-    div(id="game-board-info")
+  div(id="game-board-container")
+    div(id="game-board-info", hidden=true)
+      h1 Partie en cours
+
       p
         span(id="game-board-instance-name-title") Nom de la partie : 
         span(id="game-board-instance-name")
@@ -43,18 +63,21 @@ block content
         span(id="game-board-current-player-title") Joueur en train de jouer : 
         span(id="game-board-current-player")
 
-    div(id="game-board")
+    div(id="game-board", hidden=true)
+      h1 Plateau de jeu
+
       // Le plateau de jeu sera généré ici par JavaScript
 
     div(id="game-board-controls", hidden=true)
+      h1 Actions
       button(type='button', id='end-turn-button') Terminer le tour
       button(type='button', id='collect-resource-button') Collecter une ressource
       button(type='button', id='fight-button') Combattre
       button(type='button', id='construct-building-button') Construire un bâtiment
       button(type='button', id='craft-tool-button') Fabriquer un équipement
 
-    div(id="game-log")
-      h2 Journal de la partie
+    div(id="game-log", hidden=true)
+      h2 Journal d'évènements
       ul(id="game-log-messages")
 
   script(src='/javascripts/drawGameBoard.js')

@@ -4,7 +4,6 @@ var router = express.Router();
 const { validateInstance } = require('../middleware/instanceValidation');
 
 const { getAllInstances, createInstance, getInstanceById } = require('../controllers/instanceController');
-//const { getExtendedInstanceDataById } = require('../controllers/instanceDataController');
 const { getPlayerById } = require('../controllers/playerController');
 const { createInstancePlayer, getCountInstancePlayersByInstanceId, getInstancePlayerByPlayerAndInstance } = require('../controllers/instancePlayerController');
 

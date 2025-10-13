@@ -7,6 +7,7 @@ const instancePath = "/instance";
 const playerAuthenticationPath = "/player/authenticate";
 const playerCreationPath = "/player/create";
 const ownerStartGamePath = "/game/start";
+const readyToPlayPath = "/game/readyToPlay";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -85,4 +86,9 @@ async function createPlayerFromAPI(playerName, password) {
 async function startGameFromAPI(instanceId, ownerId) {
   const url = `${currentProtocol}${currentUrl}${ownerStartGamePath}`;
   return await postDataToAPI(url, { instanceId, ownerId });
+}
+
+async function setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId) {
+  const url = `${currentProtocol}${currentUrl}${readyToPlayPath}`;
+  return await postDataToAPI(url, { civilization, color, instanceId, playerId });
 }

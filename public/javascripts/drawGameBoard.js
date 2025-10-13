@@ -28,7 +28,7 @@ function DrawInstanceData() {
         return;
     }
 
-    const gameBoardContainer = document.getElementById("game-board-container");
+    const gameBoardContainer = document.getElementById("game-board-info");
     gameBoardContainer.hidden = false;
 
     const instanceNameComp = document.getElementById("game-board-instance-name");
@@ -48,18 +48,52 @@ function DrawInstanceData() {
     console.log('# Draw of Instance Data OK');
 }
 
+function onStartGameButtonClick() {
+    console.log('Start Game button clicked');
+    OwnerStartGameSocket();
+}
+
+function setStartGameButtonListener() {
+    const startGameBtn = document.getElementById("start-game-button");
+    startGameBtn.addEventListener('click', onStartGameButtonClick);
+}
+
+function onReadyButtonClick() {
+    console.log('Ready button clicked');
+
+    const civilizationSelect = document.getElementById("game-board-player-civilization-select");
+    const colorSelect = document.getElementById("game-board-player-color-select");
+
+    setPlayerReadyToPlay(civilizationSelect.value, colorSelect.value).then((data) => {
+       
+        console.log('data status => ', data)
+        if (data.error || data.message) {
+            console.log('# Error setting player ready to play:', data.message);
+        }
+        DrawGameBoardScreen();
+    });
+}
+
+function setReadyButtonListener() {
+    const readyBtn = document.getElementById("ready-button");
+    readyBtn.addEventListener('click', onReadyButtonClick);
+}
+
 function DrawInstanceWaitingScreen() {
     const waitingScreen = document.getElementById("game-board-connection-container");
 
-    const instanceStatus = currentInstance.instanceStatus;
+    const instanceStatus = currentInstance.data;
 
-    if (!instanceStatus || !instanceStatus.id || instanceStatus.waitingForPlayers === false) {
+    if (!instanceStatus || instanceStatus?.gameState != 'waiting') {
         console.log('# No need to display waiting screen');
         waitingScreen.hidden = true;
         return;
     }
 
     waitingScreen.hidden = false;
+
+    setReadyButtonListener();
+    setStartGameButtonListener();
 }
 
 function DrawGameBoardScreen() {

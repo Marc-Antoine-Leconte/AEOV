@@ -1,4 +1,5 @@
 let currentInstance = {
+    data: {},
     instanceStatus: {},
-    playerList: {}
+    playerList: {},
 };

@@ -1,5 +1,5 @@
 
-function DisplayInstanceData() {
+function fetchAndDrawBoardScreen() {
     const instanceId = getCookie("currentInstanceId");
 
     if (!instanceId) {
@@ -21,28 +21,8 @@ function DisplayInstanceData() {
             instanceDataErrorComp.hidden = true;
         }
 
-        DrawInstanceData();
+        DrawGameBoardScreen();
     });
-}
-
-function onStartGameButtonClick() {
-    console.log('Start Game button clicked');
-    OwnerStartGameSocket();
-}
-
-function setStartGameButtonListener() {
-    const startGameBtn = document.getElementById("start-game-button");
-    startGameBtn.addEventListener('click', onStartGameButtonClick);
-}
-
-function onReadyButtonClick() {
-    console.log('Ready button clicked');
-    setPlayerReadyToPlaySocket();
-}
-
-function setReadyButtonListener() {
-    const readyBtn = document.getElementById("ready-button");
-    readyBtn.addEventListener('click', onReadyButtonClick);
 }
 
 function InitGameBoardPage() {
@@ -64,8 +44,7 @@ function InitGameBoardPage() {
     //joinInstanceSocket();
     setDisconnectButtonListener();
     setLeaveInstanceButtonListener();
-    setStartGameButtonListener();
-    DisplayInstanceData();
+    fetchAndDrawBoardScreen();
     DisplayUserInfo();
     DrawInstanceWaitingScreen();
 }
