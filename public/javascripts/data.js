@@ -13,7 +13,7 @@ async function fetchDataFromAPI(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`FETCH FAIL : Response status: ${response.status}`);
+      throw new Error(response);
     }
 
     const result = await response.json();
@@ -36,7 +36,12 @@ async function postDataToAPI(url, data) {
     });
 
     if (!response.ok) {
-      throw new Error(`POST FAIL : Response status: ${response.status}`);
+      throw new Error(response);
+    }
+
+    console.log('Response status:', response);
+    if (response.statusText == "No Content") {
+      return response;
     }
 
     const result = await response.json();
@@ -83,9 +88,9 @@ async function createPlayerFromAPI(playerName, password) {
   return await postDataToAPI(url, { name: playerName, password: password });
 }
 
-async function startGameFromAPI(instanceId, ownerId) {
+async function ownerStartGameFromAPI(instanceId, playerId) {
   const url = `${currentProtocol}${currentUrl}${ownerStartGamePath}`;
-  return await postDataToAPI(url, { instanceId, ownerId });
+  return await postDataToAPI(url, { instanceId, playerId });
 }
 
 async function setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId) {

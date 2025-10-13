@@ -50,7 +50,7 @@ function DrawInstanceData() {
 
 function onStartGameButtonClick() {
     console.log('Start Game button clicked');
-    OwnerStartGameSocket();
+    ownerStartGame();
 }
 
 function setStartGameButtonListener() {

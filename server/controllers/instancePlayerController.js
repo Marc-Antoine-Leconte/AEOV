@@ -169,7 +169,7 @@ class InstancePlayerController {
                 }
             });
             if (allowTransmit) {
-                res.status(204).send();
+                res.status(204).json(instancePlayerToUpdate);
             }
             return true;
         }

@@ -1,6 +1,6 @@
 var express = require('express');
 const { getPlayerById } = require('../controllers/playerController');
-const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayerByInstanceId } = require('../controllers/instancePlayerController');
+const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 var router = express.Router();
 
@@ -76,6 +76,14 @@ router.post('/start', async function(req, res, next) {
       });
   }
 
+  if (instance.gameState != 'waiting') {
+    console.log('The game is already started');
+      return res.status(403).json({
+          statusCode: 403,
+          message: "The game is already started"
+      });
+  }
+
   if (instance.ownerId != player.id) {
       console.log('Only owner can start the game');
       return res.status(403).json({
@@ -84,7 +92,15 @@ router.post('/start', async function(req, res, next) {
       });
   }
 
-  const instancePlayers = await getInstancePlayerByInstanceId(req, res, false);
+  const instancePlayers = await getInstancePlayersByInstanceId(req, res, false);
+
+  if (!instancePlayers) {
+    console.log('Error while loading players');
+      return res.status(403).json({
+          statusCode: 403,
+          message: "Error while loading players"
+      });
+  }
   instancePlayers.forEach(element => {
     if (element.civilization == null || element.color == null) {
         console.log('All players must be ready before starting the game');
@@ -95,8 +111,19 @@ router.post('/start', async function(req, res, next) {
     }
   });
 
-  console.log('Game started data', { ...instance, gameState: 'inProgress' });
-  const updateStatus = updateInstance(req, res, { ...instance, gameState: 'inProgress' });
+  if (instancePlayers.length < 2) {
+    console.log('The game needs at least 2 players to start');
+        return res.status(400).json({
+            statusCode: 400,
+            message: "The game needs at least 2 players to start"
+        });
+  }
+
+  const randomPlayer = Math.floor(Math.random() * instancePlayers.length);
+  const currentPlayerToPlay = instancePlayers[randomPlayer];
+
+  console.log('Game started data', { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay.playerId });
+  const updateStatus = updateInstance(req, res, { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay.playerId });
 
   if (!updateStatus) {
       console.log('Not possible to update instance');

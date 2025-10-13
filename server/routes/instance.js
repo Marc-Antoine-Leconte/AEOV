@@ -3,13 +3,13 @@ var router = express.Router();
 
 const { validateInstance } = require('../middleware/instanceValidation');
 
-const { getAllInstances, createInstance, getInstanceById } = require('../controllers/instanceController');
+const { getAllAvailableInstances, createInstance, getInstanceById } = require('../controllers/instanceController');
 const { getPlayerById } = require('../controllers/playerController');
 const { createInstancePlayer, getCountInstancePlayersByInstanceId, getInstancePlayerByPlayerAndInstance } = require('../controllers/instancePlayerController');
 
 /* GET all instances */
 router.get('/list', async function (req, res) {
-    await getAllInstances(req, res);
+    await getAllAvailableInstances(req, res);
 });
 
 /* CREATE a new instances */

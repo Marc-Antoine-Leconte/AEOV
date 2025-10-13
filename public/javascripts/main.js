@@ -89,6 +89,12 @@ function setPlayerReadyToPlay(civilization, color) {
     return setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId);
 }
 
+function ownerStartGame() {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return ownerStartGameFromAPI(instanceId, playerId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

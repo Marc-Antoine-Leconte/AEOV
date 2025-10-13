@@ -21,6 +21,25 @@ class InstanceController {
         }
     }
 
+    getAllAvailableInstances = async (req, res, allowTransmit = true) => {
+     console.log('@getAllInstances req => ', req.body);
+        try {
+            const instances = await Instance.findAll({ where: { gameState: 'waiting' } });
+            if (allowTransmit)
+                res.json(instances);
+            return instances;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit)
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            return;
+        }
+    }
+
     getInstanceById = async (req, res, allowTransmit = true) => {
         console.log('@getInstanceById req => ', req.body);
 
