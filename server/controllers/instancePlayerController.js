@@ -73,6 +73,37 @@ class InstancePlayerController {
         }
     }
 
+    getInstancePlayersByPlayerId = async (req, res, allowTransmit = true) => {
+        try {
+            const instancePlayers = await InstancePlayer.findAll({
+                where: {
+                    playerId: req.body.playerId
+                }
+            });
+            if (!instancePlayers) {
+                if (allowTransmit) {
+                    return res.status(404).json({
+                        statusCode: 404,
+                        message: "InstancePlayers not found"
+                    });
+                }
+            }
+            if (allowTransmit)
+                res.json(instancePlayers);
+            return instancePlayers;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
     getInstancePlayersByInstanceId = async (req, res, allowTransmit = true) => {
         try {
             const instancePlayers = await InstancePlayer.findAll({

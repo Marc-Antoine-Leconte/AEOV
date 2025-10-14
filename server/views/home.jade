@@ -11,11 +11,18 @@ block content
   
   p(id="instance-creation-error-message", hidden=true)
 
+  h1 Mes parties en cours
+
+  div
+    ul(id="player-instance-list")
+    p(id="player-instance-list-error", hidden=true)
+    p(id="player-instance-list-empty-message", hidden=true) Aucune partie actuellement en cours
+
   h1 Parties en cours
 
   div
     ul(id="instance-list")
     p(id="instance-list-error", hidden=true)
     p(id="instance-list-empty-message", hidden=true) Aucune partie actuellement en cours
-
+  
   script(src='/javascripts/homePage.js')

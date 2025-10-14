@@ -66,7 +66,7 @@ function joinInstance(instanceId) {
             return
         } else {
             console.log('# join instance Success', data);
-            goToGameBoard(data.id, data.name);
+            goToGameBoard(data.instanceId, data.instanceName);
         }
     });
 }
@@ -93,6 +93,12 @@ function ownerStartGame() {
     playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
     return ownerStartGameFromAPI(instanceId, playerId);
+}
+
+function fetchGameInfo() {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return fetchGameInfoFromAPI(instanceId, playerId);
 }
 
 function DisplayUserInfo() {

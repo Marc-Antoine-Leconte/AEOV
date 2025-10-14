@@ -136,6 +136,70 @@ router.post('/start', async function(req, res, next) {
   return res.status(204).send();
 });
 
+router.post('/info', async function(req, res, next) {
+  const { playerId, instanceId } = req.body;
+
+  const player = await getPlayerById(req, res, false);
+  if (!player) {
+      console.log('Player not found');
+      return res.status(404).json({
+          statusCode: 404,
+          message: "Player not found"
+      });
+  }
+
+  const instance = await getInstanceById(req, res, false);
+  if (!instance) {
+      console.log('Instance not found');
+      return res.status(404).json({
+          statusCode: 404,
+          message: "Instance not found"
+      });
+  }
+
+  const playerInstanceList = await getInstancePlayersByInstanceId(req, res, false);
+
+  var userFound = false;
+  var playersData = []
+  var id = 0;
+  for (const element of playerInstanceList) {
+    if (element.playerId == player.id) {
+        userFound = true;
+    } 
+
+    const playerData = await getPlayerById({ body: { playerId: element.playerId }}, res, false);
+
+    console.log('playerData------------------- => ', playerData);
+
+    playersData[id] = {
+      playerName: playerData.name,
+      civilization: element.civilization,
+      color: element.color,
+      isOwner: (element.playerId == instance.ownerId),
+      isCurrentPlayer: (playerData.id == instance.currentPlayerId)
+    };
+    id++;
+  }
+
+  if (!userFound) {
+    console.log('Player is not in this game');
+      return res.status(404).json({
+          statusCode: 404,
+          message: "Player is not in this game"
+      });
+  }
+
+  return res.status(200).json({
+      statusCode: 200,
+      message: "Success",
+      data: {
+          currentPlayer: { ...player, password: null },
+          instance: instance,
+          players: playersData
+      }
+  });
+});
+
 const MAX_HOMES_PER_PLAYER = 10;
 const MAX_FARM_PER_PLAYER = 5;
 

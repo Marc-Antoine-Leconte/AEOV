@@ -22,7 +22,7 @@ class InstanceController {
     }
 
     getAllAvailableInstances = async (req, res, allowTransmit = true) => {
-     console.log('@getAllInstances req => ', req.body);
+     console.log('@getAllAvailableInstances req => ', req.body);
         try {
             const instances = await Instance.findAll({ where: { gameState: 'waiting' } });
             if (allowTransmit)

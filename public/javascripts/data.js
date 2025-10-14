@@ -1,6 +1,7 @@
 const currentUrl = "localhost:3000";
 const currentProtocol = "http://";
 const allInstancesPath = "/instance/list";
+const playerInstancesPath = "/instance/list/user";
 const newInstancePath = "/instance/new";
 const joinInstancePath = "/instance/join";
 const instancePath = "/instance";
@@ -8,6 +9,7 @@ const playerAuthenticationPath = "/player/authenticate";
 const playerCreationPath = "/player/create";
 const ownerStartGamePath = "/game/start";
 const readyToPlayPath = "/game/readyToPlay";
+const gameInfoPath = "/game/info";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -58,6 +60,11 @@ async function fetchAllInstancesFromAPI() {
   return await fetchDataFromAPI(url);
 }
 
+async function fetchPlayerInstancesFromAPI(playerId) {
+  const url = `${currentProtocol}${currentUrl}${playerInstancesPath}`;
+  return await postDataToAPI(url, { playerId });
+}
+
 async function createInstanceFromAPI({name, ownerId, mode = "pvp", maxPlayers = 8}) {
   const url = `${currentProtocol}${currentUrl}${newInstancePath}`;
   return await postDataToAPI(url, { name, mode, maxPlayers, ownerId });
@@ -96,4 +103,9 @@ async function ownerStartGameFromAPI(instanceId, playerId) {
 async function setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId) {
   const url = `${currentProtocol}${currentUrl}${readyToPlayPath}`;
   return await postDataToAPI(url, { civilization, color, instanceId, playerId });
+}
+
+async function fetchGameInfoFromAPI(instanceId, playerId) {
+  const url = `${currentProtocol}${currentUrl}${gameInfoPath}`;
+  return await postDataToAPI(url, { instanceId, playerId });
 }

@@ -7,8 +7,8 @@ function DrawStartGameButton() {
     }
 }
 
-function DrawPlayerControls() {
-    const instanceStatus = currentInstance.instanceStatus;
+function DrawControls() {
+    const instanceStatus = currentInstance.data;
 
     const gameBoardControlsComp = document.getElementById("game-board-controls");
     if (!instanceStatus || !instanceStatus.id || instanceStatus.gameStarted === false) {
@@ -18,6 +18,38 @@ function DrawPlayerControls() {
     }
 
     gameBoardControlsComp.hidden = false;
+}
+
+function DrawPlayerList() {
+    console.log('# Drawing player list...');
+    const playerList = currentInstance.playerList;
+    const instanceStatus = currentInstance.data;
+
+    const playerListContainerComp = document.getElementById("game-board-player-list-container");
+    if (!instanceStatus || !instanceStatus.id) {
+        console.log('# No need to draw player list');
+        playerListContainerComp.hidden = true;
+        return;
+    }
+
+    playerListContainerComp.hidden = false;
+
+    const playerListComp = document.getElementById("game-board-player-list");
+     if (!playerListComp) {
+        console.log('# No player list component found');
+            return;
+        }
+    playerListComp.innerHTML = '';
+
+    playerList.forEach(element => {
+        const playerItem = document.createElement("li");
+        playerItem.className = "game-board-player-item";
+        playerItem.id = `player-${element.playerName}`;
+        playerItem.innerHTML = `${element.playerName} (${element.civilization}, ${element.color})`;
+        playerListComp.appendChild(playerItem);
+    });
+
+    console.log('# Drawing player list OK');
 }
 
 function DrawInstanceData() {
@@ -43,7 +75,18 @@ function DrawInstanceData() {
     instanceOwnerComp.innerHTML = data.owner;
     instanceStatusComp.innerHTML = data.gameState;
     instanceCurrentTurnComp.innerHTML = data.rounds;
-    instanceCurrentPlayerComp.innerHTML = data.currentPlayer;
+
+    const playerList = currentInstance.playerList;
+
+    console.log('playerList => ', playerList);
+
+    for (var i = 0; i < playerList.length; i++) {
+        const element = playerList[i];
+        if (element.isCurrentPlayer) {
+            instanceCurrentPlayerComp.innerHTML = element.playerName;
+            return;
+        }
+    }
 
     console.log('# Draw of Instance Data OK');
 }
@@ -65,7 +108,7 @@ function onReadyButtonClick() {
     const colorSelect = document.getElementById("game-board-player-color-select");
 
     setPlayerReadyToPlay(civilizationSelect.value, colorSelect.value).then((data) => {
-       
+
         console.log('data status => ', data)
         if (data.error || data.message) {
             console.log('# Error setting player ready to play:', data.message);
@@ -100,6 +143,8 @@ function DrawGameBoardScreen() {
     DrawInstanceData();
     DrawStartGameButton();
     DrawInstanceWaitingScreen();
+    DrawControls();
+    DrawPlayerList();
 }
 
 DrawGameBoardScreen();

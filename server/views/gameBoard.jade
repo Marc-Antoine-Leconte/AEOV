@@ -5,12 +5,14 @@ block content
   button(type='button', id='disconnect-button') Déconnexion
   button(type='button', id='leave-instance-button') Quitter la partie
 
+  div(id="game-board-player-list-container")
+    h1 Liste des joueurs
+    div
+      ul(id="game-board-player-list")
+
   div(id="game-board-connection-container", hidden=false)
     h1 Connexion
     p(id="game-board-loading-message") En attente du début de la partie...
-    div(id="game-board-player-list-container", hidden=true)
-      h2 Liste des joueurs
-      ul(id="game-board-player-list")
 
     select(id="game-board-player-civilization-select", name="Choisissez une civilisation")
       option(value="roman", selected="selected") Empire Romain

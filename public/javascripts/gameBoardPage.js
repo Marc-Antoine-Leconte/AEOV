@@ -6,14 +6,16 @@ function fetchAndDrawBoardScreen() {
         console.error('No instance ID found in cookies.');
         return;
     }
-    fetchInstance(instanceId).then((data) => {
-        console.log("# DisplayInstanceData - data =>", data);
+    fetchGameInfo().then((response) => {
+        console.log("# DisplayInstanceData - data =>", response);
 
-        currentInstance.data = { ...currentInstance.data, ...data };
+        currentInstance.data = response.data.instance;
+        currentInstance.playerList = response.data.players;
+        currentInstance.currentPlayer = response.data.currentPlayer;
 
         console.log('||> Current Instance Data:', currentInstance);
         const instanceDataErrorComp = document.getElementById("game-board-instance-data-error-message");
-        if (data.error || data.length == 0 || !data) {
+        if (response.error || !response.data || response.data.length == 0) {
             instanceDataErrorComp.innerHTML = "Une erreur est survenue lors de la récupération de l'instance : <b>" + data.message + "</b>";
             instanceDataErrorComp.hidden = false;
             return
@@ -46,7 +48,6 @@ function InitGameBoardPage() {
     setLeaveInstanceButtonListener();
     fetchAndDrawBoardScreen();
     DisplayUserInfo();
-    DrawInstanceWaitingScreen();
 }
 
 InitGameBoardPage();
