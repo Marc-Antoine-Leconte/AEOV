@@ -1,3 +1,4 @@
+
 function DrawStartGameButton() {
     currentId = getCookie("currentPlayerId");
     if (currentId == currentInstance.ownerId) {
@@ -7,17 +8,28 @@ function DrawStartGameButton() {
     }
 }
 
+function onEndTurnButtonClick() {
+    setEndTurnSocket();
+}
+
+function setEndTurnButtonListener() {
+    const endTurnBtn = document.getElementById("end-turn-button");
+    endTurnBtn.addEventListener('click', onEndTurnButtonClick);
+}
+
 function DrawControls() {
     const instanceStatus = currentInstance.data;
 
     const gameBoardControlsComp = document.getElementById("game-board-controls");
-    if (!instanceStatus || !instanceStatus.id || instanceStatus.gameStarted === false) {
+    if (!instanceStatus || !instanceStatus.id || instanceStatus.gameState != 'inProgress') {
         console.log('# No need to display controls');
         gameBoardControlsComp.hidden = true;
         return;
     }
 
     gameBoardControlsComp.hidden = false;
+
+    setEndTurnButtonListener();
 }
 
 function DrawPlayerList() {
@@ -93,7 +105,13 @@ function DrawInstanceData() {
 
 function onStartGameButtonClick() {
     console.log('Start Game button clicked');
-    ownerStartGame();
+    ownerStartGame().then((data) => {
+        if (data.error || data.message) {
+            console.log('# Error starting game:', data.message);
+        }
+        ownerStartGameSocket();
+        fetchAndDrawBoardScreen();
+    });
 }
 
 function setStartGameButtonListener() {
@@ -113,6 +131,7 @@ function onReadyButtonClick() {
         if (data.error || data.message) {
             console.log('# Error setting player ready to play:', data.message);
         }
+        setPlayerReadyToPlaySocket();
         DrawGameBoardScreen();
     });
 }

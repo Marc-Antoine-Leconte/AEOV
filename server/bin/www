@@ -51,15 +51,13 @@ io.on('connection', (socket) => {
   // A PLAYER JOINED AN INSTANCE
   socket.on('playerJoin', (data) => {
     console.log("[player join]")
-    console.log('visitor ' + socket.id + ' joined instance ' + data.instanceId + ' as player ' + data.playerName);
+    console.log('visitor ' + socket.id + ' joined instance ' + data.instanceName + "#" + data.instanceId + ' as player ' + data.playerName);
     visitors[socket.id].name = data.playerName;
     visitors[socket.id].id = data.playerId;
 
     if (!instances[data.instanceId]) {
       instances[data.instanceId] = {
         instanceStatus: {
-          gameStarted: false,
-          waitingForPlayers: true,
           instanceId: data.instanceId,
           instanceName: data.instanceName,
         },
@@ -67,68 +65,103 @@ io.on('connection', (socket) => {
       }
     }
 
-    instances[data.instanceId].playerList[data.playerId] = {
-      ready: false,
-      name: data.playerName,
-      id: data.playerId,
-      visitorId: socket.id,
-    }
+    instances[data.instanceId].playerList[data.playerId] = socket.id;
 
     for (const playerId in instances[data.instanceId].playerList) {
-      const visitorId = instances[data.instanceId].playerList[playerId].visitorId
-      if (visitors[visitorId]) {
-        io.to(visitorId).emit('updateInstanceStatus', instances[data.instanceId].instanceStatus);
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
       }
     }
   });
 
  
-  socket.on('playerReadyToPlay', (userData) => {
-    console.log("[player Ready To Play]")
-    const playerId = visitors[socket.id].id;
-    if (!playerId) {
+  socket.on('playerReadyToPlay', (data) => {
+    console.log("[player Ready To Play]", socket.id)
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
       return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
     }
 
-    const player = instances[userData.instanceId].playerList[playerId];
-    if (!player) {
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
       return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
     }
 
-    instances[userData.instanceId].playerList[playerId].ready = true;
-    instances[userData.instanceId].playerList[playerId].civilization = userData.civilization;
-    instances[userData.instanceId].playerList[playerId].color = userData.color;
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
 
-    for (const otherPlayerId in instances[userData.instanceId].playerList) {
-      const visitorId = instances[data.instanceId].playerList[otherPlayerId].visitorId
-      if (visitors[visitorId]) {
-        io.to(visitorId).emit('updateInstanceStatus', instances[data.instanceId].instanceStatus);
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
       }
     }
   });
 
-    socket.on('ownerStartGame', (userData) => {
+    socket.on('ownerStartGame', (data) => {
       console.log("[owner start Game]")
-      const playerId = visitors[socket.id].id;
-      if (!playerId) {
-        return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
-      }
+      const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
 
-      const player = instances[userData.instanceId].playerList[playerId];
-      if (!player) {
-        return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
-      }
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
 
-      instances[userData.instanceId].instanceStatus.gameStarted = true;
-      instances[userData.instanceId].instanceStatus.waitingForPlayers = false;
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
 
-      for (const playerId in instances[userData.instanceId].playerList) {
-        const visitorId = instances[userData.instanceId].playerList[playerId].visitorId;
-        if (visitors[visitorId]) {
-          io.to(visitorId).emit('updateInstanceStatus', instances[userData.instanceId].instanceStatus);
-        }
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
       }
+    }
     });
+
+    socket.on('endTurn', (data) => {
+      console.log("[player ends his turn]")
+      const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
+      }
+    }
+    });
+
 
   });
 

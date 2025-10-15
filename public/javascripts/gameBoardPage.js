@@ -43,7 +43,7 @@ function InitGameBoardPage() {
         return;
     }
 
-    //joinInstanceSocket();
+    joinInstanceSocket();
     setDisconnectButtonListener();
     setLeaveInstanceButtonListener();
     fetchAndDrawBoardScreen();

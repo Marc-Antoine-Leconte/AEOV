@@ -1,47 +1,41 @@
-// const socket = io()
+var socket = null;
 
-// // REGULAR INSTANCE UPDATE
-// socket.on('updateInstanceStatus', (instanceStatus) => {
-//     console.log('Instance Status:', instanceStatus);
+const joinInstanceSocket = () => {
+    socket = io();
 
-//     currentInstance.instanceStatus = { ...currentInstance.instanceStatus, ...instanceStatus };
-//     console.log('||> Current Instance:', currentInstance);
-//     DrawGameBoardScreen();
-// });
+    // REGULAR INSTANCE UPDATE
+    socket.on('updateInstanceStatus', () => {
+        console.log('-- Socket ping to update status');
+        fetchAndDrawBoardScreen();
+    });
 
-// socket.on('updatePlayerList', (playerList) => {
-//     console.log('Player List:', playerList);
+    socket.on('error', (message) => {
+        console.error(message);
+    });
 
-//     currentInstance.playerList = playerList;
-//     console.log('Current Instance State:', currentInstance);
-// });
+    socket.emit('playerJoin', {
+        playerId: getCookie("currentPlayerId"),
+        playerName: getCookie("currentPlayerName"),
+        instanceId: getCookie("currentInstanceId"),
+        instanceName: getCookie("currentInstanceName"),
+    });
+}
 
-// const joinInstanceSocket = () => {
-//     socket.emit('playerJoin', {
-//         playerId: getCookie("currentPlayerId"),
-//         playerName: getCookie("currentPlayerName"),
-//         instanceId: getCookie("currentInstanceId"),
-//         instanceName: getCookie("currentInstanceName"),
-//     });
-// }
+const setPlayerReadyToPlaySocket = () => {
+    socket.emit("playerReadyToPlay", {
+        instanceId: getCookie("currentInstanceId"),
+    });
+}
 
-// const setPlayerReadyToPlaySocket = () => {
-//     socket.emit("playerReadyToPlay", {
-//         civilization: "romans",
-//         color: "red",
-//         instanceId: getCookie("currentInstanceId"),
-//     });
-// }
+const ownerStartGameSocket = () => {
+    socket.emit("ownerStartGame", {
+        instanceId: getCookie("currentInstanceId"),
+    });
+}
 
-// const OwnerStartGameSocket = () => {
-//     socket.emit("ownerStartGame", {
-//         instanceId: getCookie("currentInstanceId"),
-//     });
-// }
+const setEndTurnSocket = () => {
+    socket.emit("endTurn", {
+        instanceId: getCookie("currentInstanceId"),
+    });
+}
 
-// const setPlayerActionSocket = (action) => {
-//     socket.emit("playerAction", {
-//         action: action,
-//         instanceId: getCookie("currentInstanceId"),
-//     });
-// }
