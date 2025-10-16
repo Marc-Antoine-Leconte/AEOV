@@ -24,7 +24,41 @@ function fetchAndDrawBoardScreen() {
         }
 
         DrawGameBoardScreen();
+        fetchGameActions().then((response) => {
+            console.log("# DisplayGameActions - data =>", response);
+            const playerActions = response.map(action => {
+                const effects = action.effects.split(",").reduce((map, item) => {
+                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                    const [key, value] = trimmedItem.split(":");
+                    map[key] = value;
+                    return map;
+                }, {});
+
+                const requiredBuildings = action.requiredBuildings.split(",").reduce((map, item) => {
+                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                    const [key, value] = trimmedItem.split(":");
+                    map[key] = value;
+                    return map;
+                }, {});
+
+                const requiredResources = action.requiredResources.split(",").reduce((map, item) => {
+                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                    const [key, value] = trimmedItem.split(":");
+                    if (key && value) {
+                        map[key] = value;
+                    }
+                    return map;
+                }, {});
+
+                return { ...action, effects, requiredBuildings, requiredResources };
+            });
+
+            currentInstance.actions = playerActions;
+            DrawPlayerActions();
+        });
     });
+
+    
 }
 
 function InitGameBoardPage() {

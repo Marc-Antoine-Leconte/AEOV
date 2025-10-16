@@ -48,6 +48,9 @@ const instancePlayerSchema = Joi.object({
     armor: Joi.number()
         .integer()
         .min(0),
+    horse: Joi.number()
+        .integer()
+        .min(0)
 });
 
 const validateInstancePlayer = (req, res, next) => {

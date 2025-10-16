@@ -2,6 +2,7 @@ var express = require('express');
 const { getPlayerById } = require('../controllers/playerController');
 const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
+const { getAllActions } = require('../controllers/actionController');
 var router = express.Router();
 
 /* GET render game board page. */
@@ -162,9 +163,12 @@ router.post('/info', async function(req, res, next) {
   var userFound = false;
   var playersData = []
   var id = 0;
+  var currentPlayerData = {};
+
   for (const element of playerInstanceList) {
     if (element.playerId == player.id) {
         userFound = true;
+        currentPlayerData = element;
     } 
 
     const playerData = await getPlayerById({ body: { playerId: element.playerId }}, res, false);
@@ -193,11 +197,16 @@ router.post('/info', async function(req, res, next) {
       statusCode: 200,
       message: "Success",
       data: {
-          currentPlayer: { ...player, password: null },
-          instance: instance,
+          currentPlayer: { ...player.dataValues, ...currentPlayerData.dataValues, password: null },
+          instance: { ...instance.dataValues, ownerId: null },
           players: playersData
       }
   });
+});
+
+router.get('/actions', async function(req, res, next) {
+  console.log('# Fetching actions');
+  return await getAllActions(req, res);
 });
 
 const MAX_HOMES_PER_PLAYER = 10;

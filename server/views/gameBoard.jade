@@ -41,47 +41,90 @@ block content
     div(id="game-board-info", hidden=true)
       h1 Partie en cours
 
-      p
-        span(id="game-board-instance-name-title") Nom de la partie : 
-        span(id="game-board-instance-name")
-
-      p
-        span(id="game-board-instance-mode-title") Mode de la partie : 
-        span(id="game-board-instance-mode")
-
-      p
-        span(id="game-board-owner-title") Administrateur : 
-        span(id="game-board-owner")
-
-      p
-        span(id="game-board-status-title") Statut de la partie : 
-        span(id="game-board-status")
-
-      p
-        span(id="game-board-current-turn-title") Tour actuel : 
-        span(id="game-board-current-turn")
-
-      p
-        span(id="game-board-current-player-title") Joueur en train de jouer : 
-        span(id="game-board-current-player")
+      ul
+        li
+          span(id="game-board-instance-name-title") Nom de la partie : 
+          span(id="game-board-instance-name")
+        li
+          span(id="game-board-instance-mode-title") Mode de la partie : 
+          span(id="game-board-instance-mode")
+        li
+          span(id="game-board-owner-title") Administrateur : 
+          span(id="game-board-owner")
+        li
+          span(id="game-board-status-title") Statut de la partie : 
+          span(id="game-board-status")
+        li
+          span(id="game-board-current-turn-title") Tour actuel : 
+          span(id="game-board-current-turn")
+        li
+          span(id="game-board-current-player-title") Joueur en train de jouer : 
+          span(id="game-board-current-player")
+        li
+          span(id="game-board-total-players-title") Nombre de joueurs : 
+          span(id="game-board-total-players")
 
     div(id="game-board", hidden=true)
       h1 Plateau de jeu
 
       // Le plateau de jeu sera généré ici par JavaScript
 
+    div(id="game-board-player-resources", hidden=true)
+      ul 
+        li
+          span(id="player-resource-wood-title") Bois : 
+          span(id="player-resource-wood")
+        li
+          span(id="player-resource-stone-title") Pierre : 
+          span(id="player-resource-stone")
+        li
+          span(id="player-resource-food-title") Nourriture : 
+          span(id="player-resource-food")
+        li
+          span(id="player-resource-gold-title") Or : 
+          span(id="player-resource-gold")
+        li
+          span(id="player-resource-diamond-title") Diamants : 
+          span(id="player-resource-diamond")
+        li
+          span(id="player-resource-iron-title") Fer : 
+          span(id="player-resource-iron")
+        li
+          span(id="player-resource-population-title") Population : 
+          span(id="player-resource-population")
+        li
+          span(id="player-resource-army-title") Soldats : 
+          span(id="player-resource-army")
+        li
+          span(id="player-resource-armor-title") Armures : 
+          span(id="player-resource-armor")
+        li
+          span(id="player-resource-weapon-title") Armes : 
+          span(id="player-resource-weapon")
+        li
+          span(id="player-resource-tool-title") Outils : 
+          span(id="player-resource-tool")
+        li
+          span(id="player-resource-horse-title") Chevaux : 
+          span(id="player-resource-horse")
+
+
     div(id="game-board-controls", hidden=true)
       h1 Actions
       button(type='button', id='end-turn-button') Terminer le tour
-      button(type='button', id='collect-resource-button') Collecter une ressource
-      button(type='button', id='fight-button') Combattre
-      button(type='button', id='construct-building-button') Construire un bâtiment
-      button(type='button', id='craft-tool-button') Fabriquer un équipement
+      
+      div(id="player-actions-container", hidden=true)
+        h2 Mes actions possibles
+        div(id="player-actions-list")
+          // Les actions du joueur seront générées ici par JavaScript
+        h2 Autres actions impossibles
+        div(id="player-other-actions-list")
 
     div(id="game-log", hidden=true)
       h2 Journal d'évènements
       ul(id="game-log-messages")
 
+  script(src='/javascripts/gameMechanics.js')
   script(src='/javascripts/drawGameBoard.js')
   script(src='/javascripts/socketConnection.js')
   script(src='/javascripts/gameBoardPage.js')

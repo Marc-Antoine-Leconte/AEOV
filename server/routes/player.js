@@ -7,7 +7,7 @@ var router = express.Router();
 /* POST new player */
 router.post('/create', validatePlayer, async function (req, res) {
     console.log('NEW PLAYER req.body => ', req.body)
-    return await createPlayer(req, res);
+    await createPlayer(req, res);
 });
 
 /* POST authenticate player */

@@ -1,3 +1,4 @@
+const { act } = require("react");
 
 function DrawStartGameButton() {
     currentId = getCookie("currentPlayerId");
@@ -30,6 +31,44 @@ function DrawControls() {
     gameBoardControlsComp.hidden = false;
 
     setEndTurnButtonListener();
+}
+
+function DrawPlayerResources() {
+    console.log('# Drawing player resources...');
+    const playerData = currentInstance.currentPlayer;
+
+    const playerResourcesComp = document.getElementById("game-board-player-resources");
+    if (!playerData || !playerData.id) {
+        console.log('# No need to draw player resources');
+        playerResourcesComp.hidden = true;
+        return;
+    }
+
+    playerResourcesComp.hidden = false;
+
+    const resourceTitles = [
+        "wood",
+        "stone",
+        "food",
+        "gold",
+        "diamond",
+        "iron",
+        "population",
+        "armor",
+        "weapon",
+        "tool",
+        "horse",
+        "army"
+    ];
+
+    resourceTitles.forEach(resource => {
+        const resourceComp = document.getElementById(`player-resource-${resource}`);
+        if (resourceComp) {
+            resourceComp.innerHTML = playerData[resource];
+        }
+    });
+
+    console.log('# Drawing player resources OK');
 }
 
 function DrawPlayerList() {
@@ -81,12 +120,13 @@ function DrawInstanceData() {
     const instanceStatusComp = document.getElementById("game-board-status");
     const instanceCurrentTurnComp = document.getElementById("game-board-current-turn");
     const instanceCurrentPlayerComp = document.getElementById("game-board-current-player");
+    const instanceTotalPlayersComp = document.getElementById("game-board-total-players");
 
     instanceNameComp.innerHTML = data.name;
     instanceModeComp.innerHTML = data.mode;
-    instanceOwnerComp.innerHTML = data.owner;
     instanceStatusComp.innerHTML = data.gameState;
     instanceCurrentTurnComp.innerHTML = data.rounds;
+    instanceTotalPlayersComp.innerHTML = currentInstance.playerList.length + "/" + data.maxPlayers;
 
     const playerList = currentInstance.playerList;
 
@@ -96,11 +136,80 @@ function DrawInstanceData() {
         const element = playerList[i];
         if (element.isCurrentPlayer) {
             instanceCurrentPlayerComp.innerHTML = element.playerName;
-            return;
+        }
+        if (element.isOwner) {
+            instanceOwnerComp.innerHTML = element.playerName;
         }
     }
 
     console.log('# Draw of Instance Data OK');
+}
+
+function DrawActionList(actions, className, disabled = false) {
+    const actionListContainer = document.getElementById(className);
+    actionListContainer.innerHTML = '';
+
+    console.log('# Drawing action list:', className);
+
+    Object.entries(actions).forEach(([id, action]) => {
+        const actionItem = document.createElement("button");
+        actionItem.className = className + "-item";
+        actionItem.innerHTML = action.name;
+
+        const requirements = { ...action.requiredBuildings, ...action.requiredResources };
+        actionItem.addEventListener('click', () => executeAction(action.id, requirements, action.effects, () => {
+            DrawPlayerActions();
+            DrawPlayerResources();
+        }));
+        actionItem.title = Object.entries(requirements).reduce((str, [key, val]) => {
+            return str + `${key}: ${val}, `;
+        }, "Requis: ");
+        if (disabled) {
+            actionItem.disabled = "disabled";
+        }
+        actionListContainer.appendChild(actionItem);
+    });
+}
+
+function DrawPlayerActions() {
+    console.log('# Drawing player actions...');
+    const actions = currentInstance.actions;
+    const currentPlayer = currentInstance.currentPlayer;
+
+    const actionsContainerComp = document.getElementById("player-actions-container");
+    if (!actions || actions.length == 0 || !currentPlayer || !currentPlayer.id) {
+        console.log('# No actions to display');
+        actionsContainerComp.hidden = true;
+        return;
+    }
+
+    actionsContainerComp.hidden = false;
+
+    var playerActionsList = {};
+    var otherPlayerActionsList = {};
+    
+    actions.map((action, id) => {
+        var tooMuchRequirement = false;
+        const requirement = { ...action.requiredBuildings, ...action.requiredResources };
+        Object.entries(requirement).forEach(([key, value]) => {
+            if (value && !currentPlayer[key] || currentPlayer[key] < value) {
+                tooMuchRequirement = true;
+                //console.log('player need more', key, ' => ', value);
+            }
+        });
+        
+        if (tooMuchRequirement) {
+            otherPlayerActionsList[id] = action;
+        } else {
+            playerActionsList[id] = action;
+        }
+    });
+
+    DrawActionList(playerActionsList, "player-actions-list");
+    DrawActionList(otherPlayerActionsList, "player-other-actions-list", true);
+
+
+    console.log('# Drawing player actions OK');
 }
 
 function onStartGameButtonClick() {
@@ -116,6 +225,21 @@ function onStartGameButtonClick() {
 
 function setStartGameButtonListener() {
     const startGameBtn = document.getElementById("start-game-button");
+
+    if (currentInstance.data.ownerId != getCookie("currentPlayerId")) {
+        startGameBtn.hidden = true;
+        return;
+    }
+
+    playerList = currentInstance.playerList;
+    const playerListLength = playerList.length;
+
+    startGameBtn.innerText = "Démarrer la partie " + playerListLength + "/" + currentInstance.data.maxPlayers;
+    if (playerListLength < 2) {
+        startGameBtn.disabled = true;
+        return;
+    }
+    startGameBtn.disabled = false;
     startGameBtn.addEventListener('click', onStartGameButtonClick);
 }
 
@@ -163,6 +287,7 @@ function DrawGameBoardScreen() {
     DrawStartGameButton();
     DrawInstanceWaitingScreen();
     DrawControls();
+    DrawPlayerResources();
     DrawPlayerList();
 }
 

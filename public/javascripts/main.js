@@ -101,6 +101,10 @@ function fetchGameInfo() {
     return fetchGameInfoFromAPI(instanceId, playerId);
 }
 
+function fetchGameActions() {
+    return fetchAllActionsFromAPI();
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

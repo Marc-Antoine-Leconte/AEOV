@@ -88,9 +88,9 @@ class PlayerController {
                 return;
             }
             if (allowTransmit) {
-                res.json(player);
+                res.json({ ...player.dataValues, password: null });
             }
-            return player;
+            return { ...player.dataValues, password: null };
         }
         catch (error) {
             console.log(error);
@@ -116,9 +116,9 @@ class PlayerController {
             var createdPlayer = await Player.create(playerData);
             if (allowTransmit) {
                 res.status(201)
-                    .json(createdPlayer);
+                    .json( { ...createdPlayer.dataValues, password: null } );
             }
-            return createdPlayer;
+            return { ...createdPlayer.dataValues, password: null };
         } catch (error) {
             console.log(error);
             if (allowTransmit) {

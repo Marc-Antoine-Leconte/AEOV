@@ -63,7 +63,7 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 10,
         },
-        weapons: {
+        weapon: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 10,
@@ -72,6 +72,11 @@ function model(sequelize) {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 10,
+        },
+        horse: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
         }
     };
 
