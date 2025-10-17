@@ -236,12 +236,15 @@ function onStartGameButtonClick() {
 function setStartGameButtonListener() {
     const startGameBtn = document.getElementById("start-game-button");
 
-    if (currentInstance.data.ownerId != getCookie("currentPlayerId")) {
+    const playerList = currentInstance.playerList;
+
+    const ownerPlayer = playerList.find(player => player.isOwner && player.playerName == getCookie("currentPlayerName"));
+
+    if (!ownerPlayer) {
         startGameBtn.hidden = true;
         return;
     }
 
-    playerList = currentInstance.playerList;
     const playerListLength = playerList.length;
 
     startGameBtn.innerText = "Démarrer la partie " + playerListLength + "/" + currentInstance.data.maxPlayers;
@@ -264,6 +267,14 @@ function onReadyButtonClick() {
         console.log('data status => ', data)
         if (data.error || data.message) {
             console.log('# Error setting player ready to play:', data.message);
+        }
+
+        currentInstance.playerList
+        for(var i=0; i<currentInstance.playerList.length; i++) {
+            var player = currentInstance.playerList[i];
+            if (player.playerName == currentInstance.currentPlayer.name) {
+              currentInstance.playerList[i] = {...currentInstance.playerList[i], ...data}
+            }
         }
         setPlayerReadyToPlaySocket();
         DrawGameBoardScreen();

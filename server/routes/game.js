@@ -120,11 +120,19 @@ router.post('/start', async function(req, res, next) {
         });
   }
 
-  const randomPlayer = Math.floor(Math.random() * instancePlayers.length);
-  const currentPlayerToPlay = instancePlayers[randomPlayer];
+  const totalPlayers = instancePlayers.length;
+  const numberToAttribute = Array.from(Array(totalPlayers).keys()).sort(() => Math.random() - 0.5);
+  var playerRotation = {};
+  numberToAttribute.forEach((i) => {
+      playerRotation[i+1] = instancePlayers[i].playerId;
+  });
 
-  console.log('Game started data', { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay.playerId });
-  const updateStatus = updateInstance(req, res, { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay.playerId });
+  console.log('Player rotation for this game: ', playerRotation);
+
+  const currentPlayerToPlay = playerRotation[1];
+
+  console.log('Game started data', { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay, playerRotation: JSON.stringify(playerRotation) });
+  const updateStatus = updateInstance(req, res, { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay, playerRotation: JSON.stringify(playerRotation) });
 
   if (!updateStatus) {
       console.log('Not possible to update instance');
@@ -137,6 +145,7 @@ router.post('/start', async function(req, res, next) {
   return res.status(204).send();
 });
 
+/* POST get game info. */
 router.post('/info', async function(req, res, next) {
   const { playerId, instanceId } = req.body;
 
@@ -202,15 +211,13 @@ router.post('/info', async function(req, res, next) {
   });
 });
 
+/* GET all possible actions for a player. */
 router.get('/actions', async function(req, res, next) {
   console.log('# Fetching actions');
   return await getAllActions(req, res);
 });
 
-const MAX_HOMES_PER_PLAYER = 10;
-const MAX_FARM_PER_PLAYER = 5;
-
-/* GET home page. */
+/* POST player actions during a turn. */
 router.post('/play', async function(req, res, next) {
   console.log('# Player action');
   const { actions, playerId, instanceId } = req.body;

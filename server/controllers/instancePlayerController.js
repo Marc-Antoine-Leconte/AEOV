@@ -204,9 +204,9 @@ class InstancePlayerController {
                 }
             });
             if (allowTransmit) {
-                res.status(204).json(instancePlayerToUpdate);
+                res.json(instancePlayerToUpdate);
             }
-            return true;
+            return instancePlayerToUpdate;
         }
         catch (error) {
             console.log(error);

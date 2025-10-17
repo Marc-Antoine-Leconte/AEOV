@@ -39,6 +39,10 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 0
         },
+        playerRotation: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        }
     };
 
     const options = {
