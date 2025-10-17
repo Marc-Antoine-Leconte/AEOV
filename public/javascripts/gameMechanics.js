@@ -23,5 +23,7 @@ function executeAction(actionId, cost, effects, next) {
         addResourceDuringPlayerTurn(key, parseInt(value));
     });
 
+    console.log('# Executed actions:', currentInstance.currentPlayerTurn);
+
     next();
 }

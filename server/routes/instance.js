@@ -109,7 +109,7 @@ router.post('/join', async function (req, res) {
 /* GET instance by InstanceId */
 router.get('/', async function (req, res) {
     console.log('# GET instance--- req.query => ', req.query)
-   await getInstanceById(req, res);
+   await getInstanceById(req, res, true, true);
 });
 
 module.exports = router;

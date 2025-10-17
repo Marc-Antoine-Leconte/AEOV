@@ -25,6 +25,12 @@ function fetchAndDrawBoardScreen() {
 
         DrawGameBoardScreen();
         fetchGameActions().then((response) => {
+
+            if (!response || response.length == 0) {
+                console.log('No actions fetched from server');
+                return;
+            }
+
             console.log("# DisplayGameActions - data =>", response);
             const playerActions = response.map(action => {
                 const effects = action.effects.split(",").reduce((map, item) => {

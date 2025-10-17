@@ -1,5 +1,3 @@
-const { act } = require("react");
-
 function DrawStartGameButton() {
     currentId = getCookie("currentPlayerId");
     if (currentId == currentInstance.ownerId) {
@@ -10,7 +8,18 @@ function DrawStartGameButton() {
 }
 
 function onEndTurnButtonClick() {
-    setEndTurnSocket();
+    console.log('End Turn button clicked');
+
+    postGameActions(currentInstance.currentPlayerTurn).then((data) => {
+        console.log('# End turn actions posted:', data);
+        if (data.error || data.message) {
+            console.log('# Error posting end turn actions:', data.message);
+        } else {
+            currentInstance.currentPlayer.pendingActions = [];
+            setEndTurnSocket();
+            fetchAndDrawBoardScreen();
+        }
+    });
 }
 
 function setEndTurnButtonListener() {
@@ -58,7 +67,8 @@ function DrawPlayerResources() {
         "weapon",
         "tool",
         "horse",
-        "army"
+        "army",
+        "treasure"
     ];
 
     resourceTitles.forEach(resource => {

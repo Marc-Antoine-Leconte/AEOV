@@ -5,7 +5,7 @@ class InstanceController {
   getAllInstances = async (req, res, allowTransmit = true) => {
      console.log('@getAllInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll();
+            const instances = await Instance.findAll({ attributes: {exclude: ['ownerId', 'currentPlayerId']} });
             if (allowTransmit)
                 res.json(instances);
             return instances;
@@ -24,7 +24,7 @@ class InstanceController {
     getAllAvailableInstances = async (req, res, allowTransmit = true) => {
      console.log('@getAllAvailableInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll({ where: { gameState: 'waiting' } });
+            const instances = await Instance.findAll({attributes: {exclude: ['ownerId', 'currentPlayerId']}, where: { gameState: 'waiting' } });
             if (allowTransmit)
                 res.json(instances);
             return instances;
@@ -40,12 +40,16 @@ class InstanceController {
         }
     }
 
-    getInstanceById = async (req, res, allowTransmit = true) => {
+    getInstanceById = async (req, res, allowTransmit = true, filtered = false) => {
         console.log('@getInstanceById req => ', req.body);
 
         const instanceId = req.body.instanceId || req.params.instanceId || req.query.instanceId;
         try {
-            const instance = await Instance.findByPk(instanceId);
+            var instance;
+            if (filtered)
+                instance= await Instance.findByPk({attributes: {exclude: ['ownerId', 'currentPlayerId']}, where: { id: instanceId } });
+            else
+                instance = await Instance.findByPk(instanceId);
             if (!instance) {
                 if (allowTransmit) {
                     res.status(404).json({

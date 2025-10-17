@@ -105,6 +105,12 @@ function fetchGameActions() {
     return fetchAllActionsFromAPI();
 }
 
+function postGameActions(actions) {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return postGameActionsToAPI(actions, playerId, instanceId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

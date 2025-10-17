@@ -11,6 +11,7 @@ const ownerStartGamePath = "/game/start";
 const readyToPlayPath = "/game/readyToPlay";
 const gameInfoPath = "/game/info";
 const gameActionsPath = "/game/actions";
+const gamePlayActionsPath = "/game/play";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -114,4 +115,9 @@ async function fetchGameInfoFromAPI(instanceId, playerId) {
 async function fetchAllActionsFromAPI() {
   const url = `${currentProtocol}${currentUrl}${gameActionsPath}`;
   return await fetchDataFromAPI(url);
+}
+
+async function postGameActionsToAPI(actions, playerId, instanceId) {
+  const url = `${currentProtocol}${currentUrl}${gamePlayActionsPath}`;
+  return await postDataToAPI(url, { actions, playerId, instanceId });
 }

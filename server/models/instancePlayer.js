@@ -77,6 +77,16 @@ function model(sequelize) {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
+        },
+        buildings: {
+            type: DataTypes.STRING(1000),
+            allowNull: false,
+            defaultValue: '[crop:1, house:1]',
+        },
+        treasure: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
         }
     };
 

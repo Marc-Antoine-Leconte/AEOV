@@ -42,6 +42,7 @@ class InstancePlayerController {
     }
 
     getInstancePlayerByPlayerAndInstance = async (req, res, allowTransmit = true) => {
+        console.log('@getInstancePlayerByPlayerAndInstance req => ', req.body);
         try {
             const instancePlayer = await InstancePlayer.findOne({
                 where: {
@@ -49,6 +50,7 @@ class InstancePlayerController {
                     instanceId: req.body.instanceId
                 }
             });
+
             if (!instancePlayer) {
                 if (allowTransmit) {
                     res.status(404).json({
@@ -59,8 +61,8 @@ class InstancePlayerController {
                 return;
             }
             if (allowTransmit)
-                res.json(instancePlayer);
-            return instancePlayer;
+                res.json(instancePlayer.dataValues);
+            return instancePlayer.dataValues;
         } catch (error) {
             console.log(error);
             if (allowTransmit) {
@@ -161,6 +163,7 @@ class InstancePlayerController {
     }
 
     updateInstancePlayerByServer = async (req, res) => {
+        console.log('@updateInstancePlayerByServer req => ', req.body);
         try {
             await InstancePlayer.update(req.body, {
                 where: {
@@ -177,6 +180,7 @@ class InstancePlayerController {
     }
 
     updateInstancePlayer = async (req, res, allowTransmit = true) => {
+        console.log('@updateInstancePlayer req => ', req.body);
         try {
             const existingInstancePlayer = await this.getInstancePlayerByPlayerAndInstance(req, res, false);
             if (!existingInstancePlayer) {
