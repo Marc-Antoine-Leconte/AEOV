@@ -298,6 +298,86 @@ function setReadyButtonListener() {
     readyBtn.addEventListener('click', onReadyButtonClick);
 }
 
+const twoPlayersMap = [{x:18, y:6}, {x:75, y:42}];
+const threePlayersMap = [{x:18, y:6}, {x:75, y:6}, {x:43, y:42}];
+const fourPlayersMap = [{x:18, y:6}, {x:5, y:42}, {x:75, y:6}, {x:75, y:42}];
+const fivePlayersMap = [{x:15, y:15}, {x:5, y:42}, {x:43, y:6}, {x:70, y:25}, {x:43, y:42}];
+const sixPlayersMap = [{x:28, y:6}, {x:10, y:25}, {x:25, y:42}, {x:60, y:6}, {x:70, y:25}, {x:60, y:42}];
+const sevenPlayersMap = [{x:18, y:6}, {x:8, y:25}, {x:5, y:42}, {x:43, y:42}, {x:75, y:6}, {x:70, y:25}, {x:75, y:42}];
+const eightPlayersMap = [{x:18, y:6}, {x:8, y:25}, {x:5, y:42}, {x:43, y:42}, {x:43, y:6}, {x:75, y:6}, {x:70, y:25}, {x:75, y:42}];
+
+const pinPointsMap = [{x:43, y:25}, {x:43, y:35}, {x:43, y:10}, {x:25, y:25}, {x:55, y:25}];
+
+function DrawPinPoints() {
+    const playerList = currentInstance.playerList;
+    var playerPinPoints = [];
+    const pinPoints = pinPointsMap;
+    const gameMap = document.querySelector(".game-map");
+
+    
+    switch (playerList.length) {
+        case 2:
+            playerPinPoints = twoPlayersMap;
+            break;
+        case 3:
+            playerPinPoints = threePlayersMap;
+            break;
+        case 4:
+            playerPinPoints = fourPlayersMap;
+            break;
+        case 5:
+            playerPinPoints = fivePlayersMap;
+            break;
+        case 6:
+            playerPinPoints = sixPlayersMap;
+            break;
+        case 7:
+            playerPinPoints = sevenPlayersMap;
+            break;
+        case 8:
+            playerPinPoints = eightPlayersMap;
+            break;
+    }
+
+    playerPinPoints.forEach((point, index) => {
+        const pinPointDiv = document.createElement("div");
+        pinPointDiv.className = "pin-point-button";
+        pinPointDiv.style.left = point.x + "vw";
+        pinPointDiv.style.top = point.y + "vw";
+        pinPointDiv.id = `pin-point-player-${index}`;
+
+        const pinPointImg = document.createElement("img");
+        pinPointImg.src = "/images/pin-point-icon.png";
+        pinPointImg.alt = "Pin Point";
+
+        const pinPointLabel = document.createElement("p");
+        pinPointLabel.innerText = playerList[index].playerName;
+
+        pinPointDiv.appendChild(pinPointImg);
+        pinPointDiv.appendChild(pinPointLabel);
+        gameMap.appendChild(pinPointDiv);
+    });
+
+    pinPoints.forEach((point, index) => {
+        const pinPointDiv = document.createElement("div");
+        pinPointDiv.className = "pin-point-button";
+        pinPointDiv.style.left = point.x + "vw";
+        pinPointDiv.style.top = point.y + "vw";
+        pinPointDiv.id = `pin-point-${index}`;
+
+        const pinPointImg = document.createElement("img");
+        pinPointImg.src = "/images/pin-point-icon.png";
+        pinPointImg.alt = "Pin Point";
+
+        const pinPointLabel = document.createElement("p");
+        pinPointLabel.innerText = "Emplacement " + (index + 1);
+
+        pinPointDiv.appendChild(pinPointImg);
+        pinPointDiv.appendChild(pinPointLabel);
+        gameMap.appendChild(pinPointDiv);
+    });
+}
+
 function DrawInstanceWaitingScreen() {
     const waitingScreen = document.getElementById("game-board-connection-container");
 
@@ -323,6 +403,7 @@ function DrawGameBoardScreen() {
     DrawPlayerResources();
     DrawPlayerList();
     DrawGameBoard();
+    DrawPinPoints();
 }
 
 DrawGameBoardScreen();

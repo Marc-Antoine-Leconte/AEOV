@@ -18,8 +18,6 @@ function onChangeZoomButtonClick(zoomChange) {
     img.style.transform = `scale(${zoom})`
 };
 
-onChangeZoomButtonClick(1);
-
 plusButton.addEventListener('click', () => onChangeZoomButtonClick(1));
 minusButton.addEventListener('click', () => onChangeZoomButtonClick(-1));
 
@@ -40,9 +38,8 @@ container.addEventListener('mousedown', e => {
     
     xAxis = e.offsetX - parseInt(img.style.left) || 0;
     yAxis = e.offsetY - parseInt(img.style.top) || 0;
-    
+
     container.style.cursor = 'grabbing'
-    //checkSize()
 })
 
 window.addEventListener('mouseup', () => {
