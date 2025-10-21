@@ -62,9 +62,7 @@ function fetchAndDrawBoardScreen() {
             currentInstance.actions = playerActions;
             DrawPlayerActions();
         });
-    });
-
-    
+    });  
 }
 
 function InitGameBoardPage() {
@@ -78,6 +76,7 @@ function InitGameBoardPage() {
 
     const currentInstanceId = getCookie("currentInstanceId");
     if (!currentInstanceId || currentInstanceId == "" || isNaN(currentInstanceId)) {
+        console.log(currentInstanceId)
         console.log('Connected to No instance, redirecting to home page...');
         redirectToUrl("/home");
         return;

@@ -66,7 +66,7 @@ function joinInstance(instanceId) {
             return
         } else {
             console.log('# join instance Success', data);
-            goToGameBoard(data.instanceId, data.instanceName);
+            goToGameBoard(instanceId, data.instanceName);
         }
     });
 }

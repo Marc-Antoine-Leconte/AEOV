@@ -222,6 +222,18 @@ function DrawPlayerActions() {
     console.log('# Drawing player actions OK');
 }
 
+function DrawGameBoard() {
+    console.log('# Drawing game board...');
+    const gameBoardComp = document.getElementById("game-board");
+    if (!currentInstance.data || !currentInstance.data.id || currentInstance.data.gameState != 'inProgress') {
+        console.log('# No game board to display');
+        gameBoardComp.hidden = true;
+        return;
+    }
+
+    gameBoardComp.hidden = false;
+}
+
 function onStartGameButtonClick() {
     console.log('Start Game button clicked');
     ownerStartGame().then((data) => {
@@ -310,6 +322,7 @@ function DrawGameBoardScreen() {
     DrawControls();
     DrawPlayerResources();
     DrawPlayerList();
+    DrawGameBoard();
 }
 
 DrawGameBoardScreen();

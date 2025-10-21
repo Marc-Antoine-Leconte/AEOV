@@ -1,6 +1,7 @@
 extends layout
 
 block content  
+  link(rel="stylesheet", href="css/gameBoardPage.css")
 
   button(type='button', id='disconnect-button') Déconnexion
   button(type='button', id='leave-instance-button') Quitter la partie
@@ -67,50 +68,51 @@ block content
     div(id="game-board", hidden=true)
       h1 Plateau de jeu
 
-      // Le plateau de jeu sera généré ici par JavaScript
-
     div(id="game-board-player-resources", hidden=true)
-      ul 
-        li
-          span(id="player-resource-wood-title") Bois : 
-          span(id="player-resource-wood")
-        li
-          span(id="player-resource-stone-title") Pierre : 
-          span(id="player-resource-stone")
-        li
-          span(id="player-resource-food-title") Nourriture : 
-          span(id="player-resource-food")
-        li
-          span(id="player-resource-gold-title") Or : 
-          span(id="player-resource-gold")
-        li
-          span(id="player-resource-diamond-title") Diamants : 
-          span(id="player-resource-diamond")
-        li
-          span(id="player-resource-iron-title") Fer : 
-          span(id="player-resource-iron")
-        li
-          span(id="player-resource-population-title") Population : 
-          span(id="player-resource-population")
-        li
-          span(id="player-resource-army-title") Soldats : 
-          span(id="player-resource-army")
-        li
-          span(id="player-resource-armor-title") Armures : 
-          span(id="player-resource-armor")
-        li
-          span(id="player-resource-weapon-title") Armes : 
-          span(id="player-resource-weapon")
-        li
-          span(id="player-resource-tool-title") Outils : 
-          span(id="player-resource-tool")
-        li
-          span(id="player-resource-horse-title") Chevaux : 
-          span(id="player-resource-horse")
-        li
-          span(id="player-resource-treasure-title") Trésors : 
-          span(id="player-resource-treasure")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-wood-title") Bois
+        span(id="player-resource-wood")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-stone-title") Pierre
+        span(id="player-resource-stone")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-food-title") Nourriture
+        span(id="player-resource-food")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-gold-title") Or
+        span(id="player-resource-gold")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-diamond-title") Diamants
+        span(id="player-resource-diamond")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-iron-title") Fer
+        span(id="player-resource-iron")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-population-title") Population
+        span(id="player-resource-population")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-army-title") Soldats
+        span(id="player-resource-army")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-armor-title") Armures
+        span(id="player-resource-armor")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-weapon-title") Armes
+        span(id="player-resource-weapon")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-tool-title") Outils
+        span(id="player-resource-tool")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-horse-title") Chevaux
+        span(id="player-resource-horse")
+      div(class="game-board-player-resources-item")
+        span(id="player-resource-treasure-title") Trésors
+        span(id="player-resource-treasure")
 
+    div(class="game-container")
+      img(class="game-map", src="https://unsplash.it/3000/2000")
+    button(id="zoom-in-button") +
+    button(id="zoom-out-button") -
 
     div(id="game-board-controls", hidden=true)
       h1 Actions
@@ -126,6 +128,7 @@ block content
       h2 Journal d'évènements
       ul(id="game-log-messages")
 
+  script(src='/javascripts/gameBoardNavigation.js')
   script(src='/javascripts/gameMechanics.js')
   script(src='/javascripts/drawGameBoard.js')
   script(src='/javascripts/socketConnection.js')
