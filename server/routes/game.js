@@ -187,7 +187,9 @@ router.post('/info', async function(req, res, next) {
       civilization: element.civilization,
       color: element.color,
       isOwner: (element.playerId == instance.ownerId),
-      isCurrentPlayer: (playerData.id == instance.currentPlayerId)
+      isCurrentPlayer: (playerData.id == instance.currentPlayerId),
+      isUser: (playerData.id == playerId),
+      buildings: element.buildings,
     };
     id++;
   }

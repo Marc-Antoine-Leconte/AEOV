@@ -347,14 +347,25 @@ function DrawPinPoints() {
         pinPointDiv.id = `pin-point-player-${index}`;
 
         const pinPointImg = document.createElement("img");
-        pinPointImg.src = "/images/pin-point-icon.png";
-        pinPointImg.alt = "Pin Point";
+        pinPointImg.src = "/images/" + playerList[index].civilization + "-city.png";
+        pinPointImg.alt = playerList[index].civilization + " city";
+        pinPointImg.className = "city-point-image";
 
         const pinPointLabel = document.createElement("p");
         pinPointLabel.innerText = playerList[index].playerName;
+        pinPointLabel.style.backgroundColor = playerList[index].color;
+        if (['purple'].includes(playerList[index].color)) {
+            pinPointLabel.style.color = "white";
+        }
 
         pinPointDiv.appendChild(pinPointImg);
         pinPointDiv.appendChild(pinPointLabel);
+        pinPointDiv.addEventListener('click', () => { {
+            currentInstance.screen.layout = 'city';
+            currentInstance.screen.selectedCity = index + 1;
+            DrawCityOverlay();
+        } });
+        
         gameMap.appendChild(pinPointDiv);
     });
 
@@ -376,6 +387,68 @@ function DrawPinPoints() {
         pinPointDiv.appendChild(pinPointLabel);
         gameMap.appendChild(pinPointDiv);
     });
+}
+
+function DrawCityOverlay() {
+    const cityLayout = document.getElementById("city-overlay");
+
+    if (currentInstance.screen.layout != 'city' || !currentInstance.screen.selectedCity) {
+        cityLayout.style.display = "none";
+        console.log('# No city overlay to display')
+        return;
+    }
+
+    console.log("# Drawing city overlay...");
+
+    cityLayout.style.display = "flex";
+    const closeCityOverlayBtn = document.getElementById("close-city-overlay");
+    closeCityOverlayBtn.addEventListener('click', () => { {
+        currentInstance.screen.layout = null;
+        currentInstance.screen.selectedCity = null;
+        DrawGameBoardScreen();
+    } });
+
+    const selectedCityIndex = currentInstance.screen.selectedCity - 1;
+
+    const cityBuildingsGrid = document.getElementById("city-buildings-grid");
+    cityBuildingsGrid.innerHTML = '';
+
+    const cityName = document.getElementById("city-name");
+    cityName.innerText = "Ville de " + currentInstance.playerList[selectedCityIndex].playerName;
+
+    const backgroundDiv = document.getElementById("overlay-background-image");
+    if (["egyptian"].includes(currentInstance.playerList[selectedCityIndex].civilization)) {
+        backgroundDiv.src = "/images/city-background-desert.png";
+    }
+
+    const cityDescription = document.getElementById("city-description");
+    cityDescription.innerText = "Civilization : " + currentInstance.playerList[selectedCityIndex].civilization;
+
+    const currentUser = currentInstance.playerList[selectedCityIndex];
+    const buildingList = currentUser.buildings.split(",").reduce((map, item) => {
+                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                    const [key, value] = trimmedItem.split(":");
+                    map[key] = value;
+                    return map;
+                }, {});
+
+
+    Object.entries(buildingList).forEach(([building, count]) => {
+         const buildingItem = document.createElement("div");
+         buildingItem.className = "building-item";
+
+         const buildingName = document.createElement("p");
+         buildingName.innerText = building + " (Niveau " + count + ")";
+
+         const upgradeButton = document.createElement("button");
+         upgradeButton.innerText = "Améliorer";
+
+         buildingItem.appendChild(buildingName);
+         buildingItem.appendChild(upgradeButton);
+         cityBuildingsGrid.appendChild(buildingItem);
+   });
+
+   console.log("# Drawing city overlay OK");
 }
 
 function DrawInstanceWaitingScreen() {
@@ -404,6 +477,7 @@ function DrawGameBoardScreen() {
     DrawPlayerList();
     DrawGameBoard();
     DrawPinPoints();
+    DrawCityOverlay();
 }
 
 DrawGameBoardScreen();

@@ -3,10 +3,10 @@ const img = document.querySelector('.game-map')
 const plusButton = document.querySelector('#zoom-in-button')
 const minusButton = document.querySelector('#zoom-out-button')
 
-let zoom = 1
-
 function onChangeZoomButtonClick(zoomChange) {
     img.style.transformOrigin = `top left`
+
+    let zoom = currentInstance.screen.zoom;
     zoom += zoomChange
     zoom = Math.min(Math.max(1, zoom), 5)
 
@@ -16,6 +16,8 @@ function onChangeZoomButtonClick(zoomChange) {
     }
 
     img.style.transform = `scale(${zoom})`
+    currentInstance.screen.zoom = zoom;
+    checkSize();
 };
 
 plusButton.addEventListener('click', () => onChangeZoomButtonClick(1));
@@ -28,11 +30,19 @@ let yAxis;
 let y;
 
 container.addEventListener('mouseup', () => {
+    if (currentInstance.screen.layout != null) {
+        return;
+    }
+
     clicked = false;
     container.style.cursor = 'auto'
 })
 
 container.addEventListener('mousedown', e => {
+    if (currentInstance.screen.layout != null) {
+        return;
+    }
+
     e.preventDefault()
     clicked = true;
     
@@ -43,13 +53,16 @@ container.addEventListener('mousedown', e => {
 })
 
 window.addEventListener('mouseup', () => {
-    clicked = false;
-    
+    if (currentInstance.screen.layout != null) {
+        return;
+    }
+
+    clicked = false;    
     checkSize();
 })
 
 container.addEventListener('mousemove', e => {
-    if (!clicked) {
+    if (currentInstance.screen.layout != null || !clicked) {
         return
     }
     e.preventDefault()
@@ -62,6 +75,10 @@ container.addEventListener('mousemove', e => {
 })
 
 function checkSize () {
+    if (currentInstance.screen.layout != null) {
+        return;
+    }
+
     let containerOut = container.getBoundingClientRect()
     let imgIn = img.getBoundingClientRect()
 

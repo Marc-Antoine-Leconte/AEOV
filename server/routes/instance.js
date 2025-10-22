@@ -41,10 +41,10 @@ router.post('/list/user', async function (req, res) {
     }
 
     const allInstancePlayersMap = allInstancePlayers.reduce(function(map, obj) {
-                            map[obj.instanceId] = true;
-                            return map;
-                        }, {});
-    
+        map[obj.instanceId] = true;
+        return map;
+    }, {});
+
     const instancesToDisplay = allInstances.filter(instance => {
         return allInstancePlayersMap[instance.id];
     });

@@ -3,5 +3,10 @@ let currentInstance = {
     data: {},
     playerList: {},
     actions: {},
-    currentPlayerTurn: []
+    currentPlayerTurn: [],
+    screen: {
+        zoom: 1,
+        layout: null,
+        selectedCity: null
+    }
 };
