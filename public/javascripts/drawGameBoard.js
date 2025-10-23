@@ -250,7 +250,7 @@ function setStartGameButtonListener() {
 
     const playerList = currentInstance.playerList;
 
-    const ownerPlayer = playerList.find(player => player.isOwner && player.playerName == getCookie("currentPlayerName"));
+    const ownerPlayer = playerList.find(player => player.isOwner && player.isUser);
 
     if (!ownerPlayer) {
         startGameBtn.hidden = true;
@@ -437,14 +437,23 @@ function DrawCityOverlay() {
          const buildingItem = document.createElement("div");
          buildingItem.className = "building-item";
 
+        const buildingImage = document.createElement("img");
+        const buildingUpgrade = [1, 2].includes(count) ? count : 3;
+        buildingImage.className = "building-image";
+        buildingImage.src = "/images/buildings/" + building.toLowerCase() + "_" + buildingUpgrade + ".png";
+        buildingImage.alt = building + " (Niveau " + count + ")";
+        buildingItem.appendChild(buildingImage);
+
          const buildingName = document.createElement("p");
          buildingName.innerText = building + " (Niveau " + count + ")";
-
-         const upgradeButton = document.createElement("button");
-         upgradeButton.innerText = "Améliorer";
-
          buildingItem.appendChild(buildingName);
-         buildingItem.appendChild(upgradeButton);
+
+         if (currentUser.isUser) {
+            const upgradeButton = document.createElement("button");
+            upgradeButton.innerText = "Améliorer";
+            buildingItem.appendChild(upgradeButton);
+         }
+
          cityBuildingsGrid.appendChild(buildingItem);
    });
 

@@ -94,6 +94,15 @@ body {
     cursor: pointer;
 }
 
+.building-image {
+   position: relative;
+    width: inherit;
+    height: inherit;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+}
+
 .game-container {
     width: 80vw;
     height: 50vw;
