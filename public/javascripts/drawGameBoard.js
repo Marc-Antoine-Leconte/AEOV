@@ -419,6 +419,8 @@ function DrawCityOverlay() {
     const backgroundDiv = document.getElementById("overlay-background-image");
     if (["egyptian"].includes(currentInstance.playerList[selectedCityIndex].civilization)) {
         backgroundDiv.src = "/images/city-background-desert.png";
+    } else {
+        backgroundDiv.src = "/images/city-background.png";
     }
 
     const cityDescription = document.getElementById("city-description");
@@ -438,14 +440,18 @@ function DrawCityOverlay() {
          buildingItem.className = "building-item";
 
         const buildingImage = document.createElement("img");
-        const buildingUpgrade = [1, 2].includes(count) ? count : 3;
+        var buildingUpgrade = [1, 2].includes(count) ? count : 3;
+        if (["house", "wall", "castle", "prison"].includes(building)) {
+            buildingUpgrade = 1;
+        }
+
         buildingImage.className = "building-image";
         buildingImage.src = "/images/buildings/" + building.toLowerCase() + "_" + buildingUpgrade + ".png";
         buildingImage.alt = building + " (Niveau " + count + ")";
         buildingItem.appendChild(buildingImage);
 
          const buildingName = document.createElement("p");
-         buildingName.innerText = building + " (Niveau " + count + ")";
+         buildingName.innerText = building + " (Niv " + count + ")";
          buildingItem.appendChild(buildingName);
 
          if (currentUser.isUser) {
