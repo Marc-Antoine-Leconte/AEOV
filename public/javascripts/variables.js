@@ -8,7 +8,8 @@ let currentInstance = {
         zoom: 1,
         layout: null,
         selectedCity: null
-    }
+    },
+    locations: {}
 };
 
 const twoPlayersMap = [{x:18, y:6}, {x:75, y:42}];

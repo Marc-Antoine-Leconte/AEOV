@@ -12,6 +12,7 @@ function fetchAndDrawBoardScreen() {
         currentInstance.data = response.data.instance;
         currentInstance.playerList = response.data.players;
         currentInstance.currentPlayer = response.data.currentPlayer;
+        currentInstance.locations = response.data.locations;
 
         console.log('||> Current Instance Data:', currentInstance);
         const instanceDataErrorComp = document.getElementById("game-board-instance-data-error-message");

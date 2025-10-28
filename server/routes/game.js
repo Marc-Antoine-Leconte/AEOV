@@ -3,6 +3,8 @@ const { getPlayerById } = require('../controllers/playerController');
 const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 const { getAllActions } = require('../controllers/actionController');
+const { createLocation, getLocationsByInstanceId } = require('../controllers/locationController');
+const { stringListToMap, mapToString } = require('../tool/helper');
 var router = express.Router();
 
 /* GET render game board page. */
@@ -142,6 +144,43 @@ router.post('/start', async function(req, res, next) {
       });
   }
 
+  var mapPossibleLocations = {
+    pillagerVillage: {name: "Camp de bandits", buildings: "[pillagerVillage:1]"}, 
+    goldMine: {name: "Mine d'or", buildings: "[goldMine:1]"}, 
+    diamondMine: {name: "Mine de diamant", buildings: "[diamondMine:1]"}, 
+    ironMine: {name: "Mine de fer", buildings: "[ironMine:1]"}, 
+    stoneMine: {name: "Mine de pierre", buildings: "[stoneMine:1]"}, 
+    pound: {name: "Cabane de pêcheur", buildings: "[pound:1]"}, 
+    mercenaryVillage: {name: "Camp de mercenaires", buildings: "[mercenaryVillage:1]"}, 
+    woodHut: {name: "Camp de bûcherons", buildings: "[woodHut:1]"}, 
+    diamondForge: {name: "Forge de diamants", buildings: "[diamondForge:1]"}, 
+    fair: {name: "Foire", buildings: "[fair:1]"},
+    village: {name: "Village", buildings: "[village:1]"},
+  };
+
+  var mandatoryLocations = ["goldMine", "diamondMine", "ironMine", "stoneMine"];
+  var uniqueLocations = ["diamondForge"];
+  var otherLocations = ["pillagerVillage", "pound", "mercenaryVillage", "woodHut", "fair", "village"];
+
+  var mapLocationTypes = [...uniqueLocations, ...mandatoryLocations]
+
+  while (mapLocationTypes.length < 9) {
+    mapLocationTypes.push(otherLocations[Math.floor(Math.random() * otherLocations.length)]);
+  }
+
+  for (let i = 0; i < mapLocationTypes.length; i++) {
+    const currentLocation = mapPossibleLocations[mapLocationTypes[i]];
+    const locationData = {
+      name: currentLocation.name,
+      type: mapLocationTypes[i],
+      ownerId: null,
+      pointId: i + 1,
+      buildings: currentLocation.buildings,
+      instanceId: instance.id,
+    }
+    const newLocation = createLocation({ body: locationData }, res, false);
+  }
+
   return res.status(204).send();
 });
 
@@ -194,6 +233,8 @@ router.post('/info', async function(req, res, next) {
     id++;
   }
 
+  const locationsData = await getLocationsByInstanceId(req, res, false);
+
   if (!userFound) {
     console.log('Player is not in this game');
       return res.status(404).json({
@@ -208,7 +249,8 @@ router.post('/info', async function(req, res, next) {
       data: {
           currentPlayer: { ...player.dataValues, ...currentPlayerData.dataValues, password: null },
           instance: { ...instance.dataValues, ownerId: null, currentPlayerId: null },
-          players: playersData
+          players: playersData,
+          locations: locationsData
       }
   });
 });
@@ -260,12 +302,7 @@ router.post('/play', async function(req, res, next) {
       });
   }
 
-  const playerBuildingList = instancePlayer.buildings.replace('[', '').replace(']', '').split(',').reduce((map, item) => {
-        const trimmedItem = item.trim();
-        const [key, value] = trimmedItem.split(":");
-        map[key] = value;
-        return map;
-    }, {});
+  const playerBuildingList = stringListToMap(instancePlayer.buildings);
 
   console.log('||||| playerBuildingList => ', playerBuildingList);
 
@@ -279,27 +316,9 @@ router.post('/play', async function(req, res, next) {
       return errorMessages.push(`Action not found: ${actionId}`);
     }
 
-    const effects = actionToPlay.effects.replace('[', '').replace(']', '').replace(" ", "").split(",").reduce((map, item) => {
-        const trimmedItem = item.trim();
-        const [key, value] = trimmedItem.split(":");
-        map[key] = value;
-        return map;
-    }, {});
-
-    const requiredBuildings = actionToPlay.requiredBuildings.replace('[', '').replace(']', '').split(",").reduce((map, item) => {
-        const trimmedItem = item.trim();
-        const [key, value] = trimmedItem.split(":");
-        map[key] = value;
-        return map;
-    }, {});
-
-    const requiredResources = actionToPlay.requiredResources.replace('[', '').replace(']', '').split(",").reduce((map, item) => {
-        const trimmedItem = item.trim();
-        const [key, value] = trimmedItem.split(":");
-        map[key] = value;
-        return map;
-    }, {});
-
+    const effects = stringListToMap(actionToPlay.effects);
+    const requiredBuildings = stringListToMap(actionToPlay.requiredBuildings);
+    const requiredResources = stringListToMap(actionToPlay.requiredResources);
 
     const requirement = { ...requiredBuildings, ...requiredResources };
     console.log('||||| Requirement => ', requirement);
@@ -367,8 +386,7 @@ router.post('/play', async function(req, res, next) {
     });
   }
 
-   buildingString = JSON.stringify(playerBuildingList);
-   instancePlayer.buildings = buildingString.replace("{", "[").replace("}", "]").replace(/["']/g, "");
+   instancePlayer.buildings = mapToString(playerBuildingList);
    const updatedUser = await updateInstancePlayerByServer({ body: { ...instancePlayer } }, res);
 
   return res.status(200).json(updatedUser);

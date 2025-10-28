@@ -344,7 +344,7 @@ function DrawPinPoints() {
         const pinPointLabel = document.createElement("p");
         pinPointLabel.innerText = playerList[index].playerName;
         pinPointLabel.style.backgroundColor = playerList[index].color;
-        if (['purple'].includes(playerList[index].color)) {
+        if (['purple', 'blue', 'red'].includes(playerList[index].color)) {
             pinPointLabel.style.color = "white";
         }
 
@@ -361,7 +361,11 @@ function DrawPinPoints() {
         gameMap.appendChild(pinPointDiv);
     });
 
-    pinPoints.forEach((point, index) => {
+    const locations = currentInstance.locations;
+    console.log('locations => ', locations);
+
+    Object.entries(locations).forEach(([index, location]) => {
+        const point = pinPoints[index];
         const pinPointDiv = document.createElement("div");
         pinPointDiv.className = "pin-point-button";
         pinPointDiv.style.left = point.x + "vw";
@@ -373,7 +377,7 @@ function DrawPinPoints() {
         pinPointImg.alt = "Pin Point";
 
         const pinPointLabel = document.createElement("p");
-        pinPointLabel.innerText = "Emplacement " + (index + 1);
+        pinPointLabel.innerText = location.name;
 
         pinPointDiv.appendChild(pinPointImg);
         pinPointDiv.appendChild(pinPointLabel);
