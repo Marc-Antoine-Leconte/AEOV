@@ -23,7 +23,7 @@ body {
 .overlay-content {
     border: 5px solid #000000;
     border-radius: 10px;
-    padding: 20px;
+    padding: 0px;
     width: 60%;
     height: 100%;
     position: relative;
@@ -64,9 +64,10 @@ body {
     border-radius: 5px;
     width: 50%;
     padding: 10px;
+    margin: 10px;
 }
 
-.buildings-grid {
+#city-buildings-grid {
     width: 100%;
     height: 80%;
     position: relative;
@@ -76,6 +77,31 @@ body {
     justify-content: center;
     padding: 4vw;
     gap: 1vw;
+}
+
+#building-wall-container {
+    width: 100%;
+    height: 10vw;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: 100;
+}
+
+.building-item#wall-item .building-image {
+    width: 100%;
+    height: 5vw;
+}
+
+.building-item#wall-item p {
+    width: 8vw;
+    max-width: 8vw;
+}
+
+.building-item#wall-item {
+    width: 100%;
+    max-width: 100%;
 }
 
 .building-item {

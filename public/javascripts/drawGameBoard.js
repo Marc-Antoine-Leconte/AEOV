@@ -96,10 +96,10 @@ function DrawPlayerList() {
     playerListContainerComp.hidden = false;
 
     const playerListComp = document.getElementById("game-board-player-list");
-     if (!playerListComp) {
+    if (!playerListComp) {
         console.log('# No player list component found');
-            return;
-        }
+        return;
+    }
     playerListComp.innerHTML = '';
 
     playerList.forEach(element => {
@@ -197,7 +197,7 @@ function DrawPlayerActions() {
 
     var playerActionsList = {};
     var otherPlayerActionsList = {};
-    
+
     actions.map((action, id) => {
         var tooMuchRequirement = false;
         const requirement = { ...action.requiredBuildings, ...action.requiredResources };
@@ -207,7 +207,7 @@ function DrawPlayerActions() {
                 //console.log('player need more', key, ' => ', value);
             }
         });
-        
+
         if (tooMuchRequirement) {
             otherPlayerActionsList[id] = action;
         } else {
@@ -282,10 +282,10 @@ function onReadyButtonClick() {
         }
 
         currentInstance.playerList
-        for(var i=0; i<currentInstance.playerList.length; i++) {
+        for (var i = 0; i < currentInstance.playerList.length; i++) {
             var player = currentInstance.playerList[i];
             if (player.playerName == currentInstance.currentPlayer.name) {
-              currentInstance.playerList[i] = {...currentInstance.playerList[i], ...data}
+                currentInstance.playerList[i] = { ...currentInstance.playerList[i], ...data }
             }
         }
         setPlayerReadyToPlaySocket();
@@ -298,23 +298,13 @@ function setReadyButtonListener() {
     readyBtn.addEventListener('click', onReadyButtonClick);
 }
 
-const twoPlayersMap = [{x:18, y:6}, {x:75, y:42}];
-const threePlayersMap = [{x:18, y:6}, {x:75, y:6}, {x:43, y:42}];
-const fourPlayersMap = [{x:18, y:6}, {x:5, y:42}, {x:75, y:6}, {x:75, y:42}];
-const fivePlayersMap = [{x:15, y:15}, {x:5, y:42}, {x:43, y:6}, {x:70, y:25}, {x:43, y:42}];
-const sixPlayersMap = [{x:28, y:6}, {x:10, y:25}, {x:25, y:42}, {x:60, y:6}, {x:70, y:25}, {x:60, y:42}];
-const sevenPlayersMap = [{x:18, y:6}, {x:8, y:25}, {x:5, y:42}, {x:43, y:42}, {x:75, y:6}, {x:70, y:25}, {x:75, y:42}];
-const eightPlayersMap = [{x:18, y:6}, {x:8, y:25}, {x:5, y:42}, {x:43, y:42}, {x:43, y:6}, {x:75, y:6}, {x:70, y:25}, {x:75, y:42}];
-
-const pinPointsMap = [{x:43, y:25}, {x:43, y:35}, {x:43, y:10}, {x:25, y:25}, {x:55, y:25}];
-
 function DrawPinPoints() {
     const playerList = currentInstance.playerList;
     var playerPinPoints = [];
     const pinPoints = pinPointsMap;
     const gameMap = document.querySelector(".game-map");
 
-    
+
     switch (playerList.length) {
         case 2:
             playerPinPoints = twoPlayersMap;
@@ -360,12 +350,14 @@ function DrawPinPoints() {
 
         pinPointDiv.appendChild(pinPointImg);
         pinPointDiv.appendChild(pinPointLabel);
-        pinPointDiv.addEventListener('click', () => { {
-            currentInstance.screen.layout = 'city';
-            currentInstance.screen.selectedCity = index + 1;
-            DrawCityOverlay();
-        } });
-        
+        pinPointDiv.addEventListener('click', () => {
+            {
+                currentInstance.screen.layout = 'city';
+                currentInstance.screen.selectedCity = index + 1;
+                DrawCityOverlay();
+            }
+        });
+
         gameMap.appendChild(pinPointDiv);
     });
 
@@ -402,11 +394,13 @@ function DrawCityOverlay() {
 
     cityLayout.style.display = "flex";
     const closeCityOverlayBtn = document.getElementById("close-city-overlay");
-    closeCityOverlayBtn.addEventListener('click', () => { {
-        currentInstance.screen.layout = null;
-        currentInstance.screen.selectedCity = null;
-        DrawGameBoardScreen();
-    } });
+    closeCityOverlayBtn.addEventListener('click', () => {
+        {
+            currentInstance.screen.layout = null;
+            currentInstance.screen.selectedCity = null;
+            DrawGameBoardScreen();
+        }
+    });
 
     const selectedCityIndex = currentInstance.screen.selectedCity - 1;
 
@@ -428,42 +422,63 @@ function DrawCityOverlay() {
 
     const currentUser = currentInstance.playerList[selectedCityIndex];
     const buildingList = currentUser.buildings.split(",").reduce((map, item) => {
-                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                    const [key, value] = trimmedItem.split(":");
-                    map[key] = value;
-                    return map;
-                }, {});
+        const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+        const [key, value] = trimmedItem.split(":");
+        map[key] = value;
+        return map;
+    }, {});
 
+    const wallContainer = document.getElementById("building-wall-container");
+    wallContainer.innerHTML = '';
 
     Object.entries(buildingList).forEach(([building, count]) => {
-         const buildingItem = document.createElement("div");
-         buildingItem.className = "building-item";
+        const buildingItem = document.createElement("div");
+        buildingItem.className = "building-item";
+        buildingItem.id = building + "-item";
 
-        const buildingImage = document.createElement("img");
         var buildingUpgrade = [1, 2].includes(count) ? count : 3;
         if (["house", "wall", "castle", "prison"].includes(building)) {
             buildingUpgrade = 1;
         }
 
+        var buildingImage;
+        if (building != "wall") {
+            buildingImage = document.createElement("img");
+        } else {
+            buildingImage = document.createElement("div");
+        }
         buildingImage.className = "building-image";
-        buildingImage.src = "/images/buildings/" + building.toLowerCase() + "_" + buildingUpgrade + ".png";
         buildingImage.alt = building + " (Niveau " + count + ")";
+
+        const imagePath = "/images/buildings/" + building.toLowerCase() + "_" + buildingUpgrade + ".png";
+        if (building != "wall") {
+            buildingImage.src = imagePath;
+        } else {
+            buildingImage.style.backgroundImage = "url('" + imagePath + "')";
+            buildingImage.style.backgroundSize = "contain";
+            buildingImage.style.backgroundRepeat = "repeat-x";
+            buildingImage.style.width = "100%";
+        }
         buildingItem.appendChild(buildingImage);
 
-         const buildingName = document.createElement("p");
-         buildingName.innerText = building + " (Niv " + count + ")";
-         buildingItem.appendChild(buildingName);
+        const buildingName = document.createElement("p");
+        buildingName.innerText = building + " (Niv " + count + ")";
+        buildingItem.appendChild(buildingName);
 
-         if (currentUser.isUser) {
+        if (currentUser.isUser) {
             const upgradeButton = document.createElement("button");
             upgradeButton.innerText = "Améliorer";
             buildingItem.appendChild(upgradeButton);
-         }
+        }
 
-         cityBuildingsGrid.appendChild(buildingItem);
-   });
+        if (building == "wall") {
+            wallContainer.appendChild(buildingItem);
+        } else {
+            cityBuildingsGrid.appendChild(buildingItem);
+        }
+    });
 
-   console.log("# Drawing city overlay OK");
+    console.log("# Drawing city overlay OK");
 }
 
 function DrawInstanceWaitingScreen() {
