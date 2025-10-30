@@ -3,8 +3,9 @@ const { getPlayerById } = require('../controllers/playerController');
 const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 const { getAllActions } = require('../controllers/actionController');
-const { createLocation, getLocationsByInstanceId } = require('../controllers/locationController');
+const { createLocation, getLocationsByInstanceId, updateLocationByInstanceAndPoint } = require('../controllers/locationController');
 const { stringListToMap, mapToString } = require('../tool/helper');
+const { array } = require('joi');
 var router = express.Router();
 
 /* GET render game board page. */
@@ -239,7 +240,7 @@ router.post('/info', async function(req, res, next) {
   locationsData.forEach(location => {
     location.isOwnedByUser = location.ownerId == player.id;
     if (location.ownerId) {
-      const ownerPlayer = playersData.find(p => p.playerId == location.ownerId);
+      const ownerPlayer = playerInstanceList.find(p => p.playerId == location.ownerId);
       location.ownerColor = ownerPlayer.color;
     } else {
       location.ownerColor = "grey";
@@ -306,6 +307,15 @@ router.post('/play', async function(req, res, next) {
       });
   }
 
+  const allPlayerInstances = await getInstancePlayersByInstanceId(req, res, false);
+  if (!allPlayerInstances) {
+    console.log('Error while loading players');
+      return res.status(403).json({
+          statusCode: 403,
+          message: "Error while loading players"
+      });
+  }
+
   const allActions = await getAllActions(req, res, false);
   if (!allActions) {
     console.log('Error while loading actions');
@@ -315,12 +325,24 @@ router.post('/play', async function(req, res, next) {
       });
   }
 
+  var allLocations = await getLocationsByInstanceId(req, res, false);
+  if (!allLocations) {
+    console.log('Error while loading locations');
+      return res.status(403).json({
+          statusCode: 403,
+          message: "Error while loading locations"
+      });
+  }
+
   const playerBuildingList = stringListToMap(instancePlayer.buildings);
 
   console.log('||||| playerBuildingList => ', playerBuildingList);
 
   const errorMessages = [];
-  for (const actionId of actions) {
+  const failureMessages = [];
+  for (const rawAction of actions) {
+    const actionId = rawAction.actionId;
+    const actionParam = rawAction.actionParam;
     const actionToPlay = allActions.find(action => action.id == actionId);
 
     console.log('||||| Action to play => ', actionToPlay);
@@ -378,7 +400,7 @@ router.post('/play', async function(req, res, next) {
 
       // Apply requirements
       Object.entries(requirement).forEach(([key, value]) => {
-        if (!value || !key || ['building', 'population', 'tool'].includes(key))
+        if (!value || !key || ['building', 'population', 'tool', 'armyMovementPoints'].includes(key))
           return;
 
         instancePlayer[key] = (instancePlayer[key] || 0) - parseInt(value);
@@ -386,6 +408,100 @@ router.post('/play', async function(req, res, next) {
 
       console.log('||||| instancePlayer after effects applied => ', instancePlayer);
 
+      // Apply army movements
+      if (actionId === 40) { // If the action is "Move Army"
+        var locationClaimed = true;
+        
+        if (actionParam != "-1") { // If moving to an other place than home
+          var locationId = '';
+          var attackOnPlayerBase = false;
+
+          if (actionParam.startsWith("#")) { // Attacking an other player base
+            locationId = parseInt(actionParam.replace("#", ""));
+            attackOnPlayerBase = true;
+          } else {
+            locationId = parseInt(actionParam);
+          }
+
+          const contestedLocation = allLocations[actionParam];
+          const contestant = allPlayerInstances.find(p => { 
+            if (attackOnPlayerBase) {
+              return p.armyPosition == -1 && p.playerId != player.id;
+            }
+            return p.armyPosition == locationId && p.playerId != player.id; 
+          });
+
+          var fortificationForce = 0;
+          var contestedLocationBuildings = null;
+          
+          if (attackOnPlayerBase) {
+            contestedLocationBuildings = stringListToMap(contestant.buildings);
+          } else {
+            contestedLocationBuildings = stringListToMap(contestedLocation.buildings);
+          }
+
+          Object.entries(contestedLocationBuildings).forEach(([key, value]) => {
+            if (key == 'pillagerVillage' && value != null) {
+              fortificationForce += value * 2;
+            }
+            if (key == 'outpost' && value != null) {
+              fortificationForce += value * 2;
+            }
+            if (key == 'castle' && value != null) {
+              fortificationForce += value * 3;
+            }
+            if (key == 'wall' && value != null) {
+              fortificationForce += value * 3;
+            }
+          });
+
+          const localArmy = contestant?.army || 0;
+          const totalDefenseForce = localArmy + fortificationForce;
+
+          // FIGHT
+          if (totalDefenseForce >= instancePlayer.army) {
+            if (contestant) {
+              contestant.army = instancePlayer.army >= contestant.army ? 0 : contestant.army - instancePlayer.army;
+            }
+            instancePlayer.army = 0;
+            locationClaimed = false;
+            failureMessages.push(`Defensive army (${localArmy}) and fortifications (${fortificationForce}) are too strong: ${actionToPlay.name}`);
+          } else {
+            instancePlayer.army = instancePlayer.army - localArmy;
+            if (contestant) {
+              contestant.army = 0;
+            }
+          }
+          if (contestant) { // Update contestant army after fight
+            allPlayerInstances.forEach((element, id) => {
+              if (element.playerId == contestant.playerId) {
+                  allPlayerInstances[id].army = contestant.army;
+                  return;
+              }
+            });
+          }
+
+          if (!attackOnPlayerBase && instancePlayer.army <= 0) {
+            locationClaimed = false
+            failureMessages.push(`Not enough troops to claim the location: ${actionToPlay.name}`);
+          }
+
+          if (!attackOnPlayerBase && locationClaimed) {
+            instancePlayer.army = instancePlayer.army - 1;
+            allLocations[actionParam].ownerId = player.id;
+            contestedLocationBuildings['outpost'] = 1;
+            contestedLocationBuildings['pillagerVillage'] = null;
+            delete contestedLocationBuildings['pillagerVillage'];
+            allLocations[actionParam].buildings = mapToString(contestedLocationBuildings);
+          } else if (attackOnPlayerBase && locationClaimed) {
+            instancePlayer.treasure = instancePlayer.treasure + 5;
+          }
+        }
+
+        if (!attackOnPlayerBase && locationClaimed) {
+          instancePlayer.armyPosition = actionParam;
+        }
+      }
     }
   } 
 
@@ -402,7 +518,15 @@ router.post('/play', async function(req, res, next) {
    instancePlayer.buildings = mapToString(playerBuildingList);
    const updatedUser = await updateInstancePlayerByServer({ body: { ...instancePlayer } }, res);
 
-  return res.status(200).json(updatedUser);
+   allPlayerInstances.forEach((element, id) => {
+      updateInstancePlayerByServer({ body: { ...element }}, res, false);
+   });
+
+   allLocations.forEach((element, id) => {
+      updateLocationByInstanceAndPoint({ body: { ...element }}, res, false);
+   });
+
+  return res.status(200).json({ updatedUser, failureMessages });
 });
 
 module.exports = router;

@@ -9,17 +9,7 @@ function DrawStartGameButton() {
 
 function onEndTurnButtonClick() {
     console.log('End Turn button clicked');
-
-    postGameActions(currentInstance.currentPlayerTurn).then((data) => {
-        console.log('# End turn actions posted:', data);
-        if (data.error || data.message) {
-            console.log('# Error posting end turn actions:', data.message);
-        } else {
-            currentInstance.currentPlayer.pendingActions = [];
-            setEndTurnSocket();
-            fetchAndDrawBoardScreen();
-        }
-    });
+    setEndTurnSocket();
 }
 
 function setEndTurnButtonListener() {
@@ -68,7 +58,8 @@ function DrawPlayerResources() {
         "tool",
         "horse",
         "army",
-        "treasure"
+        "treasure",
+        "armyMovementPoints"
     ];
 
     resourceTitles.forEach(resource => {
@@ -328,6 +319,14 @@ function RefreshPinPoints() {
     });
 }
 
+function MoveArmyToPoint(pointId) {
+    const action = currentInstance.actions[40 - 1]
+    executeAction(action.id, { ...action.requiredBuildings, ...action.requiredResources }, action.effects, () => {
+            DrawPlayerActions();
+            DrawPlayerResources();
+    }, pointId)
+}
+
 function DrawPinPoints() {
     const playerList = currentInstance.playerList;
     var playerPinPoints = [];
@@ -407,10 +406,12 @@ function DrawPinPoints() {
             pinPointArmyAction.className = "pin-point-defend-action";
             pinPointArmyAction.id = `player-pin-point-defend-action-${index}`;
             pinPointArmyAction.innerText = "Défendre";
+            pinPointArmyAction.addEventListener('click', () => MoveArmyToPoint("-1"));
         } else {
             pinPointArmyAction.className = "pin-point-attack-action";
             pinPointArmyAction.id = `player-pin-point-attack-action-${index}`;
             pinPointArmyAction.innerText = "Attaquer";
+            pinPointArmyAction.addEventListener('click', () => MoveArmyToPoint("#" + index.toString()));
         }
 
         pinPointActions.appendChild(pinPointVisitAction);
@@ -484,6 +485,7 @@ function DrawPinPoints() {
         if (!location.isOwnedByUser) {
             pinPointDefendAction.style.display = "none";
         }
+        pinPointDefendAction.addEventListener('click', () => MoveArmyToPoint(index.toString()));
 
         const pinPointConquestAction = document.createElement("button");
         pinPointConquestAction.className = "pin-point-conquest-action";
@@ -492,6 +494,7 @@ function DrawPinPoints() {
         if (location.isOwnedByUser) {
             pinPointConquestAction.style.display = "none";
         }
+        pinPointConquestAction.addEventListener('click', () => MoveArmyToPoint(index.toString()));
 
         pinPointActions.appendChild(pinPointVisitAction);
         pinPointActions.appendChild(pinPointDefendAction);
