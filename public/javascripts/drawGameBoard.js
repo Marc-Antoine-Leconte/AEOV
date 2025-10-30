@@ -298,12 +298,47 @@ function setReadyButtonListener() {
     readyBtn.addEventListener('click', onReadyButtonClick);
 }
 
+function RefreshPinPoints() {
+    const playerList = currentInstance.playerList;
+    const pinPoints = pinPointsMap;
+    const gameMap = document.querySelector(".game-map");
+
+    const locations = currentInstance.locations;
+    console.log('locations => ', locations);
+
+    Object.entries(locations).forEach(([index, location]) => {
+        const point = pinPoints[index];
+        const pinPointConquestActionBtn = document.getElementById(`pin-point-conquest-action-${index}`);
+        const pinPointDefendActionBtn = document.getElementById(`pin-point-defend-action-${index}`);
+        const pinPointLabel = document.getElementById(`pin-point-label-${index}`);
+        pinPointLabel.style.backgroundColor = location.ownerColor;
+        if (['purple', 'blue', 'red'].includes(location.ownerColor)) {
+            pinPointLabel.style.color = "white";
+        } else {
+            pinPointLabel.style.color = "black";
+        }
+
+        if (location.isOwnedByUser) {
+            pinPointConquestActionBtn.style.display = "none";
+            pinPointDefendActionBtn.style.display = "block";
+        } else {
+            pinPointConquestActionBtn.style.display = "block";
+            pinPointDefendActionBtn.style.display = "none";
+        }
+    });
+}
+
 function DrawPinPoints() {
     const playerList = currentInstance.playerList;
     var playerPinPoints = [];
     const pinPoints = pinPointsMap;
     const gameMap = document.querySelector(".game-map");
+    const existingPinPoints = document.querySelectorAll(".pin-point-button");
 
+    if (existingPinPoints && existingPinPoints.length > 0) {
+        RefreshPinPoints();
+        return;
+    }
 
     switch (playerList.length) {
         case 2:
@@ -330,6 +365,8 @@ function DrawPinPoints() {
     }
 
     playerPinPoints.forEach((point, index) => {
+        const player = playerList[index];
+
         const pinPointDiv = document.createElement("div");
         pinPointDiv.className = "pin-point-button";
         pinPointDiv.style.left = point.x + "vw";
@@ -337,24 +374,61 @@ function DrawPinPoints() {
         pinPointDiv.id = `pin-point-player-${index}`;
 
         const pinPointImg = document.createElement("img");
-        pinPointImg.src = "/images/" + playerList[index].civilization + "-city.png";
-        pinPointImg.alt = playerList[index].civilization + " city";
+        pinPointImg.src = "/images/" + player.civilization + "-city.png";
+        pinPointImg.alt = player.civilization + " city";
         pinPointImg.className = "city-point-image";
 
         const pinPointLabel = document.createElement("p");
-        pinPointLabel.innerText = playerList[index].playerName;
-        pinPointLabel.style.backgroundColor = playerList[index].color;
-        if (['purple', 'blue', 'red'].includes(playerList[index].color)) {
+        pinPointLabel.innerText = player.playerName;
+        pinPointLabel.style.backgroundColor = player.color;
+        if (['purple', 'blue', 'red'].includes(player.color)) {
             pinPointLabel.style.color = "white";
         }
 
-        pinPointDiv.appendChild(pinPointImg);
-        pinPointDiv.appendChild(pinPointLabel);
-        pinPointDiv.addEventListener('click', () => {
+        const pinPointActions = document.createElement("div");
+        pinPointActions.className = "pin-point-actions";
+        pinPointActions.id = `player-pin-point-actions-${index}`;
+        pinPointActions.style.display = "none";
+        
+        const pinPointVisitAction = document.createElement("button");
+        pinPointVisitAction.className = "pin-point-visit-action";
+        pinPointVisitAction.id = `player-pin-point-visit-action-${index}`;
+        pinPointVisitAction.innerText = "Visiter";
+        pinPointVisitAction.addEventListener('click', () => {
             {
                 currentInstance.screen.layout = 'city';
                 currentInstance.screen.selectedCity = index + 1;
                 DrawCityOverlay();
+            }
+        });
+
+        const pinPointArmyAction = document.createElement("button");
+        if (player.isUser) {
+            pinPointArmyAction.className = "pin-point-defend-action";
+            pinPointArmyAction.id = `player-pin-point-defend-action-${index}`;
+            pinPointArmyAction.innerText = "Défendre";
+        } else {
+            pinPointArmyAction.className = "pin-point-attack-action";
+            pinPointArmyAction.id = `player-pin-point-attack-action-${index}`;
+            pinPointArmyAction.innerText = "Attaquer";
+        }
+
+        pinPointActions.appendChild(pinPointVisitAction);
+        pinPointActions.appendChild(pinPointArmyAction);
+
+        pinPointDiv.appendChild(pinPointImg);
+        pinPointDiv.appendChild(pinPointLabel);
+        pinPointDiv.appendChild(pinPointActions);
+        pinPointDiv.addEventListener('mouseenter', () => {
+            {
+                const actionsComp = document.getElementById(`player-pin-point-actions-${index}`);
+                actionsComp.style.display = actionsComp.style.display === "none" ? "flex" : "none";
+            }
+        });
+        pinPointDiv.addEventListener('mouseleave', () => {
+            {
+                const actionsComp = document.getElementById(`player-pin-point-actions-${index}`);
+                actionsComp.style.display = actionsComp.style.display === "none" ? "flex" : "none";
             }
         });
 
@@ -378,9 +452,67 @@ function DrawPinPoints() {
 
         const pinPointLabel = document.createElement("p");
         pinPointLabel.innerText = location.name;
+        pinPointLabel.id = `pin-point-label-${index}`;
+        pinPointLabel.style.backgroundColor = location.ownerColor;
+        if (['purple', 'blue', 'red'].includes(location.ownerColor)) {
+            pinPointLabel.style.color = "white";
+        } else {
+            pinPointLabel.style.color = "black";
+        }
+
+        const pinPointActions = document.createElement("div");
+        pinPointActions.className = "pin-point-actions";
+        pinPointActions.id = `pin-point-actions-${index}`;
+        pinPointActions.style.display = "none";
+        
+        const pinPointVisitAction = document.createElement("button");
+        pinPointVisitAction.className = "pin-point-visit-action";
+        pinPointVisitAction.id = `pin-point-visit-action-${index}`;
+        pinPointVisitAction.innerText = "Visiter";
+        pinPointVisitAction.addEventListener('click', () => {
+            {
+                currentInstance.screen.layout = 'location';
+                currentInstance.screen.selectedLocation = location.pointId;
+                DrawCityOverlay();
+            }
+        });
+
+        const pinPointDefendAction = document.createElement("button");
+        pinPointDefendAction.className = "pin-point-defend-action";
+        pinPointDefendAction.id = `pin-point-defend-action-${index}`;
+        pinPointDefendAction.innerText = "Défendre";
+        if (!location.isOwnedByUser) {
+            pinPointDefendAction.style.display = "none";
+        }
+
+        const pinPointConquestAction = document.createElement("button");
+        pinPointConquestAction.className = "pin-point-conquest-action";
+        pinPointConquestAction.id = `pin-point-conquest-action-${index}`;
+        pinPointConquestAction.innerText = "Conquérir";
+        if (location.isOwnedByUser) {
+            pinPointConquestAction.style.display = "none";
+        }
+
+        pinPointActions.appendChild(pinPointVisitAction);
+        pinPointActions.appendChild(pinPointDefendAction);
+        pinPointActions.appendChild(pinPointConquestAction);
 
         pinPointDiv.appendChild(pinPointImg);
         pinPointDiv.appendChild(pinPointLabel);
+        pinPointDiv.appendChild(pinPointActions);
+        pinPointDiv.addEventListener('mouseenter', () => {
+            {
+                const actionsComp = document.getElementById(`pin-point-actions-${index}`);
+                actionsComp.style.display = actionsComp.style.display === "none" ? "flex" : "none";
+            }
+        });
+        pinPointDiv.addEventListener('mouseleave', () => {
+            {
+                const actionsComp = document.getElementById(`pin-point-actions-${index}`);
+                actionsComp.style.display = actionsComp.style.display === "none" ? "flex" : "none";
+            }
+        });
+
         gameMap.appendChild(pinPointDiv);
     });
 }
@@ -388,7 +520,7 @@ function DrawPinPoints() {
 function DrawCityOverlay() {
     const cityLayout = document.getElementById("city-overlay");
 
-    if (currentInstance.screen.layout != 'city' || !currentInstance.screen.selectedCity) {
+    if (!['city', 'location'].includes(currentInstance.screen.layout) || (!currentInstance.screen.selectedCity && !currentInstance.screen.selectedLocation)) {
         cityLayout.style.display = "none";
         console.log('# No city overlay to display')
         return;
@@ -402,30 +534,58 @@ function DrawCityOverlay() {
         {
             currentInstance.screen.layout = null;
             currentInstance.screen.selectedCity = null;
+            currentInstance.screen.selectedLocation = null;
             DrawGameBoardScreen();
         }
     });
 
-    const selectedCityIndex = currentInstance.screen.selectedCity - 1;
+    var cityData = {
+        name: "-",
+        description: "-",
+        background: "/images/city-background.png",
+        userIsOwner: false,
+        buildingList: null
+    };
+
+    if (currentInstance.screen.selectedCity) {
+        const selectedCityIndex = currentInstance.screen.selectedCity - 1;
+        const currentUser = currentInstance.playerList[selectedCityIndex];
+        
+        cityData.name = "Ville de " + currentUser.playerName;
+        cityData.description = "Civilisation : " + currentUser.civilization;
+        cityData.buildingList = currentUser.buildings;
+        cityData.userIsOwner = currentUser.isUser;
+
+        if (["egyptian"].includes(currentUser.civilization)) {
+            cityData.background = "/images/city-background-desert.png";
+        }
+
+    } else if (currentInstance.screen.selectedLocation) {
+        const selectedLocationIndex = currentInstance.screen.selectedLocation - 1;
+        const currentLocation = currentInstance.locations[selectedLocationIndex];
+
+        console.log("selectedLocationIndex", selectedLocationIndex)
+        console.log('currentLocation => ', currentLocation);
+
+        cityData.name = currentLocation.name;
+        cityData.description = "Un emplacement rêvé pour faire des affaires ...";
+        cityData.buildingList = currentLocation.buildings;
+        cityData.userIsOwner = currentLocation.isOwnedByUser;
+    }
 
     const cityBuildingsGrid = document.getElementById("city-buildings-grid");
     cityBuildingsGrid.innerHTML = '';
 
-    const cityName = document.getElementById("city-name");
-    cityName.innerText = "Ville de " + currentInstance.playerList[selectedCityIndex].playerName;
+    const cityNameComp = document.getElementById("city-name");
+    cityNameComp.innerText = cityData.name;
 
     const backgroundDiv = document.getElementById("overlay-background-image");
-    if (["egyptian"].includes(currentInstance.playerList[selectedCityIndex].civilization)) {
-        backgroundDiv.src = "/images/city-background-desert.png";
-    } else {
-        backgroundDiv.src = "/images/city-background.png";
-    }
+    backgroundDiv.src = cityData.background;
 
     const cityDescription = document.getElementById("city-description");
-    cityDescription.innerText = "Civilization : " + currentInstance.playerList[selectedCityIndex].civilization;
+    cityDescription.innerText = cityData.description;
 
-    const currentUser = currentInstance.playerList[selectedCityIndex];
-    const buildingList = currentUser.buildings.split(",").reduce((map, item) => {
+    const buildingList = cityData.buildingList.split(",").reduce((map, item) => {
         const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
         const [key, value] = trimmedItem.split(":");
         map[key] = value;
@@ -440,9 +600,9 @@ function DrawCityOverlay() {
         buildingItem.className = "building-item";
         buildingItem.id = building + "-item";
 
-        var buildingUpgrade = [1, 2].includes(count) ? count : 3;
+        var buildingUpgrade = ["1", "2"].includes(count) ? count : "3";
         if (["house", "wall", "castle", "prison"].includes(building)) {
-            buildingUpgrade = 1;
+            buildingUpgrade = "1";
         }
 
         var buildingImage;
@@ -469,7 +629,7 @@ function DrawCityOverlay() {
         buildingName.innerText = building + " (Niv " + count + ")";
         buildingItem.appendChild(buildingName);
 
-        if (currentUser.isUser) {
+        if (cityData.userIsOwner) {
             const upgradeButton = document.createElement("button");
             upgradeButton.innerText = "Améliorer";
             buildingItem.appendChild(upgradeButton);

@@ -235,6 +235,18 @@ router.post('/info', async function(req, res, next) {
 
   const locationsData = await getLocationsByInstanceId(req, res, false);
 
+  locationsData.forEach(location => {
+    location.isOwnedByUser = location.ownerId == player.id;
+    if (location.ownerId) {
+      const ownerPlayer = playersData.find(p => p.playerId == location.ownerId);
+      location.ownerColor = ownerPlayer.color;
+    } else {
+      location.ownerColor = "grey";
+    }
+
+    location.ownerId = null;
+  });
+
   if (!userFound) {
     console.log('Player is not in this game');
       return res.status(404).json({

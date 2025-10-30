@@ -56,7 +56,10 @@ class LocationController {
 
         const instanceId = req.body.instanceId;
         try {
-            const locations = await Location.findAll({ where: { instanceId: instanceId } });
+            const locations = await Location.findAll({
+                where: { instanceId: instanceId },
+                order: [['pointId', 'ASC']]
+            });
             if (!locations) {
                 if (allowTransmit) {
                     res.status(404).json({
