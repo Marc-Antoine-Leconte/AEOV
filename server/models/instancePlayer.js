@@ -87,6 +87,16 @@ function model(sequelize) {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
+        },
+        armyPosition: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: -1,
+        },
+        armyMovementPoints: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1,
         }
     };
 

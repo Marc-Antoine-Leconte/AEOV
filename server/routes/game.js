@@ -229,6 +229,7 @@ router.post('/info', async function(req, res, next) {
       isCurrentPlayer: (playerData.id == instance.currentPlayerId),
       isUser: (playerData.id == playerId),
       buildings: element.buildings,
+      armyPosition: element.armyPosition,
     };
     id++;
   }

@@ -645,6 +645,38 @@ function DrawCityOverlay() {
     console.log("# Drawing city overlay OK");
 }
 
+function DrawPlayerArmy() {
+    console.log('# Drawing player army...');
+    const playerList = currentInstance.playerList;
+
+    if (!playerList) {
+        console.log('# No player army to display');
+        return;
+    }
+    
+    playerList.forEach((element, index) => {
+        const userArmy = document.createElement("img");
+        userArmy.className = "player-army-image";
+        userArmy.id = `player-army-${element.playerName}`;
+        userArmy.style.borderColor = element.color;
+        userArmy.src = "/images/" + element.civilization + "-army.jpg";
+        userArmy.alt = `${element.playerName} ${element.civilization} army`;
+
+        if (element.armyPosition == -1) {
+            console.log('index => ', index);
+            console.log('element => ', element);
+            const playerPinPoint = document.getElementById(`pin-point-player-${index}`);
+            playerPinPoint.appendChild(userArmy);
+        } else {
+            const locationPinPoint = document.getElementById(`pin-point-${element.armyPosition}`);
+            locationPinPoint.appendChild(userArmy);
+        }
+    });
+    
+
+    console.log('# Drawing player army OK');
+}
+
 function DrawInstanceWaitingScreen() {
     const waitingScreen = document.getElementById("game-board-connection-container");
 
@@ -671,6 +703,7 @@ function DrawGameBoardScreen() {
     DrawPlayerList();
     DrawGameBoard();
     DrawPinPoints();
+    DrawPlayerArmy();
     DrawCityOverlay();
 }
 

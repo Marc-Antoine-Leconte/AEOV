@@ -173,7 +173,6 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transform-origin: center;
     cursor: pointer;
     width: 6vw;
 }
@@ -261,4 +260,15 @@ body {
     background-color: #2872a7;
     color: white;
     cursor: pointer;
+}
+
+.player-army-image {
+    width: 40px;
+    height: 40px;
+    position: absolute !important;
+    transform-origin: center;
+    border: 3px solid;
+    border-radius: 50%;
+    top: 1.8vw;
+    left: 4vw;
 }
