@@ -58,7 +58,17 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 5,
         },
+        maxPopulation: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 5,
+        },
         tool: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 10,
+        },
+        maxTool: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 10,
@@ -94,6 +104,11 @@ function model(sequelize) {
             defaultValue: -1,
         },
         armyMovementPoints: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1,
+        },
+        maxArmyMovementPoints: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1,

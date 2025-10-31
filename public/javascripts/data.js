@@ -21,7 +21,7 @@ async function fetchDataFromAPI(url) {
     }
 
     const result = await response.json();
-    console.log(result);
+    console.log("API Response :", result);
     return result;
   } catch (error) {
     console.error(error.message);

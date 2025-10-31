@@ -119,7 +119,7 @@ class LocationController {
 
     updateLocationByInstanceAndPoint = async (req, res) => {
         console.log('@updateLocationByInstanceAndPoint req => ', req);
-        const data = req.body.dataValues;
+        const data = req.body;
         try {
             await Location.update(data, {
                 where: {

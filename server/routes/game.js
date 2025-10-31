@@ -9,49 +9,49 @@ const { array } = require('joi');
 var router = express.Router();
 
 /* GET render game board page. */
-router.get('/', async function(req, res, next) {
-    console.log('# Rendering gameBoard page');
+router.get('/', async function (req, res, next) {
+  console.log('# Rendering gameBoard page');
   res.render('gameBoard', { title: 'Game Board' });
 });
 
 /* POST set Player ready to play. */
-router.post('/readyToPlay', async function(req, res, next) {
+router.post('/readyToPlay', async function (req, res, next) {
   const { civilization, color, instanceId, playerId } = req.body;
   console.log('# Player join game');
 
   const player = await getPlayerById(req, res, false);
   if (!player) {
-      console.log('Player not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player not found"
-      });
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
   }
 
   const playerInstance = await getInstancePlayerByPlayerAndInstance(req, res, false);
   if (!playerInstance) {
-      console.log('Player not playing in this instance');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player not playing in this instance"
-      });
+    console.log('Player not playing in this instance');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not playing in this instance"
+    });
   }
 
   const instance = await getInstanceById(req, res, false);
   if (!instance) {
-      console.log('Instance not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Instance not found"
-      });
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
   }
 
   if (instance.gameState != 'waiting') {
-     console.log('Instance is already started');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Instance is already started"
-      });
+    console.log('Instance is already started');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance is already started"
+    });
   }
 
   return await updateInstancePlayer(req, res);
@@ -59,75 +59,75 @@ router.post('/readyToPlay', async function(req, res, next) {
 });
 
 /* POST start game. */
-router.post('/start', async function(req, res, next) {
+router.post('/start', async function (req, res, next) {
   console.log('# Owner start game');
 
   const player = await getPlayerById(req, res, false);
   if (!player) {
-      console.log('Player not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player not found"
-      });
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
   }
 
   const instance = await getInstanceById(req, res, false);
   if (!instance) {
-      console.log('Instance not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Instance not found"
-      });
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
   }
 
   if (instance.gameState != 'waiting') {
     console.log('The game is already started');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "The game is already started"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "The game is already started"
+    });
   }
 
   if (instance.ownerId != player.id) {
-      console.log('Only owner can start the game');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Only owner can start the game"
-      });
+    console.log('Only owner can start the game');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Only owner can start the game"
+    });
   }
 
   const instancePlayers = await getInstancePlayersByInstanceId(req, res, false);
   if (!instancePlayers) {
     console.log('Error while loading players');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Error while loading players"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading players"
+    });
   }
 
   instancePlayers.forEach(element => {
     if (element.civilization == null || element.color == null) {
-        console.log('All players must be ready before starting the game');
-        return res.status(400).json({
-            statusCode: 400,
-            message: "All players must be ready before starting the game"
-        });
+      console.log('All players must be ready before starting the game');
+      return res.status(400).json({
+        statusCode: 400,
+        message: "All players must be ready before starting the game"
+      });
     }
   });
 
   if (instancePlayers.length < 2) {
     console.log('The game needs at least 2 players to start');
-        return res.status(400).json({
-            statusCode: 400,
-            message: "The game needs at least 2 players to start"
-        });
+    return res.status(400).json({
+      statusCode: 400,
+      message: "The game needs at least 2 players to start"
+    });
   }
 
   const totalPlayers = instancePlayers.length;
   const numberToAttribute = Array.from(Array(totalPlayers).keys()).sort(() => Math.random() - 0.5);
   var playerRotation = {};
   numberToAttribute.forEach((i) => {
-      playerRotation[i+1] = instancePlayers[i].playerId;
+    playerRotation[i + 1] = instancePlayers[i].playerId;
   });
 
   console.log('Player rotation for this game: ', playerRotation);
@@ -138,25 +138,25 @@ router.post('/start', async function(req, res, next) {
   const updateStatus = updateInstance(req, res, { ...instance.dataValues, gameState: 'inProgress', currentPlayerId: currentPlayerToPlay, playerRotation: JSON.stringify(playerRotation) });
 
   if (!updateStatus) {
-      console.log('Not possible to update instance');
-      return res.status(400).json({
-          statusCode: 400,
-          message: "Not possible to update instance"
-      });
+    console.log('Not possible to update instance');
+    return res.status(400).json({
+      statusCode: 400,
+      message: "Not possible to update instance"
+    });
   }
 
   var mapPossibleLocations = {
-    pillagerVillage: {name: "Camp de bandits", buildings: "[pillagerVillage:1]"}, 
-    goldMine: {name: "Mine d'or", buildings: "[goldMine:1]"}, 
-    diamondMine: {name: "Mine de diamant", buildings: "[diamondMine:1]"}, 
-    ironMine: {name: "Mine de fer", buildings: "[ironMine:1]"}, 
-    stoneMine: {name: "Mine de pierre", buildings: "[stoneMine:1]"}, 
-    pound: {name: "Cabane de pêcheur", buildings: "[pound:1]"}, 
-    mercenaryVillage: {name: "Camp de mercenaires", buildings: "[mercenaryVillage:1]"}, 
-    woodHut: {name: "Camp de bûcherons", buildings: "[woodHut:1]"}, 
-    diamondForge: {name: "Forge de diamants", buildings: "[diamondForge:1]"}, 
-    fair: {name: "Foire", buildings: "[fair:1]"},
-    village: {name: "Village", buildings: "[village:1]"},
+    pillagerVillage: { name: "Camp de bandits", buildings: "[pillagerVillage:1]" },
+    goldMine: { name: "Mine d'or", buildings: "[goldMine:1]" },
+    diamondMine: { name: "Mine de diamant", buildings: "[diamondMine:1]" },
+    ironMine: { name: "Mine de fer", buildings: "[ironMine:1]" },
+    stoneMine: { name: "Mine de pierre", buildings: "[stoneMine:1]" },
+    pound: { name: "Cabane de pêcheur", buildings: "[pound:1]" },
+    mercenaryVillage: { name: "Camp de mercenaires", buildings: "[mercenaryVillage:1]" },
+    woodHut: { name: "Camp de bûcherons", buildings: "[woodHut:1]" },
+    diamondForge: { name: "Forge de diamants", buildings: "[diamondForge:1]" },
+    fair: { name: "Foire", buildings: "[fair:1]" },
+    village: { name: "Village", buildings: "[village:1]" },
   };
 
   var mandatoryLocations = ["goldMine", "diamondMine", "ironMine", "stoneMine"];
@@ -186,25 +186,25 @@ router.post('/start', async function(req, res, next) {
 });
 
 /* POST get game info. */
-router.post('/info', async function(req, res, next) {
+router.post('/info', async function (req, res, next) {
   const { playerId, instanceId } = req.body;
 
   const player = await getPlayerById(req, res, false);
   if (!player) {
-      console.log('Player not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player not found"
-      });
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
   }
 
   const instance = await getInstanceById(req, res, false);
   if (!instance) {
-      console.log('Instance not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Instance not found"
-      });
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
   }
 
   const playerInstanceList = await getInstancePlayersByInstanceId(req, res, false);
@@ -216,11 +216,11 @@ router.post('/info', async function(req, res, next) {
 
   for (const element of playerInstanceList) {
     if (element.playerId == player.id) {
-        userFound = true;
-        currentPlayerData = element;
-    } 
+      userFound = true;
+      currentPlayerData = element;
+    }
 
-    const playerData = await getPlayerById({ body: { playerId: element.playerId }}, res, false);
+    const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
 
     playersData[id] = {
       playerName: playerData.name,
@@ -235,106 +235,118 @@ router.post('/info', async function(req, res, next) {
     id++;
   }
 
-  const locationsData = await getLocationsByInstanceId(req, res, false);
+  var locationsData = await getLocationsByInstanceId(req, res, false);
 
   locationsData.forEach(location => {
-    location.isOwnedByUser = location.ownerId == player.id;
+    location.dataValues.isOwnedByUser = location.ownerId == player.id;
     if (location.ownerId) {
       const ownerPlayer = playerInstanceList.find(p => p.playerId == location.ownerId);
-      location.ownerColor = ownerPlayer.color;
+      location.dataValues.ownerColor = ownerPlayer.color;
     } else {
-      location.ownerColor = "grey";
+      location.dataValues.ownerColor = "white";
     }
 
-    location.ownerId = null;
+    location.dataValues.ownerId = null;
   });
 
   if (!userFound) {
     console.log('Player is not in this game');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player is not in this game"
-      });
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player is not in this game"
+    });
   }
 
   return res.status(200).json({
-      statusCode: 200,
-      message: "Success",
-      data: {
-          currentPlayer: { ...player.dataValues, ...currentPlayerData.dataValues, password: null },
-          instance: { ...instance.dataValues, ownerId: null, currentPlayerId: null },
-          players: playersData,
-          locations: locationsData
-      }
+    statusCode: 200,
+    message: "Success",
+    data: {
+      currentPlayer: { ...player.dataValues, ...currentPlayerData.dataValues, password: null },
+      instance: { ...instance.dataValues, ownerId: null, currentPlayerId: null },
+      players: playersData,
+      locations: locationsData
+    }
   });
 });
 
 /* GET all possible actions for a player. */
-router.get('/actions', async function(req, res, next) {
+router.get('/actions', async function (req, res, next) {
   console.log('# Fetching actions');
   return await getAllActions(req, res);
 });
 
 /* POST player actions during a turn. */
-router.post('/play', async function(req, res, next) {
+router.post('/play', async function (req, res, next) {
   console.log('# Player action');
   const { actions, playerId, instanceId } = req.body;
 
   const player = await getPlayerById(req, res, false);
   if (!player) {
-      console.log('Player not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Player not found"
-      });
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
   }
 
   const instance = await getInstanceById(req, res, false);
   if (!instance) {
-      console.log('Instance not found');
-      return res.status(404).json({
-          statusCode: 404,
-          message: "Instance not found"
-      });
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
   }
 
   var instancePlayer = await getInstancePlayerByPlayerAndInstance(req, res, false);
   if (!instancePlayer) {
     console.log('Error while loading players');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Error while loading players"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading players"
+    });
   }
 
-  const allPlayerInstances = await getInstancePlayersByInstanceId(req, res, false);
+  var allPlayerInstances = await getInstancePlayersByInstanceId(req, res, false);
   if (!allPlayerInstances) {
     console.log('Error while loading players');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Error while loading players"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading players"
+    });
   }
 
   const allActions = await getAllActions(req, res, false);
   if (!allActions) {
     console.log('Error while loading actions');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Error while loading actions"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading actions"
+    });
   }
 
   var allLocations = await getLocationsByInstanceId(req, res, false);
   if (!allLocations) {
     console.log('Error while loading locations');
-      return res.status(403).json({
-          statusCode: 403,
-          message: "Error while loading locations"
-      });
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading locations"
+    });
   }
 
-  const playerBuildingList = stringListToMap(instancePlayer.buildings);
+  var playerBuildingList = stringListToMap(instancePlayer.buildings);
+  allLocations.forEach(location => {
+    if (location.ownerId == player.id) {
+      const locationBuildings = stringListToMap(location.buildings);
+      Object.entries(locationBuildings).forEach(([key, value]) => {
+        if (playerBuildingList[key] == null) {
+          playerBuildingList[key] = value;
+        } else {
+          playerBuildingList[key] = parseInt(playerBuildingList[key]) + parseInt(value);
+        }
+      });
+    }
+  });
 
   console.log('||||| playerBuildingList => ', playerBuildingList);
 
@@ -376,7 +388,7 @@ router.post('/play', async function(req, res, next) {
       tooMuchRequirement = true;
       return;
     });
-    
+
     if (tooMuchRequirement) {
       errorMessages.push(`Not enough requirements for action: ${actionToPlay.name}`);
     } else {
@@ -400,7 +412,7 @@ router.post('/play', async function(req, res, next) {
 
       // Apply requirements
       Object.entries(requirement).forEach(([key, value]) => {
-        if (!value || !key || ['building', 'population', 'tool', 'armyMovementPoints'].includes(key))
+        if (!value || !key || ['building'].includes(key))
           return;
 
         instancePlayer[key] = (instancePlayer[key] || 0) - parseInt(value);
@@ -411,7 +423,7 @@ router.post('/play', async function(req, res, next) {
       // Apply army movements
       if (actionId === 40) { // If the action is "Move Army"
         var locationClaimed = true;
-        
+
         if (actionParam != "-1") { // If moving to an other place than home
           var locationId = '';
           var attackOnPlayerBase = false;
@@ -424,16 +436,16 @@ router.post('/play', async function(req, res, next) {
           }
 
           const contestedLocation = allLocations[actionParam];
-          const contestant = allPlayerInstances.find(p => { 
+          const contestant = allPlayerInstances.find(p => {
             if (attackOnPlayerBase) {
               return p.armyPosition == -1 && p.playerId != player.id;
             }
-            return p.armyPosition == locationId && p.playerId != player.id; 
+            return p.armyPosition == locationId && p.playerId != player.id;
           });
 
           var fortificationForce = 0;
           var contestedLocationBuildings = null;
-          
+
           if (attackOnPlayerBase) {
             contestedLocationBuildings = stringListToMap(contestant.buildings);
           } else {
@@ -472,11 +484,12 @@ router.post('/play', async function(req, res, next) {
               contestant.army = 0;
             }
           }
+
           if (contestant) { // Update contestant army after fight
             allPlayerInstances.forEach((element, id) => {
               if (element.playerId == contestant.playerId) {
-                  allPlayerInstances[id].army = contestant.army;
-                  return;
+                allPlayerInstances[id].army = contestant.army;
+                return;
               }
             });
           }
@@ -486,7 +499,7 @@ router.post('/play', async function(req, res, next) {
             failureMessages.push(`Not enough troops to claim the location: ${actionToPlay.name}`);
           }
 
-          if (!attackOnPlayerBase && locationClaimed) {
+          if (!attackOnPlayerBase && locationClaimed && contestedLocation.ownerId != player.id) {
             instancePlayer.army = instancePlayer.army - 1;
             allLocations[actionParam].ownerId = player.id;
             contestedLocationBuildings['outpost'] = 1;
@@ -503,28 +516,30 @@ router.post('/play', async function(req, res, next) {
         }
       }
     }
-  } 
+  }
 
   console.log('Errors found: ', errorMessages);
 
   if (errorMessages.length > 0) {
     return res.status(400).json({
-        statusCode: 400,
-        message: "Errors found",
-        errors: errorMessages
+      statusCode: 400,
+      message: "Errors found",
+      errors: errorMessages
     });
   }
 
-   instancePlayer.buildings = mapToString(playerBuildingList);
-   const updatedUser = await updateInstancePlayerByServer({ body: { ...instancePlayer } }, res);
+  instancePlayer.buildings = mapToString(playerBuildingList);
+  const updatedUser = await updateInstancePlayerByServer({ body: { ...instancePlayer } }, res);
 
-   allPlayerInstances.forEach((element, id) => {
-      updateInstancePlayerByServer({ body: { ...element }}, res, false);
-   });
+  allPlayerInstances.forEach((element, id) => {
+    if (element.playerId != instancePlayer.playerId) {
+      updateInstancePlayerByServer({ body: { ...element.dataValues } }, res, false);
+    }
+  });
 
-   allLocations.forEach((element, id) => {
-      updateLocationByInstanceAndPoint({ body: { ...element }}, res, false);
-   });
+  allLocations.forEach((element, id) => {
+    updateLocationByInstanceAndPoint({ body: { ...element.dataValues } }, res, false);
+  });
 
   return res.status(200).json({ updatedUser, failureMessages });
 });

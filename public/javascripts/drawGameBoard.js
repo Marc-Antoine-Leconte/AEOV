@@ -65,7 +65,16 @@ function DrawPlayerResources() {
     resourceTitles.forEach(resource => {
         const resourceComp = document.getElementById(`player-resource-${resource}`);
         if (resourceComp) {
-            resourceComp.innerHTML = playerData[resource];
+            var text = playerData[resource];
+
+            if (resource === "armyMovementPoints") {
+                text += ` / ${playerData.maxArmyMovementPoints}`;
+            } else if (resource === "tool") {
+                text += ` / ${playerData.maxTool}`;
+            } else if (resource === "population") {
+                text += ` / ${playerData.maxPopulation}`;
+            }
+            resourceComp.innerHTML = text;
         }
     });
 
@@ -175,7 +184,7 @@ function DrawActionList(actions, className, disabled = false) {
 function DrawPlayerActions() {
     console.log('# Drawing player actions...');
     const actions = currentInstance.actions;
-    const currentPlayer = currentInstance.currentPlayer;
+    var currentPlayer = currentInstance.currentPlayer;
 
     const actionsContainerComp = document.getElementById("player-actions-container");
     if (!actions || actions.length == 0 || !currentPlayer || !currentPlayer.id) {
@@ -193,7 +202,7 @@ function DrawPlayerActions() {
         var tooMuchRequirement = false;
         const requirement = { ...action.requiredBuildings, ...action.requiredResources };
         Object.entries(requirement).forEach(([key, value]) => {
-            if (value && !currentPlayer[key] || currentPlayer[key] < value) {
+            if (value && (!currentPlayer[key] || currentPlayer[key] < value)) {
                 tooMuchRequirement = true;
                 //console.log('player need more', key, ' => ', value);
             }
@@ -658,6 +667,18 @@ function DrawPlayerArmy() {
     }
     
     playerList.forEach((element, index) => {
+        const oldArmyImg = document.getElementById(`player-army-${element.playerName}`);
+        if (oldArmyImg != null) {
+            const oldArmyParent = oldArmyImg.parentElement
+            const oldArmyLocation = oldArmyParent.id;
+            if (oldArmyLocation == `pin-point-${element.armyPosition}` || (oldArmyLocation == `pin-point-player-${index}` && element.armyPosition == -1)) {
+                console.log('# Army already in correct position => ', oldArmyLocation);
+                return;
+            } else {
+                oldArmyImg.remove();
+            }
+        }
+
         const userArmy = document.createElement("img");
         userArmy.className = "player-army-image";
         userArmy.id = `player-army-${element.playerName}`;
@@ -666,8 +687,6 @@ function DrawPlayerArmy() {
         userArmy.alt = `${element.playerName} ${element.civilization} army`;
 
         if (element.armyPosition == -1) {
-            console.log('index => ', index);
-            console.log('element => ', element);
             const playerPinPoint = document.getElementById(`pin-point-player-${index}`);
             playerPinPoint.appendChild(userArmy);
         } else {
@@ -675,7 +694,6 @@ function DrawPlayerArmy() {
             locationPinPoint.appendChild(userArmy);
         }
     });
-    
 
     console.log('# Drawing player army OK');
 }

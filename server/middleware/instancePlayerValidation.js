@@ -50,7 +50,19 @@ const instancePlayerSchema = Joi.object({
         .min(0),
     horse: Joi.number()
         .integer()
-        .min(0)
+        .min(0),
+    treasure: Joi.number()
+        .integer()
+        .min(0),
+    maxArmyMovementPoints: Joi.number()
+        .integer()
+        .min(0),
+    maxTool: Joi.number()
+        .integer()
+        .min(0),
+    maxPopulation: Joi.number()
+        .integer()
+        .min(0),
 });
 
 const validateInstancePlayer = (req, res, next) => {
@@ -69,7 +81,7 @@ const validateInstancePlayer = (req, res, next) => {
 }
 
 const validateInstancePlayerUpdate = (req, res, next) => {
-    const updateSchema = instancePlayerSchema.fork(['playerId', 'instanceId', 'gold', 'food', 'wood', 'stone', 'iron', 'diamond', 'army', 'population', 'tool', 'weapons', 'armor'], (schema) => schema.optional());
+    const updateSchema = instancePlayerSchema.fork(['playerId', 'instanceId', 'gold', 'food', 'wood', 'stone', 'iron', 'diamond', 'army', 'population', 'tool', 'weapons', 'armor', 'treasure', 'maxArmyMovementPoints', 'maxTool', 'maxPopulation'], (schema) => schema.optional());
     const { error } = updateSchema.validate(req.body);
 
     if (error) {

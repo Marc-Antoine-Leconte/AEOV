@@ -14,6 +14,40 @@ function fetchAndDrawBoardScreen() {
         currentInstance.currentPlayer = response.data.currentPlayer;
         currentInstance.locations = response.data.locations;
 
+        const playerBuildings = currentInstance.currentPlayer.buildings.split(",").reduce((map, item) => {
+                const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                const [key, value] = trimmedItem.split(":");
+                map[key] = value;
+                return map;
+            }, {});
+
+        Object.entries(playerBuildings).forEach(([key, value]) => {
+            if (currentInstance.currentPlayer[key] == null) {
+                currentInstance.currentPlayer[key] = value;
+            } else {
+                currentInstance.currentPlayer[key] = parseInt(currentInstance.currentPlayer[key]) + parseInt(value);
+            }
+        });
+
+        const userLocations = currentInstance.locations.filter(location => location.isOwnedByUser);
+        Object.entries(userLocations).forEach(([index, location]) => {
+            const locationBuildings = location.buildings.split(",").reduce((map, item) => {
+                const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+                const [key, value] = trimmedItem.split(":");
+                map[key] = value;
+                return map;
+            }, {});
+
+            Object.entries(locationBuildings).forEach(([key, value]) => {
+                if (currentInstance.currentPlayer[key] == null) {
+                    currentInstance.currentPlayer[key] = value;
+                } else {
+                    currentInstance.currentPlayer[key] = parseInt(currentInstance.currentPlayer[key]) + parseInt(value);
+                }
+            });
+        });
+
+
         console.log('||> Current Instance Data:', currentInstance);
         const instanceDataErrorComp = document.getElementById("game-board-instance-data-error-message");
         if (response.error || !response.data || response.data.length == 0) {
@@ -25,6 +59,11 @@ function fetchAndDrawBoardScreen() {
         }
 
         DrawGameBoardScreen();
+        if (currentInstance.actions && currentInstance.actions.length > 0) {
+            console.log('Actions already fetched, skipping fetch');
+            return;
+        }
+
         fetchGameActions().then((response) => {
 
             if (!response || response.length == 0) {
@@ -32,7 +71,6 @@ function fetchAndDrawBoardScreen() {
                 return;
             }
 
-            console.log("# DisplayGameActions - data =>", response);
             const playerActions = response.map(action => {
                 const effects = action.effects.split(",").reduce((map, item) => {
                     const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
@@ -63,7 +101,7 @@ function fetchAndDrawBoardScreen() {
             currentInstance.actions = playerActions;
             DrawPlayerActions();
         });
-    });  
+    });
 }
 
 function InitGameBoardPage() {
