@@ -335,20 +335,22 @@ router.post('/play', async function (req, res, next) {
   }
 
   var playerBuildingList = stringListToMap(instancePlayer.buildings);
+  var virtualBuildingList = { ...playerBuildingList };
   allLocations.forEach(location => {
     if (location.ownerId == player.id) {
       const locationBuildings = stringListToMap(location.buildings);
       Object.entries(locationBuildings).forEach(([key, value]) => {
-        if (playerBuildingList[key] == null) {
-          playerBuildingList[key] = value;
+        if (virtualBuildingList[key] == null) {
+          virtualBuildingList[key] = value;
         } else {
-          playerBuildingList[key] = parseInt(playerBuildingList[key]) + parseInt(value);
+          virtualBuildingList[key] = parseInt(virtualBuildingList[key]) + parseInt(value);
         }
       });
     }
   });
 
   console.log('||||| playerBuildingList => ', playerBuildingList);
+  console.log('||||| virtualBuildingList => ', virtualBuildingList);
 
   const errorMessages = [];
   const failureMessages = [];
@@ -377,7 +379,7 @@ router.post('/play', async function (req, res, next) {
       if (!value || !key || tooMuchRequirement)
         return;
 
-      if (playerBuildingList[key] != null && playerBuildingList[key] >= value) {
+      if (virtualBuildingList[key] != null && virtualBuildingList[key] >= value) {
         return;
       }
 

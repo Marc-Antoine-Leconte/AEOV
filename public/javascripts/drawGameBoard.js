@@ -52,30 +52,48 @@ function DrawPlayerResources() {
         "gold",
         "diamond",
         "iron",
-        "population",
         "armor",
         "weapon",
-        "tool",
         "horse",
         "army",
         "treasure",
+        "tool",
+        "population",
         "armyMovementPoints"
     ];
 
     resourceTitles.forEach(resource => {
-        const resourceComp = document.getElementById(`player-resource-${resource}`);
-        if (resourceComp) {
-            var text = playerData[resource];
+        var resourceComp = document.getElementById(`player-resource-${resource}`);
+        if (!resourceComp) {
+            var resourceCompContainer = document.createElement("div");
+            resourceCompContainer.className = "game-board-player-resources-item";
+            resourceCompContainer.title = resource;
 
-            if (resource === "armyMovementPoints") {
-                text += ` / ${playerData.maxArmyMovementPoints}`;
-            } else if (resource === "tool") {
-                text += ` / ${playerData.maxTool}`;
-            } else if (resource === "population") {
-                text += ` / ${playerData.maxPopulation}`;
-            }
-            resourceComp.innerHTML = text;
+            var resourceCompImageContainer = document.createElement("span");
+            resourceCompImageContainer.className = `player-resource-image-container`;
+
+            var resourceCompImage = document.createElement("img");
+            resourceCompImage.id = `player-resource-${resource}-image`;
+            resourceCompImage.src = `images/resources/${resource}.png`;
+            resourceCompImageContainer.appendChild(resourceCompImage);
+
+            resourceComp = document.createElement("span");
+            resourceComp.id = `player-resource-${resource}`;
+            
+            resourceCompContainer.appendChild(resourceCompImageContainer);
+            resourceCompContainer.appendChild(resourceComp);
+            playerResourcesComp.appendChild(resourceCompContainer);
         }
+        var text = playerData[resource];
+
+        if (resource === "armyMovementPoints") {
+            text += ` / ${playerData.maxArmyMovementPoints}`;
+        } else if (resource === "tool") {
+            text += ` / ${playerData.maxTool}`;
+        } else if (resource === "population") {
+            text += ` / ${playerData.maxPopulation}`;
+        }
+        resourceComp.innerHTML = text;
     });
 
     console.log('# Drawing player resources OK');
