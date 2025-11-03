@@ -180,8 +180,14 @@ function DrawInstanceData() {
     console.log('# Draw of Instance Data OK');
 }
 
-function DrawActionList(actions, className, disabled = false) {
-    const actionListContainer = document.getElementById(className);
+function DrawActionList(actions, className, disabled = false) { 
+    var actionListContainer = document.getElementById(className);
+    if (!actionListContainer) {
+        const actionsContainerComp = document.getElementById("overlay-actions");
+        actionListContainer = document.createElement("div");
+        actionListContainer.id = className;
+        actionsContainerComp.appendChild(actionListContainer);
+    }
     actionListContainer.innerHTML = '';
 
     console.log('# Drawing action list:', className);
@@ -222,19 +228,39 @@ function DrawPlayerActions() {
     const actions = currentInstance.actions;
     var currentPlayer = currentInstance.currentPlayer;
 
+    var noActionsToDisplay = false;
     const actionsContainerComp = document.getElementById("overlay-actions");
-    if (!actions || actions.length == 0 || !currentPlayer || !currentPlayer.id) {
+    if (!actions || actions == null || !actions.length || !currentPlayer || !currentPlayer.id) {
+        noActionsToDisplay = true;
+    }
+
+    console.log('currentInstance.screen.layout => ', currentInstance.screen);
+    if (currentInstance.screen.layout == 'city') {
+    console.log('currentInstance.playerList[currentInstance.screen.selectedCity] => ', currentInstance.playerList[currentInstance.screen.selectedCity - 1]);
+        if (!currentInstance.playerList[currentInstance.screen.selectedCity - 1].isUser) {
+            noActionsToDisplay = true;
+        }
+    } else if (currentInstance.screen.layout == 'location') {
+    console.log('currentInstance.locations[currentInstance.screen.selectedLocation] => ', currentInstance.locations[currentInstance.screen.selectedLocation - 1]);
+        if (!currentInstance.locations[currentInstance.screen.selectedLocation - 1].isOwnedByUser) {
+            noActionsToDisplay = true;
+        }
+    }
+
+    if (noActionsToDisplay) {
         console.log('# No actions to display');
-        actionsContainerComp.hidden = true;
+        actionsContainerComp.innerHTML = '';
         return;
     }
 
-    actionsContainerComp.hidden = false;
 
     var playerActionsList = {};
     var otherPlayerActionsList = {};
 
     actions.map((action, id) => {
+        if (['38', '39', '40'].includes(action.id.toString())) { // ignore actions based on player decisions
+            return;
+        }
         var tooMuchRequirement = false;
         const requirement = { ...action.requiredBuildings, ...action.requiredResources };
         Object.entries(requirement).forEach(([key, value]) => {
@@ -689,6 +715,8 @@ function DrawCityOverlay() {
         }
     });
 
+    DrawPlayerActions();
+
     console.log("# Drawing city overlay OK");
 }
 
@@ -720,6 +748,7 @@ function DrawPlayerArmy() {
         userArmy.style.borderColor = element.color;
         userArmy.src = "/images/" + element.civilization + "-army.jpg";
         userArmy.alt = `${element.playerName} ${element.civilization} army`;
+        userArmy.title = `Armée du joueur ${element.playerName}, Nombre de soldat : ${element.army}, famine : ${element.food < 0 ? 'Oui' : 'Non'}, puissance réelle : ${ element.food < 0 ? (element.army == 0 ? 0 : element.army / 2) : element.army }`;
 
         if (element.armyPosition == -1) {
             const playerPinPoint = document.getElementById(`pin-point-player-${index}`);

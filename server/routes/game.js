@@ -461,7 +461,10 @@ router.post('/play', async function (req, res, next) {
             }
           });
 
-          const localArmy = contestant?.army || 0;
+          var localArmy = contestant?.army || 0;
+          if (localArmy != 0 && contestant.food < 0) {
+            localArmy = localArmy / 2;
+          }
           const totalDefenseForce = localArmy + fortificationForce;
 
           // FIGHT
@@ -476,6 +479,7 @@ router.post('/play', async function (req, res, next) {
             instancePlayer.army = instancePlayer.army - localArmy;
             if (contestant) {
               contestant.army = 0;
+              contestant.armyPosition = -1;
             }
           }
 
@@ -594,6 +598,14 @@ router.post('/endTurn', async function (req, res, next) {
       element.population = element.maxPopulation;
       element.tool = element.maxTool;
       element.armyMovementPoints = element.maxArmyMovementPoints;
+
+      //consume food
+      element.food = element.food - element.maxPopulation - element.army;
+
+      if (element.food < 0) {
+        element.food = -1;
+      }
+
       await updateInstancePlayerByServer({ ...req, body: element.dataValues }, res, false);
     });
 
