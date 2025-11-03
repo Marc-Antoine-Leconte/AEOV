@@ -9,7 +9,13 @@ function DrawStartGameButton() {
 
 function onEndTurnButtonClick() {
     console.log('End Turn button clicked');
-    setEndTurnSocket();
+    setPlayerEndTurn().then((data) => {
+        if (data.error || data.message) {
+            console.error('# Error ending turn:', data.message);
+        } else {
+            setEndTurnSocket();
+        }
+    });
 }
 
 function setEndTurnButtonListener() {
@@ -124,7 +130,8 @@ function DrawPlayerList() {
         const playerItem = document.createElement("li");
         playerItem.className = "game-board-player-item";
         playerItem.id = `player-${element.playerName}`;
-        playerItem.innerHTML = `${element.playerName} (${element.civilization}, ${element.color})`;
+        const pendingMessages = element.endTurn ? " - <span style='color: orange; font-weight: bold;'>En attente de fin de tour</span>" : "";
+        playerItem.innerHTML = `${element.playerName} (${element.civilization}, ${element.color}) - ` + pendingMessages;
         playerListComp.appendChild(playerItem);
     });
 
@@ -180,6 +187,17 @@ function DrawActionList(actions, className, disabled = false) {
     console.log('# Drawing action list:', className);
 
     Object.entries(actions).forEach(([id, action]) => {
+        let typeContainer = document.getElementById(`${className}-type-${action.type}`);
+        if (!typeContainer) {
+            typeContainer = document.createElement("div");
+            typeContainer.id = `${className}-type-${action.type}`;
+            const typeTitle = document.createElement("h3");
+            typeTitle.innerHTML = action.type;
+            typeContainer.appendChild(typeTitle);
+            
+            actionListContainer.appendChild(typeContainer);
+        }
+
         const actionItem = document.createElement("button");
         actionItem.className = className + "-item";
         actionItem.innerHTML = action.name;
@@ -195,7 +213,7 @@ function DrawActionList(actions, className, disabled = false) {
         if (disabled) {
             actionItem.disabled = "disabled";
         }
-        actionListContainer.appendChild(actionItem);
+        typeContainer.appendChild(actionItem);
     });
 }
 
@@ -204,7 +222,7 @@ function DrawPlayerActions() {
     const actions = currentInstance.actions;
     var currentPlayer = currentInstance.currentPlayer;
 
-    const actionsContainerComp = document.getElementById("player-actions-container");
+    const actionsContainerComp = document.getElementById("overlay-actions");
     if (!actions || actions.length == 0 || !currentPlayer || !currentPlayer.id) {
         console.log('# No actions to display');
         actionsContainerComp.hidden = true;
@@ -235,7 +253,6 @@ function DrawPlayerActions() {
 
     DrawActionList(playerActionsList, "player-actions-list");
     DrawActionList(otherPlayerActionsList, "player-other-actions-list", true);
-
 
     console.log('# Drawing player actions OK');
 }

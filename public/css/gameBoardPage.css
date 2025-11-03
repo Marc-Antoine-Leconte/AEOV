@@ -27,6 +27,55 @@ body {
     width: 60%;
     height: 100%;
     position: relative;
+    margin: 0px 1%;
+}
+
+.overlay-informations {
+    border: 5px solid #000000;
+    background-color: #0000006f;
+    border-radius: 10px;
+    padding: 0px;
+    width: 19%;
+    height: 100%;
+    position: relative;
+}
+
+.overlay-actions {
+    border: 5px solid #000000;
+    background-color: white;
+    border-radius: 10px;
+    padding: 0px;
+    width: 19%;
+    height: 100%;
+    position: relative;
+    overflow-y: scroll;
+}
+
+.overlay-actions h2 {
+    padding: 5px;
+    width: 100%;
+}
+
+.overlay-actions h3 {
+    padding: 5px;
+    width: 100%;
+}
+
+.overlay-actions button {
+    margin: 2px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2872a7;
+    color: white;
+    cursor: pointer;
+    width: 80%;
+}
+
+.overlay-actions button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
 }
 
 .overlay-close-button {
@@ -178,14 +227,14 @@ body {
 }
 
 .pin-point-button img {
-    width: 30px;
-    height: 30px;
+    width: 3vw;
+    height: 3vw;
     position: relative;
 }
 
 .pin-point-button .city-point-image {
-    width: 50px;
-    height: 50px;
+    width: 5vw;
+    height: 5vw;
 }
 
 .pin-point-button p {

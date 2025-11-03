@@ -75,6 +75,7 @@ block content
           img(src="/images/game-map-image.png")
 
         div(id="city-overlay", class="overlay")
+          div(class="overlay-informations")
           div(class="overlay-content")
             img(class="overlay-background-image", id="overlay-background-image", src="/images/city-background.png")
             span(class="overlay-close-button", id="close-city-overlay") ×
@@ -83,6 +84,11 @@ block content
               p(id="city-description") Description de la ville
             div(id="city-buildings-grid")
             div(id="building-wall-container")
+          div(class="overlay-actions", id="overlay-actions")
+            h2 Actions
+            div(id="player-actions-list")
+            h2 Actions bloquées
+            div(id="player-other-actions-list")
 
       div(id="game-board-zoom-controls")
         button(id="zoom-in-button") +
@@ -91,12 +97,6 @@ block content
     div(id="game-board-controls", hidden=true)
       h1 Actions
       button(type='button', id='end-turn-button') Terminer le tour
-      
-      div(id="player-actions-container", hidden=true)
-        h2 Mes actions possibles
-        div(id="player-actions-list")
-        h2 Autres actions impossibles
-        div(id="player-other-actions-list")
 
     div(id="game-log", hidden=true)
       h2 Journal d'évènements

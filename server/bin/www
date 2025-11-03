@@ -157,7 +157,7 @@ io.on('connection', (socket) => {
         io.to(socketId).emit('updateInstanceStatus', {});
         console.log('emission done to : ', visitor.name)
       } else {
-        console.log('skip sending a message to the player himself : ')
+        console.log('skip sending a message to the player himself')
       }
     }
     });

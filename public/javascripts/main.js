@@ -111,6 +111,12 @@ function postGameActions(actions) {
     return postGameActionsToAPI(actions, playerId, instanceId);
 }
 
+function setPlayerEndTurn() {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return setPlayerEndTurnToAPI(instanceId, playerId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

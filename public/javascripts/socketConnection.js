@@ -33,9 +33,17 @@ const ownerStartGameSocket = () => {
     });
 }
 
+const setPlayerActionSocket = () => {
+    socket.emit("playerAction", {
+        instanceId: getCookie("currentInstanceId"),
+    });
+    fetchAndDrawBoardScreen();
+}
+
 const setEndTurnSocket = () => {
     socket.emit("endTurn", {
         instanceId: getCookie("currentInstanceId"),
     });
+    fetchAndDrawBoardScreen();
 }
 

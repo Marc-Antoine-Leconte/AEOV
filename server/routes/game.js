@@ -1,11 +1,12 @@
 var express = require('express');
 const { getPlayerById } = require('../controllers/playerController');
-const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer } = require('../controllers/instancePlayerController');
+const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer, updateInstancePlayerTurnStatus } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 const { getAllActions } = require('../controllers/actionController');
 const { createLocation, getLocationsByInstanceId, updateLocationByInstanceAndPoint } = require('../controllers/locationController');
 const { stringListToMap, mapToString } = require('../tool/helper');
-const { array } = require('joi');
+const { getPublicInstancePlayerData, getPublicInstancePlayerDataList } = require('../tool/dataFormatHelper');
+
 var router = express.Router();
 
 /* GET render game board page. */
@@ -222,16 +223,7 @@ router.post('/info', async function (req, res, next) {
 
     const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
 
-    playersData[id] = {
-      playerName: playerData.name,
-      civilization: element.civilization,
-      color: element.color,
-      isOwner: (element.playerId == instance.ownerId),
-      isCurrentPlayer: (playerData.id == instance.currentPlayerId),
-      isUser: (playerData.id == playerId),
-      buildings: element.buildings,
-      armyPosition: element.armyPosition,
-    };
+    playersData[id] = getPublicInstancePlayerData({ ...element.dataValues, ...playerData.dataValues}, instance, player);
     id++;
   }
 
@@ -544,6 +536,68 @@ router.post('/play', async function (req, res, next) {
   });
 
   return res.status(200).json({ updatedUser, failureMessages });
+});
+
+/* POST set Player ready to play. */
+router.post('/endTurn', async function (req, res, next) {
+  const { instanceId, playerId } = req.body;
+  console.log('# End of turn');
+
+  const player = await getPlayerById(req, res, false);
+  if (!player) {
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
+  }
+
+  const playerInstance = await getInstancePlayerByPlayerAndInstance(req, res, false);
+  if (!playerInstance) {
+    console.log('Player not playing in this instance');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not playing in this instance"
+    });
+  }
+
+  const instance = await getInstanceById(req, res, false);
+  if (!instance) {
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
+  }
+
+  await updateInstancePlayerTurnStatus({ ...req, body: { ...req.body, endTurn: true } }, res, false);
+
+  var allPlayerInstances = await getInstancePlayersByInstanceId(req, res, false);
+
+  var somePlayerArePlaying = false;
+  allPlayerInstances.forEach(element => {
+    if (element.endTurn == false) {
+      somePlayerArePlaying = true;
+    }
+  });
+
+  if (somePlayerArePlaying) {
+    console.log('Some player did not finished their turns yet');
+    return res.status(200).json({ok: true});
+  }
+
+  // All players have ended their turn, reset for next turn
+    allPlayerInstances.forEach(async (element) => {
+      element.endTurn = false;
+
+      // reset base resources
+      element.population = element.maxPopulation;
+      element.tool = element.maxTool;
+      element.armyMovementPoints = element.maxArmyMovementPoints;
+      await updateInstancePlayerByServer({ ...req, body: element.dataValues }, res, false);
+    });
+
+    return res.status(200).json({ok: true});
 });
 
 module.exports = router;

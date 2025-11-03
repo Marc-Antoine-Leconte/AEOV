@@ -26,6 +26,10 @@ function model(sequelize) {
             type: DataTypes.STRING(100),
             allowNull: true,
             defaultValue: '[]'
+        },
+        type: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
         }
     };
 

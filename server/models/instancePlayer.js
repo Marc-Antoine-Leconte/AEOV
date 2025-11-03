@@ -112,6 +112,11 @@ function model(sequelize) {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1,
+        },
+        endTurn: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
         }
     };
 
