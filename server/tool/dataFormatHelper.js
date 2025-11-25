@@ -15,6 +15,9 @@ export const getPublicInstancePlayerData = (instancePlayerData, instanceData, cu
         endTurn: dataValues.endTurn,
         army: dataValues.army,
         food: dataValues.food,
+        market: dataValues.market,
+        marketIsOpen: dataValues.marketIsOpen,
+        instancePlayerId: dataValues.id,
     }
     return result;
 }

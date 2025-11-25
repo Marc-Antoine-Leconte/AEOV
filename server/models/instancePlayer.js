@@ -117,6 +117,16 @@ function model(sequelize) {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
+        },
+        market: {
+            type: DataTypes.STRING(1000),
+            allowNull: false,
+            defaultValue: '[]',
+        },
+        marketIsOpen: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
         }
     };
 

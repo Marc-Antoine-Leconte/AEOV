@@ -77,9 +77,9 @@ block content
         div(id="city-overlay", class="overlay")
           div(class="overlay-informations")
           div(class="overlay-content")
-            img(class="overlay-background-image", id="overlay-background-image", src="/images/city-background.png")
+            img(class="overlay-background-image", id="overlay-background-image-city", src="/images/city-background.png")
             span(class="overlay-close-button", id="close-city-overlay") ×
-            div(class="city-informations")
+            div(class="overlay-inner-informations")
               h2(id="city-name") Nom de la ville
               p(id="city-description") Description de la ville
             div(id="city-buildings-grid")
@@ -90,13 +90,22 @@ block content
             h2 Actions bloquées
             div(id="player-other-actions-list")
 
+        div(id="market-overlay", class="overlay")
+          div(class="overlay-content")
+            img(class="overlay-background-image", id="overlay-background-image-market", src="/images/city-background.png")
+            span(class="overlay-close-button", id="close-market-overlay") ×
+            div(class="overlay-inner-informations")
+              h2(id="market-title") Nom de la ville
+              p(id="market-description") Description de la ville
+            div(id="market-grid")
+
       div(id="game-board-zoom-controls")
         button(id="zoom-in-button") +
         button(id="zoom-out-button") -
 
       div(id="game-board-controls", hidden=true)
         button(type='button', id='end-turn-button') Terminer le tour
-        button(type='button', id='market-button') Marché
+        button(type='button', id='visit-market-action-button') Marché
 
     div(id="game-log", hidden=true)
       h2 Journal d'évènements

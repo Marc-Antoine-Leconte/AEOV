@@ -220,6 +220,44 @@ class InstancePlayerController {
         }
     }
 
+    updateInstancePlayerMarket = async (req, res, allowTransmit = true) => {
+        console.log('@updateInstancePlayerMarket req => ', req.body);
+
+        console.log('-----------------market data to update => ', req.body);
+        try {
+            const existingInstancePlayer = await this.getInstancePlayerByPlayerAndInstance(req, res, false);
+            if (!existingInstancePlayer) {
+               if (allowTransmit) {
+                   return res.status(404).json({
+                       statusCode: 404,
+                       message: "InstancePlayer not found."
+                   });
+               }
+               return;
+            }
+            const instancePlayer = await InstancePlayer.update({ marketIsOpen: !!req.body.marketIsOpen, market: req.body.market }, {
+                where: {
+                    playerId: req.body.playerId,
+                    instanceId: req.body.instanceId
+                }
+            });
+            if (allowTransmit) {
+                res.json(instancePlayer);
+            }
+            return instancePlayer;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
     updateInstancePlayerTurnStatus = async (req, res, allowTransmit = true) => {
         console.log('@updateInstancePlayerTurnStatus req => ', req.body);
         try {

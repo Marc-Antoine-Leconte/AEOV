@@ -14,12 +14,13 @@ function fetchAndDrawBoardScreen() {
         currentInstance.currentPlayer = response.data.currentPlayer;
         currentInstance.locations = response.data.locations;
 
+        // Add player building to player data
         const playerBuildings = currentInstance.currentPlayer.buildings.split(",").reduce((map, item) => {
-                const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                const [key, value] = trimmedItem.split(":");
-                map[key] = value;
-                return map;
-            }, {});
+            const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+            const [key, value] = trimmedItem.split(":");
+            map[key] = value;
+            return map;
+        }, {});
 
         Object.entries(playerBuildings).forEach(([key, value]) => {
             if (currentInstance.currentPlayer[key] == null) {
@@ -46,7 +47,6 @@ function fetchAndDrawBoardScreen() {
                 }
             });
         });
-
 
         console.log('||> Current Instance Data:', currentInstance);
         const instanceDataErrorComp = document.getElementById("game-board-instance-data-error-message");

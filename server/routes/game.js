@@ -1,6 +1,6 @@
 var express = require('express');
 const { getPlayerById } = require('../controllers/playerController');
-const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer, updateInstancePlayerTurnStatus } = require('../controllers/instancePlayerController');
+const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer, updateInstancePlayerTurnStatus, updateInstancePlayerMarket } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 const { getAllActions } = require('../controllers/actionController');
 const { createLocation, getLocationsByInstanceId, updateLocationByInstanceAndPoint } = require('../controllers/locationController');
@@ -532,6 +532,9 @@ router.post('/play', async function (req, res, next) {
   allPlayerInstances.forEach((element, id) => {
     if (element.playerId != instancePlayer.playerId) {
       updateInstancePlayerByServer({ body: { ...element.dataValues } }, res, false);
+    } else {
+      allPlayerInstances[id].army = updatedUser.army;
+      allPlayerInstances[id].food = updatedUser.food;
     }
   });
 
@@ -610,6 +613,41 @@ router.post('/endTurn', async function (req, res, next) {
     });
 
     return res.status(200).json({ok: true});
+});
+
+/* GET all possible actions for a player. */
+router.post('/marketUpdate', async function (req, res, next) {
+  const { instanceId, playerId } = req.body;
+  console.log('# Update market for player');
+
+  const player = await getPlayerById(req, res, false);
+  if (!player) {
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
+  }
+
+  const playerInstance = await getInstancePlayerByPlayerAndInstance(req, res, false);
+  if (!playerInstance) {
+    console.log('Player not playing in this instance');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not playing in this instance"
+    });
+  }
+
+  const instance = await getInstanceById(req, res, false);
+  if (!instance) {
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
+  }
+
+  return await updateInstancePlayerMarket(req, res, false);
 });
 
 module.exports = router;

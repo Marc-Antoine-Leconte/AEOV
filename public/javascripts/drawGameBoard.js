@@ -18,9 +18,21 @@ function onEndTurnButtonClick() {
     });
 }
 
+function onVisitMarketButtonClick(index = null) {
+    console.log('Visit Market button clicked');
+    currentInstance.screen.layout = 'market';
+    currentInstance.screen.selectedCity = index;
+    DrawMarketOverlay();
+}
+
 function setEndTurnButtonListener() {
     const endTurnBtn = document.getElementById("end-turn-button");
     endTurnBtn.addEventListener('click', onEndTurnButtonClick);
+}
+
+function setVisitMarketButtonListener() {
+    const visitMarketBtn = document.getElementById("visit-market-action-button");
+    visitMarketBtn.addEventListener('click', () => onVisitMarketButtonClick(null));
 }
 
 function DrawControls() {
@@ -36,6 +48,7 @@ function DrawControls() {
     gameBoardControlsComp.hidden = false;
 
     setEndTurnButtonListener();
+    setVisitMarketButtonListener();
 }
 
 function DrawPlayerResources() {
@@ -85,7 +98,7 @@ function DrawPlayerResources() {
 
             resourceComp = document.createElement("span");
             resourceComp.id = `player-resource-${resource}`;
-            
+
             resourceCompContainer.appendChild(resourceCompImageContainer);
             resourceCompContainer.appendChild(resourceComp);
             playerResourcesComp.appendChild(resourceCompContainer);
@@ -180,7 +193,7 @@ function DrawInstanceData() {
     console.log('# Draw of Instance Data OK');
 }
 
-function DrawActionList(actions, className, disabled = false) { 
+function DrawActionList(actions, className, disabled = false) {
     var actionListContainer = document.getElementById(className);
     if (!actionListContainer) {
         const actionsContainerComp = document.getElementById("overlay-actions");
@@ -200,7 +213,7 @@ function DrawActionList(actions, className, disabled = false) {
             const typeTitle = document.createElement("h3");
             typeTitle.innerHTML = action.type;
             typeContainer.appendChild(typeTitle);
-            
+
             actionListContainer.appendChild(typeContainer);
         }
 
@@ -236,12 +249,12 @@ function DrawPlayerActions() {
 
     console.log('currentInstance.screen.layout => ', currentInstance.screen);
     if (currentInstance.screen.layout == 'city') {
-    console.log('currentInstance.playerList[currentInstance.screen.selectedCity] => ', currentInstance.playerList[currentInstance.screen.selectedCity - 1]);
+        console.log('currentInstance.playerList[currentInstance.screen.selectedCity] => ', currentInstance.playerList[currentInstance.screen.selectedCity - 1]);
         if (!currentInstance.playerList[currentInstance.screen.selectedCity - 1].isUser) {
             noActionsToDisplay = true;
         }
     } else if (currentInstance.screen.layout == 'location') {
-    console.log('currentInstance.locations[currentInstance.screen.selectedLocation] => ', currentInstance.locations[currentInstance.screen.selectedLocation - 1]);
+        console.log('currentInstance.locations[currentInstance.screen.selectedLocation] => ', currentInstance.locations[currentInstance.screen.selectedLocation - 1]);
         if (!currentInstance.locations[currentInstance.screen.selectedLocation - 1].isOwnedByUser) {
             noActionsToDisplay = true;
         }
@@ -392,8 +405,8 @@ function RefreshPinPoints() {
 function MoveArmyToPoint(pointId) {
     const action = currentInstance.actions[40 - 1]
     executeAction(action.id, { ...action.requiredBuildings, ...action.requiredResources }, action.effects, () => {
-            DrawPlayerActions();
-            DrawPlayerResources();
+        DrawPlayerActions();
+        DrawPlayerResources();
     }, pointId)
 }
 
@@ -458,7 +471,7 @@ function DrawPinPoints() {
         pinPointActions.className = "pin-point-actions";
         pinPointActions.id = `player-pin-point-actions-${index}`;
         pinPointActions.style.display = "none";
-        
+
         const pinPointVisitAction = document.createElement("button");
         pinPointVisitAction.className = "pin-point-visit-action";
         pinPointVisitAction.id = `player-pin-point-visit-action-${index}`;
@@ -469,6 +482,14 @@ function DrawPinPoints() {
                 currentInstance.screen.selectedCity = index + 1;
                 DrawCityOverlay();
             }
+        });
+
+        const pinPointMarketAction = document.createElement("button");
+        pinPointMarketAction.className = "pin-point-market-action";
+        pinPointMarketAction.id = `player-pin-point-market-action-${index}`;
+        pinPointMarketAction.innerText = "Marché";
+        pinPointMarketAction.addEventListener('click', () => {
+            onVisitMarketButtonClick(index + 1);
         });
 
         const pinPointArmyAction = document.createElement("button");
@@ -485,6 +506,7 @@ function DrawPinPoints() {
         }
 
         pinPointActions.appendChild(pinPointVisitAction);
+        pinPointActions.appendChild(pinPointMarketAction);
         pinPointActions.appendChild(pinPointArmyAction);
 
         pinPointDiv.appendChild(pinPointImg);
@@ -535,7 +557,7 @@ function DrawPinPoints() {
         pinPointActions.className = "pin-point-actions";
         pinPointActions.id = `pin-point-actions-${index}`;
         pinPointActions.style.display = "none";
-        
+
         const pinPointVisitAction = document.createElement("button");
         pinPointVisitAction.className = "pin-point-visit-action";
         pinPointVisitAction.id = `pin-point-visit-action-${index}`;
@@ -623,7 +645,7 @@ function DrawCityOverlay() {
     if (currentInstance.screen.selectedCity) {
         const selectedCityIndex = currentInstance.screen.selectedCity - 1;
         const currentUser = currentInstance.playerList[selectedCityIndex];
-        
+
         cityData.name = "Ville de " + currentUser.playerName;
         cityData.description = "Civilisation : " + currentUser.civilization;
         cityData.buildingList = currentUser.buildings;
@@ -652,7 +674,7 @@ function DrawCityOverlay() {
     const cityNameComp = document.getElementById("city-name");
     cityNameComp.innerText = cityData.name;
 
-    const backgroundDiv = document.getElementById("overlay-background-image");
+    const backgroundDiv = document.getElementById("overlay-background-image-city");
     backgroundDiv.src = cityData.background;
 
     const cityDescription = document.getElementById("city-description");
@@ -720,15 +742,331 @@ function DrawCityOverlay() {
     console.log("# Drawing city overlay OK");
 }
 
+function toggleMarketLock(playerId) {
+    const marketIsOpen = currentInstance.playerList[playerId].marketIsOpen;
+    const newMarketStatus = !marketIsOpen;
+
+    console.log('market to update => ', currentInstance.playerList[playerId].market);
+    setMarketData(newMarketStatus, currentInstance.playerList[playerId].market);
+    currentInstance.playerList[playerId].marketIsOpen = newMarketStatus;
+}
+
+function AddItemToMarket(item, price, quantity, currency, slotId) {
+    if (currentInstance.currentPlayer[item] < quantity) {
+        return false;
+    }
+
+    currentInstance.currentPlayer[item] -= quantity;
+    var marketItems = JSON.parse(currentInstance.playerList[slotId].market);
+    var itemObject = {item, price, quantity, currency}
+    marketItems.push(itemObject);
+    currentInstance.playerList[slotId].market = JSON.stringify(marketItems);
+    return true;
+}
+
+function DrawMarketOverlay() {
+    const marketLayout = document.getElementById("market-overlay");
+
+    if (!['market'].includes(currentInstance.screen.layout)) {
+        marketLayout.style.display = "none";
+        console.log('# No market overlay to display')
+        return;
+    }
+
+    console.log("# Drawing market overlay...");
+
+    marketLayout.style.display = "flex";
+    const closeMarketOverlayBtn = document.getElementById("close-market-overlay");
+    closeMarketOverlayBtn.addEventListener('click', () => {
+        {
+            currentInstance.screen.layout = null;
+            currentInstance.screen.selectedCity = null;
+            currentInstance.screen.selectedLocation = null;
+            DrawGameBoardScreen();
+        }
+    });
+
+    var currentUserIndex = null;
+    if (currentInstance.screen.selectedCity == null) {
+        currentUserIndex = currentInstance.playerList.findIndex(player => player.isUser);
+        console.log('currentUserIndex by isUser => ', currentUserIndex);
+    } else {
+        currentUserIndex = currentInstance.screen.selectedCity - 1;
+    }
+
+    console.log('currentUserIndex => ', currentUserIndex);
+
+    const marketPlayer = currentInstance.playerList[currentUserIndex];
+    console.log('marketPlayer => ', marketPlayer);
+
+    var marketPlayerList = [];
+    marketPlayerList.push(marketPlayer);
+
+    if (currentInstance.screen.selectedCity == null) {
+        currentInstance.playerList.forEach((player) => {
+            if (!player.isUser) {
+                marketPlayerList.push(player);
+            }
+        });
+    }
+
+    const marketGrid = document.getElementById("market-grid");
+    marketGrid.innerHTML = '';
+
+    const cityNameComp = document.getElementById("market-title");
+    cityNameComp.innerText = "Marché";
+
+    const backgroundDiv = document.getElementById("overlay-background-image-market");
+    backgroundDiv.src = "/images/city-background.png";
+
+    const cityDescription = document.getElementById("market-description");
+    cityDescription.innerText = "coley coley coley ...";
+
+    Object.entries(marketPlayerList).forEach(([index, player]) => {
+        var playerMarketDiv = document.createElement("div");
+        playerMarketDiv.className = "player-market";
+        playerMarketDiv.id = `player-market-${index}`;
+
+        const buildingList = player.buildings.split(",").reduce((map, item) => {
+            const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
+            const [key, value] = trimmedItem.split(":");
+            map[key] = value;
+            return map;
+        }, {});
+
+        var maxAvailableMarketSlots = 0;
+        if (buildingList["market"]) {
+            maxAvailableMarketSlots = 3 + parseInt(buildingList["market"]) - 1;
+        }
+
+        const marketItems = JSON.parse(player.market);
+        console.log('marketItems => ', marketItems);
+
+        var slotCount = 0;
+
+        const editionMode = player.isUser && !player.marketIsOpen;
+
+        for (let slotId = 0; slotId < maxAvailableMarketSlots; slotId++) {
+            const slot = marketItems[slotId];
+            console.log('slot => ', slotId);
+            if (!slot || slotCount >= maxAvailableMarketSlots) {
+                console.log('Skipping');
+                continue;
+            }
+            slotCount += 1;
+
+            const slotItem = document.createElement("div");
+            slotItem.className = "slot-item" + (editionMode ? " editable-slot-item" : " non-editable-slot-item");
+            slotItem.id = `slot-${slotId}`;
+
+            if (editionMode) {
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete-market-item-button";
+                deleteButton.innerText = "X";
+                slotItem.appendChild(deleteButton);
+                deleteButton.addEventListener('click', () => {
+                    const marketItems = JSON.parse(player.market);
+                    const marketItem = marketItems[slotId];
+                    marketItems.splice(slotId, 1);
+                    player.market = JSON.stringify(marketItems);
+                    currentInstance.currentPlayer[marketItem.item] += parseInt(marketItem.quantity);
+                    DrawGameBoardScreen();
+                });
+            }
+
+            const marketItem = document.createElement("div");
+            marketItem.className = "market-item";
+            marketItem.id = `market-${slotId}`;
+
+            const marketItemImage = document.createElement("img");
+            marketItemImage.src = `/images/resources/${slot.item.toLowerCase()}.png`;
+            marketItemImage.alt = slot.item;
+            marketItemImage.id = `market-item-image-${slotId}`;
+
+            const marketItemQuantity = document.createElement("span");
+            marketItemQuantity.innerHTML = " x " + slot.quantity;
+            marketItemQuantity.alt = slot.item;
+            marketItemQuantity.id = `market-item-quantity-${slotId}`;
+            
+            marketItem.appendChild(marketItemImage);
+            marketItem.appendChild(marketItemQuantity);
+
+            const marketPriceItem = document.createElement("div");
+            marketPriceItem.className = "market-price-item";
+            marketPriceItem.id = `market-price-${slotId}`;
+
+            const marketPriceItemImage = document.createElement("img");
+            marketPriceItemImage.src = `/images/resources/${slot.currency.toLowerCase()}.png`;
+            marketPriceItemImage.alt = slot.item;
+
+            const marketPriceItemQuantity = document.createElement("span");
+            marketPriceItemQuantity.innerHTML = " x " + slot.price;
+            marketPriceItemQuantity.alt = slot.item;
+
+            marketPriceItem.appendChild(marketPriceItemImage);
+            marketPriceItem.appendChild(marketPriceItemQuantity);
+
+            slotItem.appendChild(marketItem);
+            slotItem.appendChild(marketPriceItem);
+
+            if (!editionMode) {
+                const buyButton = document.createElement("button");
+                buyButton.innerText = "Acheter 1 élément";
+
+                if (player.marketIsOpen) {
+                    buyButton.disabled = "disabled";
+                }
+                buyButton.addEventListener('click', () => {
+                    buyMarketItem(slotId, () => {
+                        DrawPlayerResources();
+                        DrawMarketOverlay();
+                    });
+                });
+                slotItem.appendChild(buyButton);
+            }
+
+            playerMarketDiv.appendChild(slotItem);
+        }
+
+        // empty slot
+        if (slotCount < maxAvailableMarketSlots && editionMode) {
+            console.log('Adding empty slot');
+            const emptySlotItem = document.createElement("div");
+            emptySlotItem.className = "slot-item empty-slot-item";
+            emptySlotItem.id = `empty-slot`;
+
+            // item to sell
+            const itemToSellLabel = document.createElement("label");
+            itemToSellLabel.htmlFor = `item-to-sell-select`;
+            itemToSellLabel.innerText = "Article à vendre : ";
+            emptySlotItem.appendChild(itemToSellLabel);
+            
+            const itemToSell = document.createElement("select");
+            itemToSell.id = `item-to-sell-select`;
+            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool"].forEach((resource) => {
+                const option = document.createElement("option");
+                option.value = resource;
+                option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
+                itemToSell.appendChild(option);
+            });
+            emptySlotItem.appendChild(itemToSell);
+
+            // quantity
+            const quantityLabel = document.createElement("label");
+            quantityLabel.htmlFor = `item-quantity-input`;
+            quantityLabel.innerText = "Quantité : ";
+            emptySlotItem.appendChild(quantityLabel);
+
+            const itemQuantity = document.createElement("input");
+            itemQuantity.type = "number";
+            itemQuantity.id = `item-quantity-input`;
+            itemQuantity.min = 1;
+            itemQuantity.value = 1;
+            emptySlotItem.appendChild(itemQuantity);
+
+            // currency
+            const currencyLabel = document.createElement("label");
+            currencyLabel.htmlFor = `item-price-input`;
+            currencyLabel.innerText = "Objet échangeable : ";
+            emptySlotItem.appendChild(currencyLabel);
+
+            const itemCurrency = document.createElement("select");
+            itemCurrency.id = `item-price-input`;
+            emptySlotItem.appendChild(itemCurrency);
+
+            itemCurrency.id = `item-price-select`;
+            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool"].forEach((resource) => {
+                const option = document.createElement("option");
+                option.value = resource;
+                option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
+                itemCurrency.appendChild(option);
+            });
+            emptySlotItem.appendChild(itemCurrency);
+
+            // price
+            const priceLabel = document.createElement("label");
+            priceLabel.htmlFor = `item-price-input`;
+            priceLabel.innerText = "Prix : ";
+            emptySlotItem.appendChild(priceLabel);
+
+            const itemPrice = document.createElement("input");
+            itemPrice.type = "number";
+            itemPrice.id = `item-price-input`;
+            itemPrice.min = 0;
+            itemPrice.value = 0;
+            emptySlotItem.appendChild(itemPrice);
+
+            // add button
+            const addButton = document.createElement("button");
+            addButton.innerText = "Ajouter l'article";
+            addButton.addEventListener('click', () => {
+                const selectedItem = itemToSell.value;
+                const price = itemPrice.value;
+                const quantity = itemQuantity.value;
+                const currency = itemCurrency.value;
+                if (AddItemToMarket(selectedItem, price, quantity, currency, index)) {
+                    DrawGameBoardScreen();
+                }
+            });
+            emptySlotItem.appendChild(addButton);
+            playerMarketDiv.appendChild(emptySlotItem);
+        }
+
+        // empty market message
+        if (slotCount == 0 && !player.isUser) {
+            const noItemComp = document.createElement("p");
+            noItemComp.innerText = "Aucun article en vente.";
+            playerMarketDiv.appendChild(noItemComp);
+        }
+
+        // market lock button
+        const marketLock = document.createElement("button");
+        marketLock.className = "market-lock";
+        marketLock.id = `market-lock`;
+
+        const marketLockImg = document.createElement("img");
+        if (player.marketIsOpen && player.isUser) {
+            marketLockImg.src = "/images/icons/edit-market.png";
+            marketLockImg.title = "Fermer le marché pour modifier les articles en vente"
+        } else if (editionMode) {
+            marketLockImg.src = "/images/icons/valid-market.png";
+            marketLockImg.title = "Ouvrir le marché pour le rendre visible aux autres joueurs"
+        } else if (player.marketIsOpen && !player.isUser) {
+            marketLockImg.src = "/images/icons/opened-lock.png";
+            marketLockImg.title = "Le marché du joueur est accessible"
+        } else if (!player.marketIsOpen && !player.isUser) {
+            marketLockImg.src = "/images/icons/closed-lock.png";
+            marketLockImg.title = "Le marché du joueur est fermé"
+        }
+        marketLock.appendChild(marketLockImg);
+
+        if (player.isUser) {
+            marketLock.addEventListener('click', () => {
+                toggleMarketLock(index);
+                DrawMarketOverlay();
+            });
+        } else {
+            marketLock.disabled = "disabled";
+        }
+        playerMarketDiv.appendChild(marketLock);
+
+        marketGrid.appendChild(playerMarketDiv);
+    });
+
+    DrawPlayerActions();
+
+    console.log("# Drawing market overlay OK");
+}
+
 function DrawPlayerArmy() {
     console.log('# Drawing player army...');
     const playerList = currentInstance.playerList;
 
-    if (!playerList) {
+    if (!playerList || playerList.length == 0) {
         console.log('# No player army to display');
         return;
     }
-    
+
     playerList.forEach((element, index) => {
         const oldArmyImg = document.getElementById(`player-army-${element.playerName}`);
         if (oldArmyImg != null) {
@@ -748,7 +1086,7 @@ function DrawPlayerArmy() {
         userArmy.style.borderColor = element.color;
         userArmy.src = "/images/" + element.civilization + "-army.jpg";
         userArmy.alt = `${element.playerName} ${element.civilization} army`;
-        userArmy.title = `Armée du joueur ${element.playerName}, Nombre de soldat : ${element.army}, famine : ${element.food < 0 ? 'Oui' : 'Non'}, puissance réelle : ${ element.food < 0 ? (element.army == 0 ? 0 : element.army / 2) : element.army }`;
+        userArmy.title = `Armée du joueur ${element.playerName}, Nombre de soldat : ${element.army}, famine : ${element.food < 0 ? 'Oui' : 'Non'}, puissance réelle : ${element.food < 0 ? (element.army == 0 ? 0 : element.army / 2) : element.army}`;
 
         if (element.armyPosition == -1) {
             const playerPinPoint = document.getElementById(`pin-point-player-${index}`);
@@ -790,6 +1128,7 @@ function DrawGameBoardScreen() {
     DrawPinPoints();
     DrawPlayerArmy();
     DrawCityOverlay();
+    DrawMarketOverlay();
 }
 
 DrawGameBoardScreen();

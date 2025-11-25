@@ -117,6 +117,12 @@ function setPlayerEndTurn() {
     return setPlayerEndTurnToAPI(instanceId, playerId);
 }
 
+function setMarketData(marketIsOpen, market) {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return setMarketDataToAPI(marketIsOpen, market, playerId, instanceId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");
