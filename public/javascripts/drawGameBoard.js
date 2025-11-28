@@ -75,6 +75,7 @@ function DrawPlayerResources() {
         "weapon",
         "horse",
         "army",
+        "siege",
         "treasure",
         "tool",
         "population",
@@ -502,7 +503,7 @@ function DrawPinPoints() {
             pinPointArmyAction.className = "pin-point-attack-action";
             pinPointArmyAction.id = `player-pin-point-attack-action-${index}`;
             pinPointArmyAction.innerText = "Attaquer";
-            pinPointArmyAction.addEventListener('click', () => MoveArmyToPoint("#" + index.toString()));
+            pinPointArmyAction.addEventListener('click', () => MoveArmyToPoint("#" + player.instancePlayerId.toString()));
         }
 
         pinPointActions.appendChild(pinPointVisitAction);
@@ -742,26 +743,63 @@ function DrawCityOverlay() {
     console.log("# Drawing city overlay OK");
 }
 
-function toggleMarketLock(playerId) {
-    const marketIsOpen = currentInstance.playerList[playerId].marketIsOpen;
+function toggleMarketLock(instancePlayerId) {
+    const playerIndex = currentInstance.playerList.findIndex(p => p.instancePlayerId === instancePlayerId);
+    const player = currentInstance.playerList[playerIndex];
+    const marketIsOpen = player.marketIsOpen;
     const newMarketStatus = !marketIsOpen;
 
-    console.log('market to update => ', currentInstance.playerList[playerId].market);
-    setMarketData(newMarketStatus, currentInstance.playerList[playerId].market);
-    currentInstance.playerList[playerId].marketIsOpen = newMarketStatus;
+    console.log('market to update => ', player.market);
+    setMarketData(newMarketStatus, player.market);
+    currentInstance.playerList[playerIndex].marketIsOpen = newMarketStatus;
 }
 
-function AddItemToMarket(item, price, quantity, currency, slotId) {
+function AddItemToMarket(item, price, quantity, currency, instancePlayerId) {
     if (currentInstance.currentPlayer[item] < quantity) {
+        console.error('# Not enough items to add to market');
+        return false;
+    }
+
+    if (price <= 0) {
+        console.error('# Price must be greater than zero');
+        return false;
+    }
+
+    if (quantity <= 0) {
+        console.error('# Quantity must be greater than zero');
         return false;
     }
 
     currentInstance.currentPlayer[item] -= quantity;
-    var marketItems = JSON.parse(currentInstance.playerList[slotId].market);
+    const playerIndex = currentInstance.playerList.findIndex(p => p.instancePlayerId === instancePlayerId);
+    var marketItems = JSON.parse(currentInstance.playerList[playerIndex].market);
     var itemObject = {item, price, quantity, currency}
     marketItems.push(itemObject);
-    currentInstance.playerList[slotId].market = JSON.stringify(marketItems);
+    currentInstance.playerList[playerIndex].market = JSON.stringify(marketItems);
     return true;
+}
+
+function buyMarketItem(slotId, instancePlayerId) {
+    const player = currentInstance.playerList.find(p => p.instancePlayerId === instancePlayerId);
+    const playerMarket = JSON.parse(player.market);
+    const marketItem = playerMarket[slotId];
+
+    if (currentInstance.currentPlayer[marketItem.currency] < marketItem.price) {
+        console.error('# Not enough currency to buy market item');
+        return false;
+    }
+
+    buyItemOnMarket(slotId, instancePlayerId).then((data) => {
+        if (data.error || data.message) {
+            console.error('# Error buying market item:', data.message);
+            return;
+        }
+        
+        currentInstance.currentPlayer[marketItem.currency] -= marketItem.price;
+        currentInstance.currentPlayer[marketItem.item] += 1;
+        DrawPlayerResources();
+        DrawMarketOverlay();
+    });
 }
 
 function DrawMarketOverlay() {
@@ -825,7 +863,7 @@ function DrawMarketOverlay() {
     Object.entries(marketPlayerList).forEach(([index, player]) => {
         var playerMarketDiv = document.createElement("div");
         playerMarketDiv.className = "player-market";
-        playerMarketDiv.id = `player-market-${index}`;
+        playerMarketDiv.id = `player-market-${player.instancePlayerId}`;
 
         const buildingList = player.buildings.split(",").reduce((map, item) => {
             const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
@@ -846,11 +884,10 @@ function DrawMarketOverlay() {
 
         const editionMode = player.isUser && !player.marketIsOpen;
 
+        // Draw slots with items
         for (let slotId = 0; slotId < maxAvailableMarketSlots; slotId++) {
             const slot = marketItems[slotId];
-            console.log('slot => ', slotId);
             if (!slot || slotCount >= maxAvailableMarketSlots) {
-                console.log('Skipping');
                 continue;
             }
             slotCount += 1;
@@ -909,18 +946,17 @@ function DrawMarketOverlay() {
             slotItem.appendChild(marketItem);
             slotItem.appendChild(marketPriceItem);
 
-            if (!editionMode) {
+            if (!editionMode && !player.isUser) {
                 const buyButton = document.createElement("button");
                 buyButton.innerText = "Acheter 1 élément";
+                buyButton.title = `Acheter 1 ${slot.item} pour ${slot.price} ${slot.currency}`;
 
-                if (player.marketIsOpen) {
-                    buyButton.disabled = "disabled";
+                if (!player.marketIsOpen) {
+                    buyButton.disabled = "disable";
+                    buyButton.title = `Le marché de ce joueur est fermé`;
                 }
                 buyButton.addEventListener('click', () => {
-                    buyMarketItem(slotId, () => {
-                        DrawPlayerResources();
-                        DrawMarketOverlay();
-                    });
+                    buyMarketItem(slotId, player.instancePlayerId);
                 });
                 slotItem.appendChild(buyButton);
             }
@@ -928,7 +964,7 @@ function DrawMarketOverlay() {
             playerMarketDiv.appendChild(slotItem);
         }
 
-        // empty slot
+        // Draw empty slot
         if (slotCount < maxAvailableMarketSlots && editionMode) {
             console.log('Adding empty slot');
             const emptySlotItem = document.createElement("div");
@@ -1004,7 +1040,7 @@ function DrawMarketOverlay() {
                 const price = itemPrice.value;
                 const quantity = itemQuantity.value;
                 const currency = itemCurrency.value;
-                if (AddItemToMarket(selectedItem, price, quantity, currency, index)) {
+                if (AddItemToMarket(selectedItem, price, quantity, currency, player.instancePlayerId)) {
                     DrawGameBoardScreen();
                 }
             });
@@ -1042,7 +1078,7 @@ function DrawMarketOverlay() {
 
         if (player.isUser) {
             marketLock.addEventListener('click', () => {
-                toggleMarketLock(index);
+                toggleMarketLock(player.instancePlayerId);
                 DrawMarketOverlay();
             });
         } else {

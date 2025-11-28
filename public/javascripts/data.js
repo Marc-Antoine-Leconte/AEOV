@@ -14,6 +14,7 @@ const gameActionsPath = "/game/actions";
 const gamePlayActionsPath = "/game/play";
 const endTurnPath = "/game/endTurn";
 const updateMarketPath = "/game/marketUpdate";
+const buyMarketItemPath = "/game/marketBuy";
 
 async function fetchDataFromAPI(url) {
   try {
@@ -132,4 +133,9 @@ async function setPlayerEndTurnToAPI(instanceId, playerId) {
 async function setMarketDataToAPI(marketIsOpen, market, playerId, instanceId) {
   const url = `${currentProtocol}${currentUrl}${updateMarketPath}`;
   return await postDataToAPI(url, { marketIsOpen, market, playerId, instanceId });
+}
+
+async function buyItemOnMarketFromAPI(slotId, instancePlayerId, playerId, instanceId) {
+  const url = `${currentProtocol}${currentUrl}${buyMarketItemPath}`;
+  return await postDataToAPI(url, { slotId, instancePlayerId, playerId, instanceId });
 }

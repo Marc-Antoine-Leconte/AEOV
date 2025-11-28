@@ -91,7 +91,7 @@ function model(sequelize) {
         buildings: {
             type: DataTypes.STRING(1000),
             allowNull: false,
-            defaultValue: '[crop:1, house:1]',
+            defaultValue: '[crop:1, house:1, stoneMine:1]',
         },
         treasure: {
             type: DataTypes.INTEGER,
@@ -127,7 +127,12 @@ function model(sequelize) {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
-        }
+        },
+        siege: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
     };
 
     const options = {

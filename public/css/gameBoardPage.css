@@ -118,12 +118,14 @@ body {
 
 #market-grid {
     width: 100%;
+    height: 80%;
     position: relative;
     display: flex;
-    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
     padding: 4vw;
+    overflow: hidden;
+    overflow-y: scroll;
 }
 
 .player-market {
@@ -170,6 +172,11 @@ body {
     background-color: #2872a7;
     color: white;
     cursor: pointer;
+}
+
+.slot-item button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
 }
 
 .market-lock {

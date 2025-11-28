@@ -123,6 +123,12 @@ function setMarketData(marketIsOpen, market) {
     return setMarketDataToAPI(marketIsOpen, market, playerId, instanceId);
 }
 
+function buyItemOnMarket(slotId, instancePlayerId) {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return buyItemOnMarketFromAPI(slotId, instancePlayerId, playerId, instanceId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

@@ -160,7 +160,7 @@ router.post('/start', async function (req, res, next) {
     village: { name: "Village", buildings: "[village:1]" },
   };
 
-  var mandatoryLocations = ["goldMine", "diamondMine", "ironMine", "stoneMine"];
+  var mandatoryLocations = ["goldMine", "diamondMine", "ironMine"];
   var uniqueLocations = ["diamondForge"];
   var otherLocations = ["pillagerVillage", "pound", "mercenaryVillage", "woodHut", "fair", "village"];
 
@@ -189,6 +189,7 @@ router.post('/start', async function (req, res, next) {
 /* POST get game info. */
 router.post('/info', async function (req, res, next) {
   const { playerId, instanceId } = req.body;
+  console.log('# Get Game INFO');
 
   const player = await getPlayerById(req, res, false);
   if (!player) {
@@ -223,7 +224,7 @@ router.post('/info', async function (req, res, next) {
 
     const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
 
-    playersData[id] = getPublicInstancePlayerData({ ...element.dataValues, ...playerData.dataValues}, instance, player);
+    playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
     id++;
   }
 
@@ -392,15 +393,21 @@ router.post('/play', async function (req, res, next) {
       Object.entries(effects).forEach(([key, value]) => {
         if (!value || !key)
           return;
+        const trimmedValue = value.trim();
+        const trimmedKey = key.trim();
 
-        if (key == "building") {
-          if (playerBuildingList[value] == null) {
-            playerBuildingList[value] = 1;
+        console.log('||||| Applying effect ', trimmedKey, ' => ', trimmedValue);
+        if (trimmedKey == "building") {
+          if (!playerBuildingList[trimmedValue]) {
+            console.log('||||| Adding building ', trimmedValue);
+            playerBuildingList[trimmedValue] = 1;
           } else {
-            playerBuildingList[value] = parseInt(playerBuildingList[value]) + 1;
+            console.log('||||| upgrading building ', trimmedValue);
+            console.log('||||| with value ', parseInt(playerBuildingList[trimmedValue]) + 1);
+            playerBuildingList[trimmedValue] = parseInt(playerBuildingList[trimmedValue]) + 1;
           }
         } else {
-          instancePlayer[key] = (instancePlayer[key] || 0) + parseInt(value);
+          instancePlayer[trimmedKey] = (instancePlayer[trimmedKey] || 0) + parseInt(trimmedValue);
         }
       });
 
@@ -409,7 +416,10 @@ router.post('/play', async function (req, res, next) {
         if (!value || !key || ['building'].includes(key))
           return;
 
-        instancePlayer[key] = (instancePlayer[key] || 0) - parseInt(value);
+        const trimmedValue = value.trim();
+        const trimmedKey = key.trim();
+
+        instancePlayer[trimmedKey] = (instancePlayer[trimmedKey] || 0) - parseInt(trimmedValue);
       });
 
       console.log('||||| instancePlayer after effects applied => ', instancePlayer);
@@ -423,20 +433,20 @@ router.post('/play', async function (req, res, next) {
           var attackOnPlayerBase = false;
 
           if (actionParam.startsWith("#")) { // Attacking an other player base
-            locationId = parseInt(actionParam.replace("#", ""));
+            locationId = parseInt(actionParam.replace("#", "")); // in this case location iD is playerInstance ID
             attackOnPlayerBase = true;
           } else {
             locationId = parseInt(actionParam);
           }
 
-          const contestedLocation = allLocations[actionParam];
           const contestant = allPlayerInstances.find(p => {
             if (attackOnPlayerBase) {
-              return p.armyPosition == -1 && p.playerId != player.id;
+              return p.id == locationId; // in this case location iD is playerInstance ID
             }
             return p.armyPosition == locationId && p.playerId != player.id;
           });
 
+          const contestedLocation = allLocations[actionParam];
           var fortificationForce = 0;
           var contestedLocationBuildings = null;
 
@@ -447,30 +457,45 @@ router.post('/play', async function (req, res, next) {
           }
 
           Object.entries(contestedLocationBuildings).forEach(([key, value]) => {
-            if (key == 'pillagerVillage' && value != null) {
-              fortificationForce += value * 2;
+            const trimmedKey = key.trim();
+            const trimmedValue = value;
+            
+            if (trimmedKey == 'pillagerVillage' && trimmedValue != null) {
+              fortificationForce += trimmedValue * 2;
             }
-            if (key == 'outpost' && value != null) {
-              fortificationForce += value * 2;
+            if (trimmedKey == 'outpost' && trimmedValue != null) {
+              fortificationForce += trimmedValue * 2;
             }
-            if (key == 'castle' && value != null) {
-              fortificationForce += value * 3;
+            if (trimmedKey == 'castle' && trimmedValue != null) {
+              fortificationForce += trimmedValue * 3;
             }
-            if (key == 'wall' && value != null) {
-              fortificationForce += value * 3;
+            if (trimmedKey == 'wall' && trimmedValue != null) {
+              fortificationForce += trimmedValue * 3;
             }
           });
 
           var localArmy = contestant?.army || 0;
+          if (attackOnPlayerBase && contestant.armyPosition != -1) {
+            localArmy = 0;
+          }
+
           if (localArmy != 0 && contestant.food < 0) {
             localArmy = localArmy / 2;
           }
+
+          if (instancePlayer.siege > 0) {
+            fortificationForce = 0;
+            instancePlayer.siege -= 1;
+          }
+
           const totalDefenseForce = localArmy + fortificationForce;
 
           // FIGHT
           if (totalDefenseForce >= instancePlayer.army) {
             if (contestant) {
-              contestant.army = instancePlayer.army >= contestant.army ? 0 : contestant.army - instancePlayer.army;
+              if (!attackOnPlayerBase || contestant.armyPosition == -1) {
+                contestant.army = instancePlayer.army >= contestant.army ? 0 : contestant.army - instancePlayer.army;
+              }
             }
             instancePlayer.army = 0;
             locationClaimed = false;
@@ -478,8 +503,10 @@ router.post('/play', async function (req, res, next) {
           } else {
             instancePlayer.army = instancePlayer.army - localArmy;
             if (contestant) {
-              contestant.army = 0;
-              contestant.armyPosition = -1;
+              if (!attackOnPlayerBase || contestant.armyPosition == -1) {
+                contestant.army = 0;
+                contestant.armyPosition = -1;
+              }
             }
           }
 
@@ -590,29 +617,29 @@ router.post('/endTurn', async function (req, res, next) {
 
   if (somePlayerArePlaying) {
     console.log('Some player did not finished their turns yet');
-    return res.status(200).json({ok: true});
+    return res.status(200).json({ ok: true });
   }
 
   // All players have ended their turn, reset for next turn
-    allPlayerInstances.forEach(async (element) => {
-      element.endTurn = false;
+  allPlayerInstances.forEach(async (element) => {
+    element.endTurn = false;
 
-      // reset base resources
-      element.population = element.maxPopulation;
-      element.tool = element.maxTool;
-      element.armyMovementPoints = element.maxArmyMovementPoints;
+    // reset base resources
+    element.population = element.maxPopulation;
+    element.tool = element.maxTool;
+    element.armyMovementPoints = element.maxArmyMovementPoints;
 
-      //consume food
-      element.food = element.food - element.maxPopulation - element.army;
+    //consume food
+    element.food = element.food - element.maxPopulation - element.army;
 
-      if (element.food < 0) {
-        element.food = -1;
-      }
+    if (element.food < 0) {
+      element.food = -1;
+    }
 
-      await updateInstancePlayerByServer({ ...req, body: element.dataValues }, res, false);
-    });
+    await updateInstancePlayerByServer({ ...req, body: element.dataValues }, res, false);
+  });
 
-    return res.status(200).json({ok: true});
+  return res.status(200).json({ ok: true });
 });
 
 /* GET all possible actions for a player. */
@@ -647,7 +674,128 @@ router.post('/marketUpdate', async function (req, res, next) {
     });
   }
 
+  const currentMarketItems = JSON.parse(playerInstance.market || "[]");
+  const newMarketItems = JSON.parse(req.body.market || "[]");
+
+  const maxSize = 3;
+
+  if (newMarketItems.length > maxSize) {
+    console.log('New market items exceed maximum size');
+    return res.status(400).json({
+      statusCode: 400,
+      message: "New market items exceed maximum size"
+    });
+  }
+
   return await updateInstancePlayerMarket(req, res, false);
+});
+
+router.post('/marketBuy', async function (req, res, next) {
+  const { slotId, instancePlayerId, playerId, instanceId } = req.body;
+  console.log('# Buy item from market');
+
+  const player = await getPlayerById(req, res, false);
+  if (!player) {
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
+  }
+
+  const playerInstance = await getInstancePlayerByPlayerAndInstance(req, res, false);
+  if (!playerInstance) {
+    console.log('Player not playing in this instance');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not playing in this instance"
+    });
+  }
+
+  const instance = await getInstanceById(req, res, false);
+  if (!instance) {
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
+  }
+
+  var instancePlayerList = await getInstancePlayersByInstanceId(req, res, false);
+
+  const sellingPlayerInstance = instancePlayerList.find(ip => ip.dataValues.id == instancePlayerId)?.dataValues;
+  if (!sellingPlayerInstance) {
+    console.log('Selling player not found in this instance');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Selling player not found in this instance"
+    });
+  }
+
+  if (playerInstance.id == sellingPlayerInstance.id) {
+    console.log('Player cannot buy his own item');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Player cannot buy his own item"
+    });
+  }
+
+  var marketItems = JSON.parse(sellingPlayerInstance.market);
+  console.log('Market items of the seller => ', marketItems);
+  console.log('slotId to buy => ', slotId);
+  const itemToBuy = marketItems.find((item, index) => index == slotId);
+  console.log('Item to buy => ', itemToBuy);
+  if (!itemToBuy) {
+    console.log('Item not found in market');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Item not found in market"
+    });
+  }
+
+  if (!itemToBuy.currency || !itemToBuy.price || !itemToBuy.item || !itemToBuy.quantity) {
+    console.log('Invalid item data');
+    return res.status(400).json({
+      statusCode: 400,
+      message: "Invalid item data"
+    });
+  }
+
+  if (playerInstance[itemToBuy.currency] < itemToBuy.price) {
+    console.log('Not enough resources to buy this item');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Not enough resources to buy this item"
+    });
+  }
+
+  if (sellingPlayerInstance[itemToBuy.item] < itemToBuy.quantity) {
+    console.log('Not enough items to sell');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Not enough items to sell"
+    });
+  }
+
+  // Proceed with the transaction
+  playerInstance[itemToBuy.currency] -= parseInt(itemToBuy.price);
+  playerInstance[itemToBuy.item] = (parseInt(playerInstance[itemToBuy.item]) || 0) + 1;
+
+  sellingPlayerInstance[itemToBuy.currency] = (parseInt(sellingPlayerInstance[itemToBuy.currency]) || 0) + parseInt(itemToBuy.price);
+  marketItems.forEach((item, index) => {
+    if (index == slotId) {
+      item.quantity -= 1;
+    }
+  });
+  sellingPlayerInstance.market = JSON.stringify(marketItems.filter(item => item.quantity > 0));
+
+  await updateInstancePlayerByServer({ body: { ...sellingPlayerInstance } }, res);
+  await updateInstancePlayerByServer({ body: { ...playerInstance } }, res);
+
+  return res.status(200).json({
+    statusCode: 200,
+    data: { playerInstance }
+  });
 });
 
 module.exports = router;
