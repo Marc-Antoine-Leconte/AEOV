@@ -227,9 +227,13 @@ function DrawActionList(actions, className, disabled = false) {
             DrawPlayerActions();
             DrawPlayerResources();
         }));
-        actionItem.title = Object.entries(requirements).reduce((str, [key, val]) => {
+        const requirementStr = Object.entries(requirements).reduce((str, [key, val]) => {
             return str + `${key}: ${val}, `;
         }, "Requis: ");
+        const effectStr = Object.entries(action.effects).reduce((str, [key, val]) => {
+            return str + `${key}: ${val}, `;
+        }, "Effets: ");
+        actionItem.title = requirementStr + "\n" + effectStr;
         if (disabled) {
             actionItem.disabled = "disabled";
         }
@@ -1110,19 +1114,30 @@ function DrawPlayerArmy() {
             const oldArmyLocation = oldArmyParent.id;
             if (oldArmyLocation == `pin-point-${element.armyPosition}` || (oldArmyLocation == `pin-point-player-${index}` && element.armyPosition == -1)) {
                 console.log('# Army already in correct position => ', oldArmyLocation);
+                oldArmyImg.title = `Armée du joueur ${element.playerName}, Nombre de soldat : ${element.army}, famine : ${element.food < 0 ? 'Oui' : 'Non'}, puissance réelle : ${element.food < 0 ? (element.army == 0 ? 0 : element.army / 2) : element.army}`;
+                oldArmyImg.querySelector(".player-army-count").innerText = element.army;
                 return;
             } else {
                 oldArmyImg.remove();
             }
         }
 
-        const userArmy = document.createElement("img");
-        userArmy.className = "player-army-image";
+        const userArmy = document.createElement("div");
+        userArmy.className = "player-army-container";
         userArmy.id = `player-army-${element.playerName}`;
-        userArmy.style.borderColor = element.color;
-        userArmy.src = "/images/" + element.civilization + "-army.jpg";
-        userArmy.alt = `${element.playerName} ${element.civilization} army`;
         userArmy.title = `Armée du joueur ${element.playerName}, Nombre de soldat : ${element.army}, famine : ${element.food < 0 ? 'Oui' : 'Non'}, puissance réelle : ${element.food < 0 ? (element.army == 0 ? 0 : element.army / 2) : element.army}`;
+
+        const userArmyImg = document.createElement("img");
+        userArmyImg.className = "player-army-image";
+        userArmyImg.style.borderColor = element.color;
+        userArmyImg.src = "/images/" + element.civilization + "-army.jpg";
+        userArmyImg.alt = `${element.playerName} ${element.civilization} army`;
+        userArmy.appendChild(userArmyImg);
+
+        const userArmyCount = document.createElement("span");
+        userArmyCount.className = "player-army-count";
+        userArmyCount.innerText = element.army;
+        userArmy.appendChild(userArmyCount);
 
         if (element.armyPosition == -1) {
             const playerPinPoint = document.getElementById(`pin-point-player-${index}`);
