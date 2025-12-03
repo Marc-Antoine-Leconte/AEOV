@@ -262,6 +262,61 @@ router.post('/info', async function (req, res, next) {
   });
 });
 
+/* POST get players info for the current game */
+router.post('/playersInfo', async function (req, res, next) {
+  const { playerId, instanceId } = req.body;
+  console.log('# Get Game INFO');
+
+  const player = await getPlayerById(req, res, false);
+  if (!player) {
+    console.log('Player not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player not found"
+    });
+  }
+
+  const instance = await getInstanceById(req, res, false);
+  if (!instance) {
+    console.log('Instance not found');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Instance not found"
+    });
+  }
+
+  const playerInstanceList = await getInstancePlayersByInstanceId(req, res, false);
+
+  var userFound = false;
+  var playersData = []
+  var id = 0;
+
+  for (const element of playerInstanceList) {
+    if (element.playerId == player.id) {
+      userFound = true;
+    }
+
+    const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
+
+    playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    id++;
+  }
+
+  if (!userFound) {
+    console.log('Player is not in this game');
+    return res.status(404).json({
+      statusCode: 404,
+      message: "Player is not in this game"
+    });
+  }
+
+  return res.status(200).json({
+    statusCode: 200,
+    message: "Success",
+    data: playersData
+  });
+});
+
 /* GET all possible actions for a player. */
 router.get('/actions', async function (req, res, next) {
   console.log('# Fetching actions');

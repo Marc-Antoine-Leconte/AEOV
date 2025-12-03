@@ -12,6 +12,7 @@ router.get('/list', async function (req, res) {
     await getAllAvailableInstances(req, res);
 });
 
+/* GET all instances for a user */
 router.post('/list/user', async function (req, res) {
     const player = await getPlayerById(req, res, false);
     if (!player) {

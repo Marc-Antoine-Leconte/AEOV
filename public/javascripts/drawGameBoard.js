@@ -378,6 +378,12 @@ function setReadyButtonListener() {
 }
 
 function RefreshPinPoints() {
+    console.log('# Refreshing pin points...');
+    if (currentInstance.data.gameState != 'inProgress') {
+        console.log('# Game is not in progress, skipping pin points refresh');
+        return;
+    }
+
     const playerList = currentInstance.playerList;
     const pinPoints = pinPointsMap;
     const gameMap = document.querySelector(".game-map");
@@ -390,21 +396,24 @@ function RefreshPinPoints() {
         const pinPointConquestActionBtn = document.getElementById(`pin-point-conquest-action-${index}`);
         const pinPointDefendActionBtn = document.getElementById(`pin-point-defend-action-${index}`);
         const pinPointLabel = document.getElementById(`pin-point-label-${index}`);
-        pinPointLabel.style.backgroundColor = location.ownerColor;
-        if (['purple', 'blue', 'red'].includes(location.ownerColor)) {
-            pinPointLabel.style.color = "white";
-        } else {
-            pinPointLabel.style.color = "black";
+        if (pinPointLabel) {
+            pinPointLabel.style.backgroundColor = location.ownerColor;
+            if (['purple', 'blue', 'red'].includes(location.ownerColor)) {
+                pinPointLabel.style.color = "white";
+            } else {
+                pinPointLabel.style.color = "black";
+            }
         }
 
-        if (location.isOwnedByUser) {
+        if (pinPointConquestActionBtn && location.isOwnedByUser) {
             pinPointConquestActionBtn.style.display = "none";
             pinPointDefendActionBtn.style.display = "block";
-        } else {
+        } else if (pinPointConquestActionBtn) {
             pinPointConquestActionBtn.style.display = "block";
             pinPointDefendActionBtn.style.display = "none";
         }
     });
+    console.log('# Refreshing pin points OK');
 }
 
 function MoveArmyToPoint(pointId) {
@@ -412,10 +421,17 @@ function MoveArmyToPoint(pointId) {
     executeAction(action.id, { ...action.requiredBuildings, ...action.requiredResources }, action.effects, () => {
         DrawPlayerActions();
         DrawPlayerResources();
+        setPlayerMoveArmySocket();
     }, pointId)
 }
 
 function DrawPinPoints() {
+    console.log('# Drawing pin points...');
+    if (currentInstance.data.gameState != 'inProgress') {
+        console.log('# Game is not in progress, skipping pin points drawing');
+        return;
+    }
+
     const playerList = currentInstance.playerList;
     var playerPinPoints = [];
     const pinPoints = pinPointsMap;
@@ -453,6 +469,9 @@ function DrawPinPoints() {
 
     playerPinPoints.forEach((point, index) => {
         const player = playerList[index];
+        if (!player.civilization) {
+            return;
+        }
 
         const pinPointDiv = document.createElement("div");
         pinPointDiv.className = "pin-point-button";
@@ -615,6 +634,8 @@ function DrawPinPoints() {
 
         gameMap.appendChild(pinPointDiv);
     });
+
+    console.log('# Drawing pin points OK');
 }
 
 function DrawCityOverlay() {
@@ -755,6 +776,7 @@ function toggleMarketLock(instancePlayerId) {
 
     console.log('market to update => ', player.market);
     setMarketData(newMarketStatus, player.market);
+    setPlayerUpdateMarketSocket();
     currentInstance.playerList[playerIndex].marketIsOpen = newMarketStatus;
 }
 
@@ -1059,6 +1081,13 @@ function DrawMarketOverlay() {
             playerMarketDiv.appendChild(noItemComp);
         }
 
+        // no slots at all message
+        if (maxAvailableMarketSlots == 0 && player.isUser) {
+            const noMarketComp = document.createElement("p");
+            noMarketComp.innerText = "Construisez un marché pour vendre des articles.";
+            playerMarketDiv.appendChild(noMarketComp);
+        }
+
         // market lock button
         const marketLock = document.createElement("button");
         marketLock.className = "market-lock";
@@ -1108,6 +1137,10 @@ function DrawPlayerArmy() {
     }
 
     playerList.forEach((element, index) => {
+        if (!element.civilization) {
+            return;
+        }
+
         const oldArmyImg = document.getElementById(`player-army-${element.playerName}`);
         if (oldArmyImg != null) {
             const oldArmyParent = oldArmyImg.parentElement
@@ -1141,10 +1174,14 @@ function DrawPlayerArmy() {
 
         if (element.armyPosition == -1) {
             const playerPinPoint = document.getElementById(`pin-point-player-${index}`);
-            playerPinPoint.appendChild(userArmy);
+            if (playerPinPoint) {
+                playerPinPoint.appendChild(userArmy);
+            }
         } else {
             const locationPinPoint = document.getElementById(`pin-point-${element.armyPosition}`);
-            locationPinPoint.appendChild(userArmy);
+            if (playerPinPoint) {
+                locationPinPoint.appendChild(userArmy);
+            }
         }
     });
 
@@ -1177,6 +1214,14 @@ function DrawGameBoardScreen() {
     DrawPlayerList();
     DrawGameBoard();
     DrawPinPoints();
+    DrawPlayerArmy();
+    DrawCityOverlay();
+    DrawMarketOverlay();
+}
+
+function DrawPlayersDataScreen() {
+    DrawPlayerResources();
+    DrawPlayerList();
     DrawPlayerArmy();
     DrawCityOverlay();
     DrawMarketOverlay();

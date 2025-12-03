@@ -10,6 +10,7 @@ const playerCreationPath = "/player/create";
 const ownerStartGamePath = "/game/start";
 const readyToPlayPath = "/game/readyToPlay";
 const gameInfoPath = "/game/info";
+const playersInfoPath = "/game/playersInfo";
 const gameActionsPath = "/game/actions";
 const gamePlayActionsPath = "/game/play";
 const endTurnPath = "/game/endTurn";
@@ -112,6 +113,11 @@ async function setPlayerReadyToPlayFromAPI(civilization, color, instanceId, play
 
 async function fetchGameInfoFromAPI(instanceId, playerId) {
   const url = `${currentProtocol}${currentUrl}${gameInfoPath}`;
+  return await postDataToAPI(url, { instanceId, playerId });
+}
+
+async function fetchPlayersInfoFromAPI(instanceId, playerId) {
+  const url = `${currentProtocol}${currentUrl}${playersInfoPath}`;
   return await postDataToAPI(url, { instanceId, playerId });
 }
 

@@ -9,19 +9,28 @@ function fetchAndDrawBoardScreen() {
     fetchGameInfo().then((response) => {
         console.log("# DisplayInstanceData - data =>", response);
 
+        const newPlayerList = response.data.players?.map(player => {
+            var newPlayerObj = { ...player };
+
+            if (currentInstance.playerList && currentInstance.playerList.length > 0) {
+                const oldPlayerObj = currentInstance.playerList.find(p => p.instancePlayerId === player.instancePlayerId);
+                if (oldPlayerObj) {
+                    if (oldPlayerObj.market != player.market && !player.marketIsOpen && player.isUser) {
+                        newPlayerObj.market = oldPlayerObj.market;
+                    }
+                }
+            }
+
+            return newPlayerObj;
+        });
+
         currentInstance.data = response.data.instance;
-        currentInstance.playerList = response.data.players;
+        currentInstance.playerList = newPlayerList;
         currentInstance.currentPlayer = response.data.currentPlayer;
         currentInstance.locations = response.data.locations;
 
         // Add player building to player data
-        const playerBuildings = currentInstance.currentPlayer.buildings.split(",").reduce((map, item) => {
-            const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-            const [key, value] = trimmedItem.split(":");
-            map[key] = value;
-            return map;
-        }, {});
-
+        const playerBuildings = stringToMap(currentInstance.currentPlayer.buildings);
         Object.entries(playerBuildings).forEach(([key, value]) => {
             if (currentInstance.currentPlayer[key] == null) {
                 currentInstance.currentPlayer[key] = value;
@@ -32,13 +41,8 @@ function fetchAndDrawBoardScreen() {
 
         const userLocations = currentInstance.locations.filter(location => location.isOwnedByUser);
         Object.entries(userLocations).forEach(([index, location]) => {
-            const locationBuildings = location.buildings.split(",").reduce((map, item) => {
-                const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                const [key, value] = trimmedItem.split(":");
-                map[key] = value;
-                return map;
-            }, {});
 
+            const locationBuildings = stringToMap(location.buildings);
             Object.entries(locationBuildings).forEach(([key, value]) => {
                 if (currentInstance.currentPlayer[key] == null) {
                     currentInstance.currentPlayer[key] = value;
@@ -72,28 +76,9 @@ function fetchAndDrawBoardScreen() {
             }
 
             const playerActions = response.map(action => {
-                const effects = action.effects.split(",").reduce((map, item) => {
-                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                    const [key, value] = trimmedItem.split(":");
-                    map[key] = value;
-                    return map;
-                }, {});
-
-                const requiredBuildings = action.requiredBuildings.split(",").reduce((map, item) => {
-                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                    const [key, value] = trimmedItem.split(":");
-                    map[key] = value;
-                    return map;
-                }, {});
-
-                const requiredResources = action.requiredResources.split(",").reduce((map, item) => {
-                    const trimmedItem = item.trim().replace("[", "").replace("]", "").replace(" ", "");
-                    const [key, value] = trimmedItem.split(":");
-                    if (key && value) {
-                        map[key] = value;
-                    }
-                    return map;
-                }, {});
+                const effects = stringToMap(action.effects);
+                const requiredBuildings = stringToMap(action.requiredBuildings);
+                const requiredResources = stringToMap(action.requiredResources);
 
                 return { ...action, effects, requiredBuildings, requiredResources };
             });
@@ -101,6 +86,37 @@ function fetchAndDrawBoardScreen() {
             currentInstance.actions = playerActions;
             DrawPlayerActions();
         });
+    });
+}
+
+function fetchAndDrawPlayersInfo() {
+    const instanceId = getCookie("currentInstanceId");
+
+    if (!instanceId) {
+        console.error('No instance ID found in cookies.');
+        return;
+    }
+
+    fetchPlayersInfo().then((response) => {
+        console.log("# DisplayPlayersInfo - data =>", response);
+
+        const newPlayerList = response.data?.map(player => {
+            var newPlayerObj = { ...player };
+
+            if (currentInstance.playerList && currentInstance.playerList.length > 0) {
+                const oldPlayerObj = currentInstance.playerList.find(p => p.instancePlayerId === player.instancePlayerId);
+                if (oldPlayerObj) {
+                    if (oldPlayerObj.market != player.market && !player.marketIsOpen && player.isUser) {
+                        newPlayerObj.market = oldPlayerObj.market;
+                    }
+                }
+            }
+
+            return newPlayerObj;
+        });
+
+        currentInstance.playerList = newPlayerList;
+        DrawPlayersDataScreen();
     });
 }
 

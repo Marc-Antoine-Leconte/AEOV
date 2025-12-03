@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
   // A VISITOR DISCONNECTS FROM THE SERVER
   socket.on('disconnect', (reason) => {
     console.log('user ' + socket.id + ":" + visitors[socket.id].name + ' disconnected :', reason);
-    
+
     delete visitors[socket.id]
   })
 
@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
     }
   });
 
- 
+  // A PLAYER IS READY TO START THE GAME
   socket.on('playerReadyToPlay', (data) => {
     console.log("[player Ready To Play]", socket.id)
     const currentPlayerId = visitors[socket.id].id;
@@ -108,9 +108,10 @@ io.on('connection', (socket) => {
     }
   });
 
-    socket.on('ownerStartGame', (data) => {
-      console.log("[owner start Game]")
-      const currentPlayerId = visitors[socket.id].id;
+  // THE OWNER OF THE GAME HAS STARTED THE GAME
+  socket.on('ownerStartGame', (data) => {
+    console.log("[owner start Game]")
+    const currentPlayerId = visitors[socket.id].id;
     if (!currentPlayerId) {
       console.log('player id not found', visitors)
       return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
@@ -133,11 +134,12 @@ io.on('connection', (socket) => {
         console.log('skip sending a message to the player himself : ')
       }
     }
-    });
+  });
 
-    socket.on('endTurn', (data) => {
-      console.log("[player ends his turn]")
-      const currentPlayerId = visitors[socket.id].id;
+  // A PLAYER HAS ENDED HIS TURN
+  socket.on('endTurn', (data) => {
+    console.log("[player ends his turn]")
+    const currentPlayerId = visitors[socket.id].id;
     if (!currentPlayerId) {
       console.log('player id not found', visitors)
       return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
@@ -160,10 +162,64 @@ io.on('connection', (socket) => {
         console.log('skip sending a message to the player himself')
       }
     }
-    });
-
-
   });
+
+  // A PLAYER HAS UPDATED HIS MARKET
+  socket.on('marketUpdate', (data) => {
+    console.log("[player updates his market]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('marketUpdate', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself')
+      }
+    }
+  });
+
+  // A PLAYER HAS MOVED HIS ARMY
+  socket.on('armyMove', (data) => {
+    console.log("[player moves his army]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('armyMove', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself')
+      }
+    }
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.

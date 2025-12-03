@@ -9,6 +9,16 @@ const joinInstanceSocket = () => {
         fetchAndDrawBoardScreen();
     });
 
+    socket.on('armyMove', () => {
+        console.log('-- Socket ping a user moved his army')
+        fetchAndDrawBoardScreen();
+    })
+
+    socket.on('marketUpdate', () => {
+        console.log('-- Socket ping a user updated his market')
+        fetchAndDrawPlayersInfo();
+    })
+
     socket.on('error', (message) => {
         console.error(message);
     });
@@ -45,5 +55,17 @@ const setEndTurnSocket = () => {
         instanceId: getCookie("currentInstanceId"),
     });
     fetchAndDrawBoardScreen();
+}
+
+const setPlayerUpdateMarketSocket = () => {
+    socket.emit("marketUpdate", {
+        instanceId: getCookie("currentInstanceId"),
+    });
+}
+
+const setPlayerMoveArmySocket = () => {
+    socket.emit("armyMove", {
+        instanceId: getCookie("currentInstanceId"),
+    });
 }
 

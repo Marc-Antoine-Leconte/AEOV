@@ -101,6 +101,12 @@ function fetchGameInfo() {
     return fetchGameInfoFromAPI(instanceId, playerId);
 }
 
+function fetchPlayersInfo() {
+    playerId = getCookie("currentPlayerId");
+    instanceId = getCookie("currentInstanceId");
+    return fetchPlayersInfoFromAPI(instanceId, playerId);
+}
+
 function fetchGameActions() {
     return fetchAllActionsFromAPI();
 }
