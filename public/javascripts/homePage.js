@@ -1,12 +1,44 @@
-function onJoinInstanceButtonClick() {
-    console.log (this);
-    const confirmed = confirm(`Do you want to join instance: ${this.value}?`);
-    
-    if (confirmed) {
-        console.log('Joining instance ', this.value)
-        console.log('joinging instance id ', this.id)
-        joinInstance(this.id)
+var selectedInstance = null;
+
+function onSelectInstanceButtonClick(instance) {
+    if (selectedInstance) {
+        const oldPlayerSelectedInstance = document.getElementById("player-list-instance-"+selectedInstance);
+        if (oldPlayerSelectedInstance) {
+            oldPlayerSelectedInstance.classList.remove("selected-instance");
+        }
+        const oldSelectedInstance = document.getElementById("list-instance-"+selectedInstance);
+        if (oldSelectedInstance) {
+            oldSelectedInstance.classList.remove("selected-instance");
+        }
     }
+
+    if (selectedInstance === instance) {
+        selectedInstance = null;
+        const joinInstanceBtn = document.getElementById("join-selected-instance-button");
+        joinInstanceBtn.disabled = true;
+        return;
+    }
+
+    selectedInstance = instance;
+    const newPlayerSelectedInstance = document.getElementById("player-list-instance-"+selectedInstance);
+    if (newPlayerSelectedInstance) {
+        newPlayerSelectedInstance.classList.add("selected-instance");
+    }
+
+    const newSelectedInstance = document.getElementById("list-instance-"+selectedInstance);
+    if (newSelectedInstance) {
+        newSelectedInstance.classList.add("selected-instance");
+    }
+
+    const joinInstanceBtn = document.getElementById("join-selected-instance-button");
+    if (joinInstanceBtn) {
+        joinInstanceBtn.disabled = false;
+    }
+}
+
+function onJoinInstanceButtonClick() {
+    console.log('joining instance id ', selectedInstance)
+    joinInstance(selectedInstance);
 }
 
 async function onCreateInstanceButtonClick() {
@@ -58,14 +90,16 @@ function DisplayInstanceList() {
         }
 
         data.forEach((instance) => {
-            const listItem = document.createElement("li");
+            const listItem = document.createElement("div");
+            listItem.className = "instance-list-item";
+
             const button = document.createElement("button");
             button.type = "button";
             button.className = "select-instance-button";
-            button.id = instance.id;
+            button.id = "list-instance-"+instance.id;
             button.value = instance.name;
-            button.textContent = instance.name;
-            button.addEventListener('click', onJoinInstanceButtonClick);
+            button.textContent = instance.name + "#" + instance.id;
+            button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
             listItem.appendChild(button);
             instanceList.appendChild(listItem);
@@ -103,14 +137,16 @@ function DisplayPlayerInstanceList() {
         }
 
         data.forEach((instance) => {
-            const listItem = document.createElement("li");
+            const listItem = document.createElement("div");
+            listItem.className = "instance-list-item";
+
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "select-player-instance-button";
-            button.id = instance.id;
+            button.className = "select-player-instance-button select-instance-button";
+            button.id = "player-list-instance-"+instance.id;
             button.value = instance.name;
-            button.textContent = instance.name;
-            button.addEventListener('click', onJoinInstanceButtonClick);
+            button.textContent = instance.name + "#" + instance.id;
+            button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
             listItem.appendChild(button);
             instanceList.appendChild(listItem);
@@ -126,9 +162,19 @@ function InitCreateInstanceButton() {
     createInstanceBtn.addEventListener('click', onCreateInstanceButtonClick);
 }
 
+function InitJoinInstanceButton() {
+    const joinInstanceBtn = document.getElementById("join-selected-instance-button");
+    if (!joinInstanceBtn) {
+        return;
+    }
+    joinInstanceBtn.disabled = true;
+    joinInstanceBtn.addEventListener('click', onJoinInstanceButtonClick);
+}
+
 DisplayInstanceList();
 DisplayPlayerInstanceList();
 InitCreateInstanceButton();
+InitJoinInstanceButton();
 setDisconnectButtonListener();
 DisplayUserInfo();
 

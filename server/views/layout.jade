@@ -2,7 +2,7 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel="stylesheet", href="css/style.css")
   body
     script(src='/javascripts/socket.io.min.js')
     script(src='/javascripts/cookie.js')
@@ -10,18 +10,22 @@ html
     script(src='/javascripts/main.js')
     script(src='/javascripts/data.js')
     
-    div(id="user-info-container")
-      p
-        span Joueur : 
-        span(id="user-name")
-      
-      p
-        span ID : 
-        span(id="user-id")
-      
-      p
-        span instance ID : 
-        span(id="instance-id")
+    div(id="navigation-bar")
+      h2(id="game-title") AEOV
+      div(id="right-navigation-bar")
+        div(id="user-info-container")
+          p
+            span Joueur : 
+            span(id="user-name")
+            #
+            span(id="user-id")
+          
+          p
+            span instance ID : 
+            span(id="instance-id")
+
+        button(type='button', id='disconnect-button')
+          img(src='/images/icons/disconnect.png', alt='Se déconnecter', width='15', height='15')
 
     block content
      

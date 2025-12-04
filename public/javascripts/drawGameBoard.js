@@ -1179,7 +1179,7 @@ function DrawPlayerArmy() {
             }
         } else {
             const locationPinPoint = document.getElementById(`pin-point-${element.armyPosition}`);
-            if (playerPinPoint) {
+            if (locationPinPoint) {
                 locationPinPoint.appendChild(userArmy);
             }
         }

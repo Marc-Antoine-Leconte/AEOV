@@ -6,6 +6,13 @@ function onGoToConnectionPageButtonClick() {
     redirectToUrl("/connection");
 }
 
+function hideHeader() {
+    const headerComp = document.getElementById("navigation-bar");
+    if (headerComp) {
+        headerComp.style.display = "none";
+    }
+}
+
 function InitIndexPage() {
     const currentId = getCookie("currentPlayerId");
     if (currentId && currentId != "" && !isNaN(currentId)) {
@@ -13,6 +20,8 @@ function InitIndexPage() {
         redirectToUrl("/home");
         return;
     }
+
+    hideHeader();
     console.log('Player is not connected, staying on menu page...');
 
     const connectionBtn = document.getElementById("go-to-connection-page-button");

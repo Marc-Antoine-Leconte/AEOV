@@ -1,9 +1,12 @@
 extends layout
 
 block content  
-  h1 Bienvenue au merveilleux jeu de <b>#{title}</b>
+  link(rel="stylesheet", href="css/index.css")
 
-  button(type='button', id='go-to-connection-page-button') Se connecter
-  button(type='button', id='go-to-subscribe-page-button') Créer un compte
+  div(class="menu-content-container")
+    h1 <b>#{title}</b>
+
+    button(type='button', id='go-to-connection-page-button', class='main-button') Se connecter
+    button(type='button', id='go-to-subscribe-page-button') Créer un compte
 
   script(src='/javascripts/index.js')

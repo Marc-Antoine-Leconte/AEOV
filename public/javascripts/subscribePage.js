@@ -36,7 +36,6 @@ function onSubscribeButtonClick() {
 
     subscribePlayer(userNameInput.value, userPwdInput.value).then((data) => {
         if (data && !data.errors && !data.error && data.id) {
-            alert("Connexion en tant que : " + data.name);
             setCookie("currentPlayerName", data.name, 1);
             setCookie("currentPlayerId", data.id, 1);
             redirectToUrl("/home");
@@ -57,6 +56,13 @@ function onSubscribeButtonClick() {
     });
 }
 
+function hideHeader() {
+    const headerComp = document.getElementById("navigation-bar");
+    if (headerComp) {
+        headerComp.style.display = "none";
+    }
+}
+
 function InitSubscribePage() {
     const currentId = getCookie("currentPlayerId");
     if (currentId && currentId != "" && !isNaN(currentId)) {
@@ -66,6 +72,8 @@ function InitSubscribePage() {
     }
     console.log('Player is not connected, staying on subscribe page...');
     
+    hideHeader();
+
     setGoBackToMenuButtonListener();
 
     const subscribeBtn = document.getElementById("subscribe-user-button");

@@ -1,13 +1,13 @@
 extends layout
 
 block content
-  h1= title
-  button(type='button', id='back-to-menu-button') Retour Menu
+  div(class="menu-content-container")
+    h1= title
 
-  p Se connecter
-  input(type="text", id="player-name-input", placeholder="Nom du joueur")
-  input(type="text", id="password-name-input", placeholder="Mot de passe")
-  button(type='button', id='connect-user-button') Se connecter
-  p(id="player-connect-error-message", hidden=true)
+    input(type="text", id="player-name-input", placeholder="Nom du joueur")
+    input(type="text", id="password-name-input", placeholder="Mot de passe")
+    button(type='button', id='connect-user-button', class='main-button') Se connecter
+    button(type='button', id='back-to-menu-button') Retour Menu
+    p(id="player-connect-error-message", hidden=true)
 
   script(src='/javascripts/connectionPage.js')

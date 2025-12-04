@@ -26,7 +26,6 @@ function onConnectionButtonClick() {
 
     authenticatePlayer(userNameInput.value, userPwdInput.value).then((data) => {
         if (data && !data.error && data.id) {
-            alert("Connexion en tant que : " + data.name);
             setCookie("currentPlayerName", data.name, 1);
             setCookie("currentPlayerId", data.id, 1);
             redirectToUrl("/home");
@@ -39,6 +38,13 @@ function onConnectionButtonClick() {
     });
 }
 
+function hideHeader() {
+    const headerComp = document.getElementById("navigation-bar");
+    if (headerComp) {
+        headerComp.style.display = "none";
+    }
+}
+
 function InitConnectionPage() {
     const currentId = getCookie("currentPlayerId");
     if (currentId && currentId != "" && !isNaN(currentId)) {
@@ -48,6 +54,7 @@ function InitConnectionPage() {
     }
     console.log('Player is not connected, staying on connection page...');
     
+    hideHeader();
     setGoBackToMenuButtonListener();
 
     const connectionBtn = document.getElementById("connect-user-button");
