@@ -140,6 +140,7 @@ function InitGameBoardPage() {
     joinInstanceSocket();
     setDisconnectButtonListener();
     setLeaveInstanceButtonListener();
+    setToggleInfoBarButtonListener();
     fetchAndDrawBoardScreen();
     DisplayUserInfo();
 }

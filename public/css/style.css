@@ -1,15 +1,17 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 50px;
+    padding-top: 0px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
-  color: #00B7FF;
+    color: #00B7FF;
 }
 
 @font-face {
-  font-family: "UnZialish";
-  src: url(/../font/UnZialish.ttf); /* url of the font */
+    font-family: "UnZialish";
+    src: url(/../font/UnZialish.ttf);
+    /* url of the font */
 }
 
 #game-title {
@@ -42,7 +44,8 @@ a {
     padding: 8px;
     border: none;
     cursor: pointer;
-    background-color: white;;
+    background-color: white;
+    ;
     border-radius: 15px;
 }
 
@@ -90,6 +93,7 @@ a {
 }
 
 input {
+    margin: 5px;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
@@ -98,9 +102,31 @@ input {
 }
 
 .base-button {
+    margin: 5px;
     transition: background-color 0.3s, color 0.3s;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 5px;
+}
+
+select {
+    margin: 5px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.menu-icon-button {
+    padding: 5px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-icon-button img {
+    display: block;
+    width: 15px;
+    height: 15px;
 }

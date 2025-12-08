@@ -30,6 +30,25 @@ function setLeaveInstanceButtonListener() {
     leaveInstanceBtn.addEventListener('click', onLeaveInstanceButtonClick);
 }
 
+function onToggleShowGameInfoButtonClick(event) {
+    const gameBoardInfo = document.getElementById("game-board-info");
+    const infoBarIsVisible = gameBoardInfo.checkVisibility();
+    const toggleButtonImage = document.getElementById("toggle-show-game-info-button-img");
+
+    if (infoBarIsVisible) {
+        gameBoardInfo.style.display = "none";
+        toggleButtonImage.src = "/images/icons/right-arrow.png";
+    } else {
+        gameBoardInfo.style.display = "flex";
+        toggleButtonImage.src = "/images/icons/left-arrow.png";
+    }
+}
+
+function setToggleInfoBarButtonListener() {
+    const toggleButton = document.getElementById("toggle-show-game-info-button");
+    toggleButton.addEventListener('click', onToggleShowGameInfoButtonClick);
+}
+
 function goToGameBoard(instanceId, instanceName) {
     console.log('Connecting to instance:', instanceName);
     console.log('Instance ID:', instanceId);

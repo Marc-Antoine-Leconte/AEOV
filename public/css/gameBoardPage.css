@@ -6,7 +6,11 @@
 body {
     display: grid;
     place-items: center;
-    min-height: 100vh;
+    padding: 0px;
+}
+
+#navigation-bar {
+    margin: 0px 50px !important;
 }
 
 .overlay {
@@ -270,6 +274,14 @@ body {
     cursor: pointer;
 }
 
+#game-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex-grow: 1;
+}
+
 .game-container {
     width: 80vw;
     height: 50vw;
@@ -430,4 +442,128 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+#game-board-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#instance-menu {
+    height: 30px;
+    border-bottom: solid black 2px;
+}
+
+#instance-information-container {
+    border-bottom: solid black 2px;
+}
+
+#game-board-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    position: relative;
+    padding-left: 10px;
+}
+
+#game-board-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-item-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    padding: 5px 0px;
+    border-bottom: solid black 1px;
+}
+
+.player-item-image-container {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    transform-origin: center;
+}
+
+.player-item-image {
+    width: 100% !important;
+    height: 100% !important;
+    transform-origin: center;
+    border: 3px solid;
+    border-radius: 50%;
+}
+
+.player-item-administrator-image {
+    height: 15px;
+    width: 15px;
+}
+
+.player-item-name-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.player-item-name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.player-item-status {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.player-item-status-playing {
+    color: orange;
+}
+
+.player-item-status-waiting {
+    color: green;
+}
+
+.player-item-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#toggle-show-game-info-button {
+    position: absolute;
+    top: 200px;
+    right: -30px;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#game-board-connection-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px;
+}
+
+#game-board-connection-container select {
+   width: 30%;
+}
+
+#game-board-loading-message {
+    margin: 20px;
+    font-size: 18px;
+    font-style: italic;
 }

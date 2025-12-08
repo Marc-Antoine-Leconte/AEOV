@@ -124,16 +124,13 @@ function DrawPlayerList() {
     const playerList = currentInstance.playerList;
     const instanceStatus = currentInstance.data;
 
-    const playerListContainerComp = document.getElementById("game-board-player-list-container");
     if (!instanceStatus || !instanceStatus.id) {
         console.log('# No need to draw player list');
-        playerListContainerComp.hidden = true;
         return;
     }
 
-    playerListContainerComp.hidden = false;
-
-    const playerListComp = document.getElementById("game-board-player-list");
+    const listName = "game-board-player-list";
+    const playerListComp = document.getElementById(listName);
     if (!playerListComp) {
         console.log('# No player list component found');
         return;
@@ -141,11 +138,69 @@ function DrawPlayerList() {
     playerListComp.innerHTML = '';
 
     playerList.forEach(element => {
-        const playerItem = document.createElement("li");
-        playerItem.className = "game-board-player-item";
-        playerItem.id = `player-${element.playerName}`;
-        const pendingMessages = element.endTurn ? " - <span style='color: orange; font-weight: bold;'>En attente de fin de tour</span>" : "";
-        playerItem.innerHTML = `${element.playerName} (${element.civilization}, ${element.color}) - ` + pendingMessages;
+        const playerItem = document.createElement("div");
+        playerItem.className = "player-item-container";
+
+        const playerImgContainer = document.createElement("div");
+        playerImgContainer.className = "player-item-image-container";
+        playerImgContainer.id = `player-item-${element.playerName}`;
+
+        const playerImg = document.createElement("img");
+        playerImg.className = "player-item-image";
+        playerImg.style.borderColor = element.color;
+        const src = element.civilization ? "/images/" + element.civilization + "-army.jpg" : "/images/icons/no-icon-picture.png";
+        playerImg.src = src;
+        playerImg.title = `${element.civilization}`;
+        playerImgContainer.appendChild(playerImg);
+        playerItem.appendChild(playerImgContainer);
+
+        const playerInfoContainer = document.createElement("div");
+        playerInfoContainer.className = "player-item-info-container";
+
+        const playerNameContainer = document.createElement("div");
+        playerNameContainer.className = "player-item-name-container";
+
+        const playerNameComp = document.createElement("span");
+        playerNameComp.className = "player-item-name";
+        playerNameComp.innerHTML = element.playerName;
+        playerNameContainer.appendChild(playerNameComp);
+
+        if (element.isOwner) {
+            const administratorImg = document.createElement("img");
+            administratorImg.className = "player-item-administrator-image";
+            administratorImg.src = "/images/icons/crown.png";
+            playerNameContainer.appendChild(administratorImg);
+        }
+        playerInfoContainer.appendChild(playerNameContainer);
+
+        const playerStatusComp = document.createElement("span");
+        
+        var statusText = "";
+        var statusClass = "";
+
+        if (instanceStatus.gameState == "waiting") {
+            if (element.civilization) {
+                statusText = "Prêt";
+                statusClass = "player-item-status-waiting";
+            } else {
+                statusText = "En attente";
+                statusClass = "player-item-status-playing";
+            }
+        } else {
+            if (element.endTurn) {
+                statusText = "Tour fini";
+                statusClass = "player-item-status-waiting";
+            } else {
+                statusText = "Tour en cours";
+                statusClass = "player-item-status-playing";
+            }
+        }
+        
+        playerStatusComp.className = "player-item-status " + statusClass;
+        playerStatusComp.innerHTML = statusText;
+        playerInfoContainer.appendChild(playerStatusComp);
+
+        playerItem.appendChild(playerInfoContainer);
         playerListComp.appendChild(playerItem);
     });
 
@@ -160,7 +215,7 @@ function DrawInstanceData() {
         return;
     }
 
-    const gameBoardContainer = document.getElementById("game-board-info");
+    const gameBoardContainer = document.getElementById("game-board-info-container");
     gameBoardContainer.hidden = false;
 
     const instanceNameComp = document.getElementById("game-board-instance-name");
@@ -1195,11 +1250,11 @@ function DrawInstanceWaitingScreen() {
 
     if (!instanceStatus || instanceStatus?.gameState != 'waiting') {
         console.log('# No need to display waiting screen');
-        waitingScreen.hidden = true;
+        waitingScreen.style.display = "none";
         return;
     }
 
-    waitingScreen.hidden = false;
+    waitingScreen.style.display = "flex";
 
     setReadyButtonListener();
     setStartGameButtonListener();
