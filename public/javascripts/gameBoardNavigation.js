@@ -2,6 +2,7 @@ const container = document.querySelector('.game-container')
 const img = document.querySelector('.game-map')
 const plusButton = document.querySelector('#zoom-in-button')
 const minusButton = document.querySelector('#zoom-out-button')
+const padding = 300; // 300px padding around the image
 
 function onChangeZoomButtonClick(zoomChange) {
     img.style.transformOrigin = `top left`
@@ -85,10 +86,10 @@ function checkSize () {
     let currentX = parseInt(img.style.left) || 0;
     let currentY = parseInt(img.style.top) || 0;
 
-    const maxX = (Math.round(imgIn.width) - Math.round(containerOut.width)) * -1;
-    const maxY = (Math.round(imgIn.height) - Math.round(containerOut.height)) * -1;
-    const minX = 0;
-    const minY = 0;
+    const maxX = (Math.round(imgIn.width) - Math.round(containerOut.width) + padding) * -1;
+    const maxY = (Math.round(imgIn.height) - Math.round(containerOut.height) + padding) * -1;
+    const minX = 0 + padding;
+    const minY = 0 + padding;
 
     if (currentX < maxX) {
         currentX = maxX

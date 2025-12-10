@@ -567,3 +567,10 @@ body {
     font-size: 18px;
     font-style: italic;
 }
+
+#game-background-image {
+    left: -400px;
+    top: -300px;
+    height: 1200px;
+    width: auto;
+}
