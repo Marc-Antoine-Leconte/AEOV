@@ -23,15 +23,15 @@ var app = express();
 app.set('views', path.join(__dirname, '/server/views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+app.use(logger('prod'));
 app.use(
   helmet({
      contentSecurityPolicy: false,
-    // contentSecurityPolicy: {
-    //   directives: {
-    //     "script-src": ["'self'", process.env.CSP_SRC_ENCRYPTION],
-    //   },
-    // },
+    contentSecurityPolicy: {
+      directives: {
+        "script-src": ["'self'", process.env.CSP_SRC_ENCRYPTION],
+      },
+    },
   }),
 );
 
