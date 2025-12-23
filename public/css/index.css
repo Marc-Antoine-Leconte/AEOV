@@ -1,0 +1,11 @@
+
+
+#go-to-subscribe-page-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: white;
+    color: #00B7FF;
+    border-color: #00B7FF;
+    border-radius: 5px;
+    cursor: pointer;
+}

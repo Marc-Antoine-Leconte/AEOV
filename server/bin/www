@@ -1,0 +1,290 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../../app');
+var debug = require('debug')('aeov:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Initialize socket.io
+ */
+
+const { Server } = require('socket.io')
+const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 })
+
+const visitors = {};
+const instances = {};
+
+// A VISITOR CONNECTS TO THE SERVER
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  visitors[socket.id] = {
+    name: "user" + Math.floor(Math.random() * 1000)
+  };
+
+  console.log('Current visitors:', visitors);
+
+  // A VISITOR DISCONNECTS FROM THE SERVER
+  socket.on('disconnect', (reason) => {
+    console.log('user ' + socket.id + ":" + visitors[socket.id].name + ' disconnected :', reason);
+
+    delete visitors[socket.id]
+  })
+
+  // A PLAYER JOINED AN INSTANCE
+  socket.on('playerJoin', (data) => {
+    console.log("[player join]")
+    console.log('visitor ' + socket.id + ' joined instance ' + data.instanceName + "#" + data.instanceId + ' as player ' + data.playerName);
+    visitors[socket.id].name = data.playerName;
+    visitors[socket.id].id = data.playerId;
+
+    if (!instances[data.instanceId]) {
+      instances[data.instanceId] = {
+        instanceStatus: {
+          instanceId: data.instanceId,
+          instanceName: data.instanceName,
+        },
+        playerList: {}
+      }
+    }
+
+    instances[data.instanceId].playerList[data.playerId] = socket.id;
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
+      }
+    }
+  });
+
+  // A PLAYER IS READY TO START THE GAME
+  socket.on('playerReadyToPlay', (data) => {
+    console.log("[player Ready To Play]", socket.id)
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
+      }
+    }
+  });
+
+  // THE OWNER OF THE GAME HAS STARTED THE GAME
+  socket.on('ownerStartGame', (data) => {
+    console.log("[owner start Game]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself : ')
+      }
+    }
+  });
+
+  // A PLAYER HAS ENDED HIS TURN
+  socket.on('endTurn', (data) => {
+    console.log("[player ends his turn]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('updateInstanceStatus', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself')
+      }
+    }
+  });
+
+  // A PLAYER HAS UPDATED HIS MARKET
+  socket.on('marketUpdate', (data) => {
+    console.log("[player updates his market]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('marketUpdate', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself')
+      }
+    }
+  });
+
+  // A PLAYER HAS MOVED HIS ARMY
+  socket.on('armyMove', (data) => {
+    console.log("[player moves his army]")
+    const currentPlayerId = visitors[socket.id].id;
+    if (!currentPlayerId) {
+      console.log('player id not found', visitors)
+      return io.to(socket.id).emit('error', "Vous devez être connecté pour effectuer cette action");
+    }
+
+    const visitorId = instances[data.instanceId].playerList[currentPlayerId];
+    if (!visitorId) {
+      console.log('player not in instance', instances[data.instanceId])
+      return io.to(socket.id).emit('error', "Vous devez avoir rejoins l'instance pour effectuer cette action");
+    }
+
+    for (const playerId in instances[data.instanceId].playerList) {
+      const socketId = instances[data.instanceId].playerList[playerId];
+      const visitor = visitors[socketId];
+
+      if (visitor && socketId != socket.id) {
+        io.to(socketId).emit('armyMove', {});
+        console.log('emission done to : ', visitor.name)
+      } else {
+        console.log('skip sending a message to the player himself')
+      }
+    }
+  });
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

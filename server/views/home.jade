@@ -1,0 +1,29 @@
+extends layout
+
+block content  
+  link(rel="stylesheet", href="css/home.css")
+
+  div(class="content-container")
+    h1 Créer une partie
+    div
+      button(type='button', id='create-instance-button', class="base-button") Créer une nouvelle partie
+      input(type="text", id="new-instance-name", placeholder="Nom de la partie")
+    
+    p(id="instance-creation-error-message", hidden=true)
+
+    h1 Rejoindre une partie
+    div(id="join-game-section")
+      div(class="instance-list-container")
+        h2 Mes parties en cours
+        div(id="player-instance-list")
+        p(id="player-instance-list-error", hidden=true)
+        p(id="player-instance-list-empty-message", hidden=true) Aucune partie actuellement en cours
+
+      div(class="instance-list-container")
+        h2 Parties en attente de joueur
+        div(id="instance-list")
+        p(id="instance-list-error", hidden=true)
+        p(id="instance-list-empty-message", hidden=true) Aucune partie actuellement en cours
+    button(id="join-selected-instance-button", class="main-button") Rejoindre la partie
+  
+  script(src='/javascripts/homePage.js')

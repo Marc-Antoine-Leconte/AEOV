@@ -1,0 +1,576 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    display: grid;
+    place-items: center;
+    padding: 0px;
+}
+
+#navigation-bar {
+    margin: 0px 50px !important;
+}
+
+.overlay {
+    width: 80vw;
+    height: 50vw;
+    padding: 10px;
+    position: relative;
+    background-color: #000000a6;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.overlay-content {
+    border: 5px solid #000000;
+    border-radius: 10px;
+    padding: 0px;
+    width: 60%;
+    height: 100%;
+    position: relative;
+    margin: 0px 1%;
+}
+
+.overlay-informations {
+    border: 5px solid #000000;
+    background-color: white;
+    border-radius: 10px;
+    padding: 0px;
+    width: 19%;
+    height: 100%;
+    position: relative;
+}
+
+.overlay-actions {
+    border: 5px solid #000000;
+    background-color: white;
+    border-radius: 10px;
+    padding: 0px;
+    width: 19%;
+    height: 100%;
+    position: relative;
+    overflow-y: scroll;
+}
+
+.overlay-actions h2 {
+    padding: 5px;
+    width: 100%;
+}
+
+.overlay-actions h3 {
+    padding: 5px;
+    width: 100%;
+}
+
+.overlay-actions button {
+    margin: 2px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2872a7;
+    color: white;
+    cursor: pointer;
+    width: 80%;
+}
+
+.overlay-actions button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+.overlay-close-button {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #000000;
+    cursor: pointer;
+    z-index: 5;
+    background-color: #ffffffb3;
+    border-radius: 50px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-background-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.overlay-inner-informations {
+    position: relative;
+    z-index: 2;
+    background-color: #ffffffb3;
+    border-radius: 5px;
+    width: 50%;
+    padding: 10px;
+    margin: 10px;
+}
+
+#market-grid {
+    width: 100%;
+    height: 80%;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 4vw;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.player-market {
+    width: 100%;
+    height: fit-content;
+    min-height: 5vw;
+    border: 2px solid #000000;
+    margin-bottom: 10px;
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1vw;
+}
+
+.slot-item {
+    width: 30%;
+    height: 18vw;
+    background-color: #ffffffb3;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.slot-item img {
+    height: 3vw;
+}
+
+.slot-item input {
+    width: 90%;
+}
+
+.slot-item button {
+    margin-top: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2872a7;
+    color: white;
+    cursor: pointer;
+}
+
+.slot-item button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+.market-lock {
+    position: absolute;
+    right: 5vw;
+    width: 2vw;
+    height: 2vw;
+}
+
+.market-lock img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#city-buildings-grid {
+    width: 100%;
+    height: 80%;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 4vw;
+    gap: 1vw;
+}
+
+#building-wall-container {
+    width: 100%;
+    height: 10vw;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: 100;
+}
+
+.building-item#wall-item .building-image {
+    width: 100%;
+    height: 5vw;
+}
+
+.building-item#wall-item p {
+    width: 8vw;
+    max-width: 8vw;
+}
+
+.building-item#wall-item {
+    width: 100%;
+    max-width: 100%;
+}
+
+.building-item {
+    width: 8vw;
+    max-width: 8vw;
+    height: fit-content;
+    border-radius: 5px;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+.building-image {
+    width: 6vw;
+    margin: 0px;
+    padding: 0px;
+}
+
+.building-item p {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    position: relative;
+}
+
+.building-item button {
+    margin-top: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2872a7;
+    color: white;
+    cursor: pointer;
+}
+
+#game-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.game-container {
+    width: 80vw;
+    height: 50vw;
+    position: relative;
+    outline: 10px solid #ff3030;
+    overflow: hidden;
+    margin: 20px;
+}
+
+.game-map {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.game-map img {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    object-fit: cover;
+}
+
+.pin-point-button {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 6vw;
+}
+
+.pin-point-button img {
+    width: 3vw;
+    height: 3vw;
+    position: relative;
+}
+
+.pin-point-button .city-point-image {
+    width: 5vw;
+    height: 5vw;
+}
+
+.pin-point-button p {
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-top: 2px;
+    font-size: 12px;
+    text-align: center;
+    position: relative;
+}
+
+#game-board-player-resources {
+    display: flex;
+    flex-direction: row;
+    flex: auto;
+    justify-content: space-between;
+    width: 80vw;
+    margin-left: 20px;
+    margin-right: 20px;
+    border:#000000 10px solid;
+}
+
+.game-board-player-resources-item {
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    margin: 3px;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-resource-image-container {
+    width: 2vw;
+    height: 2vw;
+}
+
+.player-resource-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#game-board-zoom-controls {
+    width: 80px;
+    height: 40px;
+    position: relative;
+    left: 20px;
+    bottom: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 10px;
+}
+
+#game-board-zoom-controls button {
+    width: 25px;
+    height: 25px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    background-color: #010101;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.pin-point-actions {
+    display: flex;
+    flex-direction: column;
+    padding-top: 2px;
+}
+
+.pin-point-actions button {
+    margin: 2px 0px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2872a7;
+    color: white;
+    cursor: pointer;
+}
+
+.player-army-container {
+    width: 30px !important;
+    height: 30px !important;
+    position: absolute !important;
+    transform-origin: center;
+    top: 1.8vw;
+    left: 4vw;
+}
+
+.player-army-image {
+    width: 100% !important;
+    height: 100% !important;
+    transform-origin: center;
+    border: 3px solid;
+    border-radius: 50%;
+}
+
+.player-army-count {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: 10px;
+}
+
+#game-board-controls {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#game-board-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#instance-menu {
+    height: 30px;
+    border-bottom: solid black 2px;
+}
+
+#instance-information-container {
+    border-bottom: solid black 2px;
+}
+
+#game-board-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    position: relative;
+    padding-left: 10px;
+}
+
+#game-board-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-item-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    padding: 5px 0px;
+    border-bottom: solid black 1px;
+}
+
+.player-item-image-container {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    transform-origin: center;
+}
+
+.player-item-image {
+    width: 100% !important;
+    height: 100% !important;
+    transform-origin: center;
+    border: 3px solid;
+    border-radius: 50%;
+}
+
+.player-item-administrator-image {
+    height: 15px;
+    width: 15px;
+}
+
+.player-item-name-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.player-item-name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.player-item-status {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.player-item-status-playing {
+    color: orange;
+}
+
+.player-item-status-waiting {
+    color: green;
+}
+
+.player-item-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#toggle-show-game-info-button {
+    position: absolute;
+    top: 200px;
+    right: -30px;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#game-board-connection-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px;
+}
+
+#game-board-connection-container select {
+   width: 30%;
+}
+
+#game-board-loading-message {
+    margin: 20px;
+    font-size: 18px;
+    font-style: italic;
+}
+
+#game-background-image {
+    left: -400px;
+    top: -300px;
+    height: 1200px;
+    width: auto;
+}

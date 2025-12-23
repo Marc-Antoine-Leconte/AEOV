@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  div(class="menu-content-container")
+    h1= title
+
+    input(type="text", id="player-name-input", placeholder="Nom du joueur")
+    input(type="password", id="password-name-input", placeholder="Mot de passe")
+    button(type='button', id='subscribe-user-button', class='main-button') S'inscrire
+    button(type='button', id='back-to-menu-button') Retour Menu
+    p(id="player-subscribe-error-message", hidden=true)
+
+  script(src='/javascripts/subscribePage.js')

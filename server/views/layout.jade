@@ -1,0 +1,31 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="css/style.css")
+  body
+    script(src='/javascripts/socket.io.min.js')
+    script(src='/javascripts/cookie.js')
+    script(src='/javascripts/variables.js')
+    script(src='/javascripts/main.js')
+    script(src='/javascripts/data.js')
+    
+    div(id="navigation-bar")
+      h2(id="game-title") AEOV
+      div(id="right-navigation-bar")
+        div(id="user-info-container")
+          p
+            span Joueur : 
+            span(id="user-name")
+            #
+            span(id="user-id")
+          
+          p
+            span instance ID : 
+            span(id="instance-id")
+
+        button(type='button', class="menu-icon-button", id='disconnect-button')
+          img(src='/images/icons/disconnect.png', title='Se déconnecter')
+
+    block content
+     

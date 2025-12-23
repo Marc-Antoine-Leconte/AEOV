@@ -1,0 +1,123 @@
+extends layout
+
+block content  
+  link(rel="stylesheet", href="css/gameBoardPage.css")
+
+  div(id="game-board-instance-data-error-message", hidden=true)
+
+  div(id="game-board-container")
+
+    div(id="game-board-info-container", hidden=true)
+      button(type='button', class="menu-icon-button", id='toggle-show-game-info-button')
+        img(src='/images/icons/left-arrow.png', id="toggle-show-game-info-button-img", title='Montrer/Masquer les informations de la partie')
+
+      div(id="game-board-info", hidden=true)
+        div(id="instance-menu")
+          button(type='button', class="menu-icon-button", id='leave-instance-button')
+            img(src='/images/icons/quit-game.png', title='Quitter la partie')
+        
+        div(id="instance-information-container")
+          h3 Informations de la partie
+          ul
+            li
+              span(id="game-board-instance-name-title") <b>Nom de la partie : </b>
+              span(id="game-board-instance-name")
+            li
+              span(id="game-board-instance-mode-title") <b>Mode de la partie : </b>
+              span(id="game-board-instance-mode")
+            li
+              span(id="game-board-owner-title") <b>Administrateur : </b>
+              span(id="game-board-owner")
+            li
+              span(id="game-board-status-title") <b>Statut de la partie : </b>
+              span(id="game-board-status")
+            li
+              span(id="game-board-current-turn-title") <b>Tour actuel : </b>
+              span(id="game-board-current-turn")
+            li
+              span(id="game-board-current-player-title") <b>Joueur en train de jouer : </b>
+              span(id="game-board-current-player")
+            li
+              span(id="game-board-total-players-title") <b>Nombre de joueurs : </b>
+              span(id="game-board-total-players")
+
+        div(id="game-board-player-list-container")
+          div(id="game-board-player-list")
+
+    div(id="game-board-connection-container", hidden=false)
+      h1 Connexion
+      p(id="game-board-loading-message") En attente du début de la partie...
+
+      p Sélectionnez votre civilisation
+      select(id="game-board-player-civilization-select", name="Choisissez une civilisation")
+        option(value="roman", selected="selected") Empire Romain
+        option(value="viking") Peuples Viking
+        option(value="egyptian") Nation Egyptienne
+        option(value="medieval") Royaume Médiéval
+        option(value="greek") Cités Grecques
+
+      p Sélectionnez votre couleur
+      select(id="game-board-player-color-select", name="Choisissez une couleur")
+        option(value="red", selected="selected") Rouge
+        option(value="blue") Bleu
+        option(value="purple") Violet
+        option(value="green") Vert
+        option(value="yellow") Jaune
+        option(value="orange") Orange
+        option(value="pink") Rose
+        option(value="brown") Marron
+        option(value="aqua") Aqua
+
+      button(type='button', class="base-button", id='ready-button') Prêt à jouer
+      button(type='button', class="base-button", id='start-game-button') Démarrer la partie
+
+    div(id="game-board", hidden=true)
+      div(id="game-board-player-resources", hidden=true)
+
+      div(class="game-container")
+        div(class="game-map")
+          img(src="/images/game-map-image.png", id="game-background-image")
+
+        div(id="city-overlay", class="overlay")
+          div(class="overlay-informations")
+          div(class="overlay-content")
+            img(class="overlay-background-image", id="overlay-background-image-city", src="/images/city-background.png")
+            span(class="overlay-close-button", id="close-city-overlay") ×
+            div(class="overlay-inner-informations")
+              h2(id="city-name") Nom de la ville
+              p(id="city-description") Description de la ville
+            div(id="city-buildings-grid")
+            div(id="building-wall-container")
+          div(class="overlay-actions", id="overlay-actions")
+            h2 Actions
+            div(id="player-actions-list")
+            h2 Actions bloquées
+            div(id="player-other-actions-list")
+
+        div(id="market-overlay", class="overlay")
+          div(class="overlay-content")
+            img(class="overlay-background-image", id="overlay-background-image-market", src="/images/city-background.png")
+            span(class="overlay-close-button", id="close-market-overlay") ×
+            div(class="overlay-inner-informations")
+              h2(id="market-title") Nom de la ville
+              p(id="market-description") Description de la ville
+            div(id="market-grid")
+
+      div(id="game-board-zoom-controls")
+        button(id="zoom-in-button") +
+        button(id="zoom-out-button") -
+
+      div(id="game-board-controls", hidden=true)
+        button(type='button', id='end-turn-button') Terminer le tour
+        button(type='button', id='visit-market-action-button') Marché
+
+    div(id="game-log", hidden=true)
+      h2 Journal d'évènements
+      ul(id="game-log-messages")
+
+  script(src='/javascripts/tools/helpers.js')
+  script(src='/javascripts/gameBoardNavigation.js')
+  script(src='/javascripts/gameMechanics.js')
+  script(src='/javascripts/drawGameBoard.js')
+  script(src='/javascripts/socketConnection.js')
+  script(src='/javascripts/gameBoardPage.js')
