@@ -8,10 +8,14 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { Sequelize } = require('./server/config/database');
 
+const verifyJWT = require('./server/middleware/verifyJWT');
+
 var indexRouter = require('./server/routes/index');
 var playerRouter = require('./server/routes/player');
+var homeRouter = require('./server/routes/home');
 var instanceRouter = require('./server/routes/instance');
 var gameRouter = require('./server/routes/game');
+const { error } = require('console');
 
 var app = express(); 
 
@@ -25,7 +29,7 @@ app.use(
      contentSecurityPolicy: false,
     // contentSecurityPolicy: {
     //   directives: {
-    //     "script-src": ["'self'", "'sha256-t4hrt/shI2RwfCP1tEJaQhtZRY5CE2e+X7jwYfSODV0='"],
+    //     "script-src": ["'self'", process.env.CSP_SRC_ENCRYPTION],
     //   },
     // },
   }),
@@ -40,23 +44,27 @@ app.use(bodyParser.json());
 
 app.use('/', indexRouter);
 app.use('/player', playerRouter);
+app.use(verifyJWT);
+app.use('/home', homeRouter);
 app.use('/instance', instanceRouter);
 app.use('/game', gameRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  console.log('## 404 error handler - req.originalUrl => ', req.originalUrl);
   next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
+  console.log('## error handler - err => ', err);
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error', { title: "Error", message: err.message });
+  res.render('error', { title: "Error", message: err.message, error: err });
 });
 
 const connectDb = async () => {

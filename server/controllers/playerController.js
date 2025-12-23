@@ -1,5 +1,6 @@
 const { Player } = require('../config/database');
 const bcrypt = require('bcrypt');
+const { getPrivatePlayerData } = require('../tool/dataFormatHelper');
 
 class PlayerController {
   getAllPlayers = async (req, res, allowTransmit = true) => {
@@ -53,6 +54,37 @@ class PlayerController {
         }
     }
 
+    getPlayersByName = async (req, res, allowTransmit = true) => {
+        try {
+            console.log('# getPlayersByName - req.body => ', req.body);
+            const name = req.body.name;
+            const players = await Player.findAll({ where: { name: name } });
+            if (!players || players.length <= 0) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "Player not found"
+                    });
+                }
+                return;
+            }
+            if (allowTransmit) {
+                res.json(players);
+            }
+            return players;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
     authenticatePlayer = async (req, res, allowTransmit = true) => {
         console.log('# authenticatePlayer - req.body => ', req.body);
         try {
@@ -88,7 +120,7 @@ class PlayerController {
                 return;
             }
             if (allowTransmit) {
-                res.json({ ...player.dataValues, password: null });
+                res.json(getPrivatePlayerData(player.dataValues));
             }
             return { ...player.dataValues, password: null };
         }
@@ -105,18 +137,19 @@ class PlayerController {
     }
 
     createPlayer = async (req, res, allowTransmit = true) => {
-        const { name, password } = req.body;
+        const { name, password, refreshToken, accessToken } = req.body;
         const hashedPassword = bcrypt.hashSync(password, 12);
 
         try {
             const playerData = {
                 name: name,
-                password: hashedPassword
+                password: hashedPassword,
+                refreshToken: refreshToken
             };
             var createdPlayer = await Player.create(playerData);
             if (allowTransmit) {
                 res.status(201)
-                    .json( { ...createdPlayer.dataValues, password: null } );
+                    .json(getPrivatePlayerData(createdPlayer, accessToken));
             }
             return { ...createdPlayer.dataValues, password: null };
         } catch (error) {
@@ -160,6 +193,45 @@ class PlayerController {
                 res.status(204).send();
             }
             return true;
+        }
+        catch (error) {
+            console.log(error);
+            if (allowTransmit) {
+                res.status(500).json({
+                    statusCode: 500,
+                    message: "Internal server error"
+                });
+            }
+            return;
+        }
+    }
+
+    updatePlayerTokenByServer = async (req, res, allowTransmit = true) => {
+        const { refreshToken, id } = req.body;
+
+        try {
+            const existingPlayer = await Player.findByPk(id);
+            if (!existingPlayer) {
+               if (allowTransmit) {
+                   res.status(404).json({
+                       statusCode: 404,
+                       message: "Player not found."
+                   });
+               }
+               return;
+            }
+            const playerToUpdate = {
+                refreshToken: refreshToken
+            };
+            const updatedPlayer = await Player.update(playerToUpdate, {
+                where: {
+                    id: id
+                }
+            });
+            if (allowTransmit) {
+                res.status(204).send(updatedPlayer);
+            }
+            return updatedPlayer;
         }
         catch (error) {
             console.log(error);

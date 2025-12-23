@@ -14,12 +14,12 @@ function hideHeader() {
 }
 
 function InitIndexPage() {
-    const currentId = getCookie("currentPlayerId");
-    if (currentId && currentId != "" && !isNaN(currentId)) {
-        console.log('Player is already connected, redirecting to home page...');
-        redirectToUrl("/home");
-        return;
-    }
+    // const currentId = getCookie("currentPlayerId");
+    // if (currentId && currentId != "" && !isNaN(currentId)) {
+    //     console.log('Player is already connected, redirecting to home page...');
+    //     redirectToUrl("/home");
+    //     return;
+    // }
 
     hideHeader();
     console.log('Player is not connected, staying on menu page...');

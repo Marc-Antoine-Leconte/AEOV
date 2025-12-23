@@ -121,14 +121,6 @@ function fetchAndDrawPlayersInfo() {
 }
 
 function InitGameBoardPage() {
-    const currentId = getCookie("currentPlayerId");
-    if (!currentId || currentId == "" || isNaN(currentId)) {
-        console.log('Player is not connected, redirecting to menu page...');
-        redirectToUrl("/");
-        return;
-    }
-    console.log('Player is connected, staying on game page...');
-
     const currentInstanceId = getCookie("currentInstanceId");
     if (!currentInstanceId || currentInstanceId == "" || isNaN(currentInstanceId)) {
         console.log(currentInstanceId)

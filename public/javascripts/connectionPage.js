@@ -25,9 +25,8 @@ function onConnectionButtonClick() {
     }
 
     authenticatePlayer(userNameInput.value, userPwdInput.value).then((data) => {
-        if (data && !data.error && data.id) {
+        if (data && !data.error) {
             setCookie("currentPlayerName", data.name, 1);
-            setCookie("currentPlayerId", data.id, 1);
             redirectToUrl("/home");
             return
         } else {
@@ -46,12 +45,12 @@ function hideHeader() {
 }
 
 function InitConnectionPage() {
-    const currentId = getCookie("currentPlayerId");
-    if (currentId && currentId != "" && !isNaN(currentId)) {
-        console.log('Player is already connected, redirecting to home page...');
-        redirectToUrl("/home");
-        return;
-    }
+    // const currentId = getCookie("currentPlayerId");
+    // if (currentId && currentId != "" && !isNaN(currentId)) {
+    //     console.log('Player is already connected, redirecting to home page...');
+    //     redirectToUrl("/home");
+    //     return;
+    // }
     console.log('Player is not connected, staying on connection page...');
     
     hideHeader();

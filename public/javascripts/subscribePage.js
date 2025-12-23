@@ -64,12 +64,12 @@ function hideHeader() {
 }
 
 function InitSubscribePage() {
-    const currentId = getCookie("currentPlayerId");
-    if (currentId && currentId != "" && !isNaN(currentId)) {
-        console.log('Player is already connected, redirecting to home page...');
-        redirectToUrl("/home");
-        return;
-    }
+    // const currentId = getCookie("currentPlayerId");
+    // if (currentId && currentId != "" && !isNaN(currentId)) {
+    //     console.log('Player is already connected, redirecting to home page...');
+    //     redirectToUrl("/home");
+    //     return;
+    // }
     console.log('Player is not connected, staying on subscribe page...');
     
     hideHeader();

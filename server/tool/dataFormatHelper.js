@@ -25,3 +25,12 @@ export const getPublicInstancePlayerData = (instancePlayerData, instanceData, cu
 export const getPublicInstancePlayerDataList = (instancePlayerDataList, instanceData, currentPlayerData) => {
     return instancePlayerDataList.map((element) => getPublicInstancePlayerData(element, instanceData, currentPlayerData));
 }
+
+export const getPrivatePlayerData = (playerData, accessToken) => {
+    const dataValues = playerData.dataValues ? playerData.dataValues : playerData;
+    const result = {
+        name: dataValues.name,
+        accessToken: accessToken,
+    }
+    return result;
+}

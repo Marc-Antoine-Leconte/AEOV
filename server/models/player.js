@@ -16,6 +16,11 @@ function model(sequelize) {
             type: DataTypes.STRING(100),
             allowNull: false
         },
+        refreshToken: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            defaultValue: null,
+        }
     };
 
     const options = {

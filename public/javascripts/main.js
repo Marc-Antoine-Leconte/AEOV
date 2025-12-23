@@ -10,9 +10,16 @@ function setGoBackToMenuButtonListener() {
 }
 
 function onDisconnectButtonClick() {
-    deleteCookie("currentPlayerId");
-    deleteCookie("currentPlayerName");
-    redirectToUrl("/");
+    logout().then(e => {
+        if (e && !e.error && !e.message) {
+            console.log('Logout successful');
+            deleteCookie("currentPlayerId");
+            deleteCookie("currentPlayerName");
+            redirectToUrl("/");
+        } else {
+            console.log('Logout failed => ', e.message);
+        }
+    });
 }
 
 function setDisconnectButtonListener() {
@@ -102,28 +109,28 @@ function subscribePlayer(playerName, password) {
     return createPlayerFromAPI(playerName, password)
 }
 
+function logout() {
+    return logoutFromAPI();
+}
+
 function setPlayerReadyToPlay(civilization, color) {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return setPlayerReadyToPlayFromAPI(civilization, color, instanceId, playerId);
+    return setPlayerReadyToPlayFromAPI(civilization, color, instanceId);
 }
 
 function ownerStartGame() {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return ownerStartGameFromAPI(instanceId, playerId);
+    return ownerStartGameFromAPI(instanceId);
 }
 
 function fetchGameInfo() {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return fetchGameInfoFromAPI(instanceId, playerId);
+    return fetchGameInfoFromAPI(instanceId);
 }
 
 function fetchPlayersInfo() {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return fetchPlayersInfoFromAPI(instanceId, playerId);
+    return fetchPlayersInfoFromAPI(instanceId);
 }
 
 function fetchGameActions() {
@@ -131,27 +138,23 @@ function fetchGameActions() {
 }
 
 function postGameActions(actions) {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return postGameActionsToAPI(actions, playerId, instanceId);
+    return postGameActionsToAPI(actions, instanceId);
 }
 
 function setPlayerEndTurn() {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return setPlayerEndTurnToAPI(instanceId, playerId);
+    return setPlayerEndTurnToAPI(instanceId);
 }
 
 function setMarketData(marketIsOpen, market) {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return setMarketDataToAPI(marketIsOpen, market, playerId, instanceId);
+    return setMarketDataToAPI(marketIsOpen, market, instanceId);
 }
 
 function buyItemOnMarket(slotId, instancePlayerId) {
-    playerId = getCookie("currentPlayerId");
     instanceId = getCookie("currentInstanceId");
-    return buyItemOnMarketFromAPI(slotId, instancePlayerId, playerId, instanceId);
+    return buyItemOnMarketFromAPI(slotId, instancePlayerId, instanceId);
 }
 
 function DisplayUserInfo() {
