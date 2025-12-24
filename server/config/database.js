@@ -6,6 +6,22 @@ const playerModel = require('../models/player')
 const actionModel = require('../models/action')
 const locationModel = require('../models/location')
 
+const options_devenv = {
+    options: {
+        encrypt: true,
+        trustServerCertificate: true, // For local development
+    }
+};
+
+const options_prodenv = {
+    options: {
+        encrypt: true,
+    },
+    ssl: {
+        ca: 'server/certs/isrgrootx1.pem',
+    }
+}
+
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USERNAME,
@@ -14,12 +30,8 @@ const sequelize = new Sequelize(
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
         dialect: process.env.DIALECT,
-        dialectOptions: {
-            options: {
-                encrypt: true,
-                trustServerCertificate: true, // For local development
-            }
-        }
+        dialectModule: require('mysql2'),
+        dialectOptions: process.env.NODE_ENV === 'production' ? options_prodenv : options_devenv,
     }
 );
 
@@ -37,7 +49,7 @@ db.InstancePlayer.belongsTo(db.Instance, { foreignKey: 'instanceId' });
 db.Player.hasMany(db.InstancePlayer, { foreignKey: 'playerId' });
 db.InstancePlayer.belongsTo(db.Player, { foreignKey: 'playerId' });
 
-db.Instance.hasMany(db.Location, {foreignKey: 'instanceId' });
+db.Instance.hasMany(db.Location, { foreignKey: 'instanceId' });
 db.Location.belongsTo(db.Instance, { foreignKey: 'instanceId' });
 
 module.exports = db;
