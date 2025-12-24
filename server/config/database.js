@@ -16,6 +16,7 @@ const options_devenv = {
 const options_prodenv = {
     options: {
         encrypt: true,
+        trustServerCertificate: true,
     },
     ssl: {
         ca: 'server/certs/isrgrootx1.pem',
