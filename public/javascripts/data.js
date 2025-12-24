@@ -1,4 +1,4 @@
-const currentUrl = "localhost:3000";
+const currentUrl = process.env.CURRENT_URL + ":" + process.env.PORT;
 const currentProtocol = "http://";
 const allInstancesPath = "/instance/list";
 const playerInstancesPath = "/instance/list/user";
