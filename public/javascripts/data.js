@@ -1,5 +1,5 @@
-const currentUrl = "aeov-etdjws9qc-marc-antoine-lecontes-projects.vercel.app"; //"localhost:3000";
-const currentProtocol = "https://";
+const currentUrl = window.location.host; //"localhost:3000";
+const currentProtocol = ""; //"https://";
 const allInstancesPath = "/instance/list";
 const playerInstancesPath = "/instance/list/user";
 const newInstancePath = "/instance/new";
