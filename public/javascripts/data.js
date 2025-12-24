@@ -1,7 +1,5 @@
-require('dotenv').config();
-
-const currentUrl = process.env.CURRENT_URL + ":" + process.env.PORT;
-const currentProtocol = "http://";
+const currentUrl = "aeov-etdjws9qc-marc-antoine-lecontes-projects.vercel.app"; //"localhost:3000";
+const currentProtocol = "https://";
 const allInstancesPath = "/instance/list";
 const playerInstancesPath = "/instance/list/user";
 const newInstancePath = "/instance/new";
