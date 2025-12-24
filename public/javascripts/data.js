@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const currentUrl = process.env.CURRENT_URL + ":" + process.env.PORT;
 const currentProtocol = "http://";
 const allInstancesPath = "/instance/list";
