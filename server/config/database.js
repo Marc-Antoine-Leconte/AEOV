@@ -28,7 +28,7 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
-        dialect: process.env.NODE_ENV === 'production' ? PostgresDialect : process.env.DIALECT,
+        dialect: process.env.DIALECT, //process.env.NODE_ENV === 'production' ? PostgresDialect : process.env.DIALECT,
         dialectModule: process.env.NODE_ENV === 'production' ? undefined : require('mysql2'),
         dialectOptions: process.env.NODE_ENV === 'production' ? options_prodenv : options_devenv,
     }
