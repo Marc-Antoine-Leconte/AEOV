@@ -5,7 +5,6 @@ const instancePlayerModel = require('../models/instancePlayer')
 const playerModel = require('../models/player')
 const actionModel = require('../models/action')
 const locationModel = require('../models/location')
-import { PostgresDialect } from '@sequelize/postgres';
 
 const options_devenv = {
     options: {
