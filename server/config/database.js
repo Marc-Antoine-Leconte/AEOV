@@ -5,6 +5,7 @@ const instancePlayerModel = require('../models/instancePlayer')
 const playerModel = require('../models/player')
 const actionModel = require('../models/action')
 const locationModel = require('../models/location')
+import { PostgresDialect } from '@sequelize/postgres';
 
 const options_devenv = {
     options: {
@@ -16,11 +17,8 @@ const options_devenv = {
 const options_prodenv = {
     options: {
         encrypt: true,
-        trustServerCertificate: true,
+        trustServerCertificate: false,
     },
-    ssl: {
-        ca: 'server/certs/isrgrootx1.pem',
-    }
 }
 
 const sequelize = new Sequelize(
@@ -30,8 +28,8 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
-        dialect: process.env.DIALECT,
-        dialectModule: require('mysql2'),
+        dialect: process.env.NODE_ENV === 'production' ? PostgresDialect : process.env.DIALECT,
+        dialectModule: process.env.NODE_ENV === 'production' ? undefined : require('mysql2'),
         dialectOptions: process.env.NODE_ENV === 'production' ? options_prodenv : options_devenv,
     }
 );
