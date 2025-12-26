@@ -81,7 +81,7 @@ class InstanceController {
             const instanceData = {
                 mode: req.body.mode,
                 name: req.body.name,
-                ownerId: req.body.ownerId,
+                ownerId: req.body.playerId,
                 maxPlayers: req.body.maxPlayers
             };
 
