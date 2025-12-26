@@ -15,10 +15,7 @@ const options_devenv = {
 };
 
 const options_prodenv = {
-    options: {
-        encrypt: true,
-        trustServerCertificate: false,
-    },
+    ssl: true
 }
 
 const sequelize = new Sequelize(
@@ -28,8 +25,8 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
-        dialect: process.env.DIALECT, //process.env.NODE_ENV === 'production' ? PostgresDialect : process.env.DIALECT,
-        dialectModule: process.env.NODE_ENV === 'production' ? undefined : require('mysql2'),
+        dialect: process.env.DIALECT,
+        dialectModule: require('mysql2'),
         dialectOptions: process.env.NODE_ENV === 'production' ? options_prodenv : options_devenv,
     }
 );
