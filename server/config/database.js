@@ -10,14 +10,16 @@ const options_devenv = {
     options: {
         encrypt: true,
         trustServerCertificate: true, // For local development
-    }
+    },
+    connectTimeout: process.env.DB_CONNECT_TIMEOUT
 };
 
 const options_prodenv = {
     ssl: {
         "require": true,
         "rejectUnauthorized": true
-    }
+    },
+    connectTimeout: process.env.DB_CONNECT_TIMEOUT
 }
 
 const sequelize = new Sequelize(
