@@ -15,7 +15,10 @@ const options_devenv = {
 };
 
 const options_prodenv = {
-    ssl: true
+    ssl: {
+        "require": true,
+        "rejectUnauthorized": true
+    }
 }
 
 const sequelize = new Sequelize(
