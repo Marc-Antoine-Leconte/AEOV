@@ -1,5 +1,5 @@
 var socket = null;
-const socketIsOn = !process.env.NODE_ENV === 'production';
+const socketIsOn = false;
 
 const joinInstanceSocket = () => {
     if (!socketIsOn) {
