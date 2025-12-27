@@ -361,11 +361,11 @@ function DrawGameBoard() {
     const gameBoardComp = document.getElementById("game-board");
     if (!currentInstance.data || !currentInstance.data.id || currentInstance.data.gameState != 'inProgress') {
         console.log('# No game board to display');
-        gameBoardComp.hidden = true;
+        gameBoardComp.style.display = "none";
         return;
     }
 
-    gameBoardComp.hidden = false;
+    gameBoardComp.style.display = "flex";
 }
 
 function onStartGameButtonClick() {

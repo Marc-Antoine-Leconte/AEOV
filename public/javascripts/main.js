@@ -72,7 +72,7 @@ async function createInstance(instanceName, instanceMode) {
 
     const currentPlayerId = getCookie("currentPlayerId");
 
-    const createdInstance = await createInstanceFromAPI({ name: instanceName, mode: instanceMode, ownerId: currentPlayerId });
+    const createdInstance = await createInstanceFromAPI({ instanceName: instanceName, mode: instanceMode, ownerId: currentPlayerId });
     if (createdInstance.message) {
         alert("Une erreur est survenue lors de la création de l'instance : " + createdInstance.message);
     } else {

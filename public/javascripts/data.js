@@ -72,9 +72,9 @@ async function fetchPlayerInstancesFromAPI() {
   return await postDataToAPI(url, { });
 }
 
-async function createInstanceFromAPI({name, mode = "pvp", maxPlayers = 8}) {
+async function createInstanceFromAPI({instanceName, mode = "pvp", maxPlayers = 8}) {
   const url = `${currentProtocol}${currentUrl}${newInstancePath}`;
-  return await postDataToAPI(url, { name, mode, maxPlayers });
+  return await postDataToAPI(url, { instanceName, mode, maxPlayers });
 }
 
 async function joinInstanceFromAPI(instanceId) {
