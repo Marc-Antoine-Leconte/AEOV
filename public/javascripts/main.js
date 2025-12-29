@@ -27,7 +27,8 @@ function setDisconnectButtonListener() {
     disconnectBtn.addEventListener('click', onDisconnectButtonClick);
 }
 
-function onLeaveInstanceButtonClick(event) {
+async function onLeaveInstanceButtonClick(event) {
+    await disconnectSocket();
     deleteCookie("currentInstanceId");
     redirectToUrl("/home");
 }

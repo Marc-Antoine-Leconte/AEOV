@@ -284,7 +284,7 @@ body {
 
 .game-container {
     width: 80vw;
-    height: 50vw;
+    height: 70vh;
     position: relative;
     outline: 10px solid #ff3030;
     overflow: hidden;
@@ -439,6 +439,8 @@ body {
 #game-board-controls {
     width: 100%;
     display: flex;
+    position: relative;
+    bottom: 20px;
     justify-content: center;
     align-items: center;
     gap: 10px;

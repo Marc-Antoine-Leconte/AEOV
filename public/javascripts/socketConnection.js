@@ -1,94 +1,79 @@
-var socket = null;
-const socketIsOn = false;
+let ablyClient = null;
+let instanceChannel = null;
+let channelName = null;
 
-const joinInstanceSocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
+const joinInstanceSocket = async (instanceId) => {
 
-    socket = io();
+    console.log("# Initialize websocket")
+    ablyClient = new Ably.Realtime({
+        authUrl: "/api/ably/auth",
+    });
+
+    await ablyClient.connection.once("connected");
+    
+    channelName = "instance:" + instanceId
+    instanceChannel = ablyClient.channels.get(channelName);
 
     // REGULAR INSTANCE UPDATE
-    socket.on('updateInstanceStatus', () => {
-        console.log('-- Socket ping to update status');
-        fetchAndDrawBoardScreen();
+    instanceChannel.subscribe((message) => {
+        if (message = "updateInstanceStatus") {
+            console.log('-- Socket ping to update status');
+            fetchAndDrawBoardScreen();
+        }
+        else if (message = "armyMove") {
+            console.log('-- Socket ping a user moved his army')
+            fetchAndDrawBoardScreen();
+        }
+        else if (message = "marketUpdate") {
+            console.log('-- Socket ping a user updated his market')
+            fetchAndDrawPlayersInfo();
+        }
+        else if (message = "error") {
+            console.error("-- Socket error => ", message);
+        } else {
+            console.log("-- Socket unknown category message =>", message);
+        }
     });
 
-    socket.on('armyMove', () => {
-        console.log('-- Socket ping a user moved his army')
-        fetchAndDrawBoardScreen();
-    })
-
-    socket.on('marketUpdate', () => {
-        console.log('-- Socket ping a user updated his market')
-        fetchAndDrawPlayersInfo();
-    })
-
-    socket.on('error', (message) => {
-        console.error(message);
+    instanceChannel.connection.on('failed', function () { console.log('✗ Connection failed from Ably.'); })
+    instanceChannel.on('attached', (stateChange) => {
+        console.log('channel ' + channel.name + ' is now attached');
+        console.log('Message continuity on this channel ' + (stateChange.resumed ? 'was' : 'was not') + ' preserved');
     });
 
-    socket.emit('playerJoin', {
-        playerId: getCookie("currentPlayerId"),
-        playerName: getCookie("currentPlayerName"),
-        instanceId: getCookie("currentInstanceId"),
-        instanceName: getCookie("currentInstanceName"),
-    });
+    instanceChannel.publish('updateInstanceStatus', 'Le joueur ' + getCookie("currentPlayerName") + " a rejoint la partie");
 }
 
 const setPlayerReadyToPlaySocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("playerReadyToPlay", {
-        instanceId: getCookie("currentInstanceId"),
-    });
+    instanceChannel.publish('updateInstanceStatus', 'Le joueur ' + getCookie("currentPlayerName") + " est prêt à jouer");
 }
 
 const ownerStartGameSocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("ownerStartGame", {
-        instanceId: getCookie("currentInstanceId"),
-    });
+    instanceChannel.publish('updateInstanceStatus', 'Le joueur admin ' + getCookie("currentPlayerName") + " a démarré la partie");
 }
 
 const setPlayerActionSocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("playerAction", {
-        instanceId: getCookie("currentInstanceId"),
-    });
-    fetchAndDrawBoardScreen();
+    instanceChannel.publish('updateInstanceStatus', 'Le joueur ' + getCookie("currentPlayerName") + " a effectué une action");
+    //fetchAndDrawBoardScreen();
 }
 
 const setEndTurnSocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("endTurn", {
-        instanceId: getCookie("currentInstanceId"),
-    });
-    fetchAndDrawBoardScreen();
+    instanceChannel.publish('updateInstanceStatus', 'Le joueur ' + getCookie("currentPlayerName") + " a terminé son tour");
+    //fetchAndDrawBoardScreen();
 }
 
 const setPlayerUpdateMarketSocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("marketUpdate", {
-        instanceId: getCookie("currentInstanceId"),
-    });
+    instanceChannel.publish('marketUpdate', 'Le joueur ' + getCookie("currentPlayerName") + " a mis à jour le marché");
 }
 
 const setPlayerMoveArmySocket = () => {
-    if (!socketIsOn) {
-        return;
-    }
-    socket.emit("armyMove", {
-        instanceId: getCookie("currentInstanceId"),
-    });
+    instanceChannel.publish('armyMove', 'Le joueur ' + getCookie("currentPlayerName") + " a bougé son armée");
+}
+
+const disconnectSocket = async () => {
+    ablyClient.connection.close();
+    await ablyClient.connection.once("closed", function () {
+        console.log("Closed the connection to Ably.")
+      });
 }
 

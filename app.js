@@ -15,6 +15,7 @@ var playerRouter = require('./server/routes/player');
 var homeRouter = require('./server/routes/home');
 var instanceRouter = require('./server/routes/instance');
 var gameRouter = require('./server/routes/game');
+var apiRouter = require('./server/routes/api');
 const { error } = require('console');
 
 var app = express(); 
@@ -30,6 +31,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         "script-src": ["'self'", process.env.CSP_SRC_ENCRYPTION],
+        "connect-src": ["'self'", "https://internet-up.ably-realtime.com", "https://main.realtime.ably.net", "wss://main.realtime.ably.net"],
       },
     },
   }),
@@ -45,6 +47,7 @@ app.use(bodyParser.json());
 app.use('/', indexRouter);
 app.use('/player', playerRouter);
 app.use(verifyJWT);
+app.use('/api/', apiRouter)
 app.use('/home', homeRouter);
 app.use('/instance', instanceRouter);
 app.use('/game', gameRouter);
