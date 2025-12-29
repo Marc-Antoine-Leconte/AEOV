@@ -129,7 +129,7 @@ function InitGameBoardPage() {
         return;
     }
 
-    joinInstanceSocket();
+    joinInstanceSocket(currentInstanceId);
     setDisconnectButtonListener();
     setLeaveInstanceButtonListener();
     setToggleInfoBarButtonListener();
