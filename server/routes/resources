@@ -1,0 +1,18 @@
+var express = require('express');
+const { getAllActions } = require('../controllers/actionController');
+const { getAllBuildings } = require('../controllers/buildingController');
+var router = express.Router();
+
+/* GET all possible actions for a player. */
+router.get('/actions', async function (req, res, next) {
+  console.log('# Fetching actions');
+  return await getAllActions(req, res);
+});
+
+/* GET all possible buildings for a player. */
+router.get('/buildings', async function (req, res, next) {
+  console.log('# Fetching buildings');
+  return await getAllBuildings(req, res);
+});
+
+module.exports = router;

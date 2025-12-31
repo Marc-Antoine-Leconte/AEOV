@@ -12,7 +12,8 @@ const ownerStartGamePath = "/game/start";
 const readyToPlayPath = "/game/readyToPlay";
 const gameInfoPath = "/game/info";
 const playersInfoPath = "/game/playersInfo";
-const gameActionsPath = "/game/actions";
+const gameActionsPath = "/resources/actions";
+const gameBuildingsPath = "/resources/buildings";
 const gamePlayActionsPath = "/game/play";
 const endTurnPath = "/game/endTurn";
 const updateMarketPath = "/game/marketUpdate";
@@ -129,6 +130,11 @@ async function fetchPlayersInfoFromAPI(instanceId) {
 
 async function fetchAllActionsFromAPI() {
   const url = `${currentProtocol}${currentUrl}${gameActionsPath}`;
+  return await fetchDataFromAPI(url);
+}
+
+async function fetchAllBuildingsFromAPI() {
+  const url = `${currentProtocol}${currentUrl}${gameBuildingsPath}`;
   return await fetchDataFromAPI(url);
 }
 

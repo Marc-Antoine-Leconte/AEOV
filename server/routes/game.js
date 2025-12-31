@@ -3,6 +3,7 @@ const { getPlayerById } = require('../controllers/playerController');
 const { getInstancePlayerByPlayerAndInstance, updateInstancePlayer, getInstancePlayersByInstanceId, updateInstancePlayerByServer, updateInstancePlayerTurnStatus, updateInstancePlayerMarket } = require('../controllers/instancePlayerController');
 const { getInstanceById, updateInstance } = require('../controllers/instanceController');
 const { getAllActions } = require('../controllers/actionController');
+const { getAllBuildings } = require('../controllers/buildingController');
 const { createLocation, getLocationsByInstanceId, updateLocationByInstanceAndPoint } = require('../controllers/locationController');
 const { stringListToMap, mapToString } = require('../tool/helper');
 const { getPublicInstancePlayerData, getPublicInstancePlayerDataList } = require('../tool/dataFormatHelper');
@@ -317,12 +318,6 @@ router.post('/playersInfo', async function (req, res, next) {
   });
 });
 
-/* GET all possible actions for a player. */
-router.get('/actions', async function (req, res, next) {
-  console.log('# Fetching actions');
-  return await getAllActions(req, res);
-});
-
 /* POST player actions during a turn. */
 router.post('/play', async function (req, res, next) {
   console.log('# Player action');
@@ -373,6 +368,15 @@ router.post('/play', async function (req, res, next) {
     });
   }
 
+  const allBuildings = await getAllBuildings(req, res, false);
+  if (!allBuildings) {
+    console.log('Error while loading buildings');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading buildings"
+    });
+  }
+
   var allLocations = await getLocationsByInstanceId(req, res, false);
   if (!allLocations) {
     console.log('Error while loading locations');
@@ -396,6 +400,12 @@ router.post('/play', async function (req, res, next) {
       });
     }
   });
+
+  Object.entries(virtualBuildingList).forEach(([key, value]) => {
+    const buildingInfo = allBuildings.find(b => b.name == key);
+    virtualBuildingList[key] = { ...buildingInfo, level: value };
+  });
+
 
   console.log('||||| playerBuildingList => ', playerBuildingList);
   console.log('||||| virtualBuildingList => ', virtualBuildingList);
@@ -427,7 +437,11 @@ router.post('/play', async function (req, res, next) {
       if (!value || !key || tooMuchRequirement)
         return;
 
-      if (virtualBuildingList[key] != null && virtualBuildingList[key] >= value) {
+      console.log('||||| Checking requirement ', key, ' => ', value);
+      console.log('||||| virtualBuildingList[key] => ', virtualBuildingList[key]);
+      if (virtualBuildingList[key] != null
+        && virtualBuildingList[key].level != null
+        && virtualBuildingList[key].level >= value) {
         return;
       }
 
@@ -440,7 +454,7 @@ router.post('/play', async function (req, res, next) {
     });
 
     if (tooMuchRequirement) {
-      errorMessages.push(`Not enough requirements for action: ${actionToPlay.name}`);
+      errorMessages.push(`Not enough resources or buildings for action: ${actionToPlay.name}`);
     } else {
       console.log('||||| requirements OK');
 
@@ -514,7 +528,7 @@ router.post('/play', async function (req, res, next) {
           Object.entries(contestedLocationBuildings).forEach(([key, value]) => {
             const trimmedKey = key.trim();
             const trimmedValue = value;
-            
+
             if (trimmedKey == 'pillagerVillage' && trimmedValue != null) {
               fortificationForce += trimmedValue * 2;
             }
@@ -659,6 +673,24 @@ router.post('/endTurn', async function (req, res, next) {
     });
   }
 
+  const allBuildings = await getAllBuildings(req, res, false);
+  if (!allBuildings) {
+    console.log('Error while loading buildings');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading buildings"
+    });
+  }
+
+  var allLocations = await getLocationsByInstanceId(req, res, false);
+  if (!allLocations) {
+    console.log('Error while loading locations');
+    return res.status(403).json({
+      statusCode: 403,
+      message: "Error while loading locations"
+    });
+  }
+
   await updateInstancePlayerTurnStatus({ ...req, body: { ...req.body, endTurn: true } }, res, false);
 
   var allPlayerInstances = await getInstancePlayersByInstanceId(req, res, false);
@@ -677,6 +709,35 @@ router.post('/endTurn', async function (req, res, next) {
 
   // All players have ended their turn, reset for next turn
   allPlayerInstances.forEach(async (element) => {
+    const elementData = element.dataValues ? element.dataValues : element;
+
+    var playerBuildingList = stringListToMap(elementData.buildings);
+    var virtualBuildingList = { ...playerBuildingList };
+    allLocations.forEach(location => {
+      if (location.ownerId == elementData.playerId) {
+        const locationBuildings = stringListToMap(location.buildings);
+        Object.entries(locationBuildings).forEach(([key, value]) => {
+          if (virtualBuildingList[key] == null) {
+            virtualBuildingList[key] = value;
+          } else {
+            virtualBuildingList[key] = parseInt(virtualBuildingList[key]) + parseInt(value);
+          }
+        });
+      } else {
+        console.log('|-|-||--|-| Location not owned by player ', elementData.playerId, ' => ', location.ownerId, ' != ', element.id);
+      }
+    });
+
+    console.log('||||| virtualBuildingList => ', virtualBuildingList);
+
+    Object.entries({ ...virtualBuildingList }).forEach(([key, value]) => {
+      const buildingInfo = allBuildings.find(b => b.name.toLowerCase() == key.toLowerCase());
+      virtualBuildingList[key] = { ...buildingInfo, level: value };
+    });
+
+    console.log('||||| playerBuildingList => ', playerBuildingList);
+    console.log('||||| virtualBuildingList => ', virtualBuildingList);
+
     element.endTurn = false;
 
     // reset base resources
@@ -684,8 +745,51 @@ router.post('/endTurn', async function (req, res, next) {
     element.tool = element.maxTool;
     element.armyMovementPoints = element.maxArmyMovementPoints;
 
+    Object.entries(virtualBuildingList).forEach(([key, buildingData]) => {
+      const building = buildingData.dataValues ? buildingData.dataValues : buildingData;
+      if (building.effects == null || building.effects.length <= 0) {
+        return;
+      }
+
+      const effects = stringListToMap(building.effects);
+      Object.entries(effects).forEach(([effectKey, value]) => {
+        if (!value || !effectKey)
+          return;
+        const trimmedValue = value.trim();
+        const trimmedKey = effectKey.trim();
+
+        console.log('||||| Applying end of turn effect ', trimmedKey, ' => ', trimmedValue);
+
+        var selectedResource = trimmedKey;
+        var effectApplied = 5;
+
+        if (trimmedKey == "random") {
+          const resourceKeys = ['wood', 'stone', 'iron', 'food', 'tool', 'treasure', 'horse', 'armor', 'weapon', 'siege', 'gold', 'diamond'];
+          selectedResource = resourceKeys[Math.floor(Math.random() * resourceKeys.length)];
+        }
+
+        // A possible effect is to increase a resource according to the max population/tool/armyMovementPoints
+        const effectValueList = ['maxPopulation', 'maxTool', 'maxArmyMovementPoints'];
+        if (effectValueList.includes(trimmedValue)) {
+          effectApplied = element[trimmedValue] || 1;
+        } else if (!isNaN(parseInt(trimmedValue))) {
+          effectApplied = parseInt(trimmedValue);
+        }
+
+        element[selectedResource] = (element[selectedResource] || 0) + effectApplied;
+        console.log('||||| Player has gained ', effectApplied, ' ', selectedResource);
+      });
+
+    });
+
+    // if batiment include camp => army +=1
+    // if batiment include pound => food += maxPopulation
+    // if batiment include fair => random + 5
+    // if batiment include village => population +=1
+    // if batiment include woodhut => wood += maxPopulation
+
     //consume food
-    element.food = element.food - element.maxPopulation - element.army;
+    element.food = element.food - element.maxPopulation - element.army - element.horse;
 
     if (element.food < 0) {
       element.food = -1;

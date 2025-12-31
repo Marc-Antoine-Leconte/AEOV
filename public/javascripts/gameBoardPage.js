@@ -86,6 +86,24 @@ function fetchAndDrawBoardScreen() {
             currentInstance.actions = playerActions;
             DrawPlayerActions();
         });
+
+        fetchGameBuildings().then((response) => {
+            if (!response || response.length == 0) {
+                console.log('No buildings fetched from server');
+                return;
+            }
+
+            const playerBuildings = response.map(building => {
+                const effects = stringToMap(building.effects);
+                const cost = stringToMap(building.cost);
+                const upgradeCost = stringToMap(building.upgradeCost);
+
+                return { ...building, effects, cost, upgradeCost };
+            });
+
+            currentInstance.buildings = playerBuildings;
+            DrawPlayerBuildingsInformations();
+        });
     });
 }
 

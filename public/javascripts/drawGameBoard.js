@@ -174,7 +174,7 @@ function DrawPlayerList() {
         playerInfoContainer.appendChild(playerNameContainer);
 
         const playerStatusComp = document.createElement("span");
-        
+
         var statusText = "";
         var statusClass = "";
 
@@ -195,7 +195,7 @@ function DrawPlayerList() {
                 statusClass = "player-item-status-playing";
             }
         }
-        
+
         playerStatusComp.className = "player-item-status " + statusClass;
         playerStatusComp.innerHTML = statusText;
         playerInfoContainer.appendChild(playerStatusComp);
@@ -294,6 +294,106 @@ function DrawActionList(actions, className, disabled = false) {
         }
         typeContainer.appendChild(actionItem);
     });
+}
+
+
+function DrawBuildingInformationList(buildings, className) {
+    var buildingListContainer = document.getElementById(className);
+    if (!buildingListContainer) {
+        const buildingsContainerComp = document.getElementById("overlay-informations");
+        buildingListContainer = document.createElement("div");
+        buildingListContainer.id = className;
+        buildingsContainerComp.appendChild(buildingListContainer);
+    }
+    buildingListContainer.innerHTML = '';
+
+    console.log('# Drawing building list:', className);
+
+    Object.entries(buildings).forEach(([id, building]) => {
+        const buildingItem = document.createElement("div");
+        buildingItem.className = className + "-item collapsed";
+
+        // HEADER CONTAINER
+        const buildingTextHeader = document.createElement("div");
+        buildingTextHeader.className = "building-text-header";
+        buildingTextHeader.title = building.title;
+
+        // Image
+        const buildingTextHeaderImg = document.createElement("img");
+        buildingTextHeaderImg.src = "/images/buildings/" + building.name.toLowerCase() + "_1.png";
+        buildingTextHeaderImg.alt = building.name;
+        buildingTextHeaderImg.className = "building-text-header-image";
+        buildingTextHeader.appendChild(buildingTextHeaderImg);
+
+        // Title
+        const buildingTextHeaderTitle = document.createElement("span");
+        buildingTextHeaderTitle.innerHTML = building.title;
+        buildingTextHeader.appendChild(buildingTextHeaderTitle);
+
+        // Toggle button
+        const buildingTextHeaderToggleButton = document.createElement("img");
+        buildingTextHeaderToggleButton.className = "building-text-header-toggle";
+        buildingTextHeaderToggleButton.src = "/images/icons/down-arrow.png";
+
+        buildingTextHeader.appendChild(buildingTextHeaderToggleButton);
+        buildingTextHeader.addEventListener('click', () => {
+            if (buildingItem.classList.contains("collapsed")) {
+                buildingItem.classList.remove("collapsed");
+                buildingTextHeaderToggleButton.src = "/images/icons/up-arrow.png";
+            } else {
+                buildingItem.classList.add("collapsed");
+                buildingTextHeaderToggleButton.src = "/images/icons/down-arrow.png";
+            }
+        });
+
+        // DESCRIPTION CONTAINER
+        const buildingTextDescriptionComp = document.createElement("div");
+        buildingTextDescriptionComp.className = "building-text-description-comp";
+
+        // Description
+        const buildingTextDescription = document.createElement("div");
+        buildingTextDescription.className = "building-text-description";
+        buildingTextDescription.innerHTML = "<b>Niveau Max : </b> " + building.maxLevel + "<br/><b>Constructible : </b>" + (!!building.constructible ? "Oui" : "Non") + "<br/><h4>Description:</h4>" + building.description;
+        buildingTextDescriptionComp.appendChild(buildingTextDescription);
+
+        // Effects
+        const buildingTextEffects = document.createElement("div");
+        buildingTextEffects.className = "building-text-effects-comp";
+        buildingTextEffects.innerHTML = "<h4>Effet de fin de tour :</h4><ul>" + Object.entries(building.effects).map(([key, effect]) => {
+            return `<li class="building-text-effect"><img src="/images/resources/${key.toLowerCase()}.png" title="${key}" /> x ${effect}</li>`;
+        }).join("") + "</ul>";
+        buildingTextDescriptionComp.appendChild(buildingTextEffects);
+
+        // Costs
+        const buildingTextCosts = document.createElement("div");
+        buildingTextCosts.className = "building-text-costs-comp";
+        buildingTextCosts.innerHTML = "<h4>Coût de construction :</h4><ul>" + Object.entries(building.cost).map(([key, cost]) => {
+            return `<li class="building-text-cost">${cost} : <img src="/images/resources/${key.toLowerCase()}.png" title="${key}" /></li>`;
+        }).join("") + "</ul>";
+        buildingTextDescriptionComp.appendChild(buildingTextCosts);
+
+        // Upgrade costs
+        // Effects
+        const buildingTextUpgradeCosts = document.createElement("div");
+        buildingTextUpgradeCosts.className = "building-text-upgrade-costs-comp";
+        buildingTextUpgradeCosts.innerHTML = "<h4>Coût d'amélioration :</h4><ul>" + Object.entries(building.upgradeCost).map(([key, cost]) => {
+            return `<li class="building-text-upgrade-cost">${cost} : <img src="/images/resources/${key.toLowerCase()}.png" title="${key}" /></li>`;
+        }).join("") + "</ul>";
+        buildingTextDescriptionComp.appendChild(buildingTextUpgradeCosts);
+
+
+        buildingItem.appendChild(buildingTextHeader);
+        buildingItem.appendChild(buildingTextDescriptionComp);
+
+        buildingListContainer.appendChild(buildingItem);
+    });
+}
+
+function DrawPlayerBuildingsInformations() {
+    console.log('# Drawing player buildings...');
+    const buildings = currentInstance.buildings;
+
+    DrawBuildingInformationList(buildings, "overlay-buildings");
 }
 
 function DrawPlayerActions() {
@@ -819,6 +919,7 @@ function DrawCityOverlay() {
     });
 
     DrawPlayerActions();
+    DrawPlayerBuildingsInformations();
 
     console.log("# Drawing city overlay OK");
 }
@@ -854,7 +955,7 @@ function AddItemToMarket(item, price, quantity, currency, instancePlayerId) {
     currentInstance.currentPlayer[item] -= quantity;
     const playerIndex = currentInstance.playerList.findIndex(p => p.instancePlayerId === instancePlayerId);
     var marketItems = JSON.parse(currentInstance.playerList[playerIndex].market);
-    var itemObject = {item, price, quantity, currency}
+    var itemObject = { item, price, quantity, currency }
     marketItems.push(itemObject);
     currentInstance.playerList[playerIndex].market = JSON.stringify(marketItems);
     return true;
@@ -875,7 +976,7 @@ function buyMarketItem(slotId, instancePlayerId) {
             console.error('# Error buying market item:', data.message);
             return;
         }
-        
+
         currentInstance.currentPlayer[marketItem.currency] -= marketItem.price;
         currentInstance.currentPlayer[marketItem.item] += 1;
         DrawPlayerResources();
@@ -1005,7 +1106,7 @@ function DrawMarketOverlay() {
             marketItemQuantity.innerHTML = " x " + slot.quantity;
             marketItemQuantity.alt = slot.item;
             marketItemQuantity.id = `market-item-quantity-${slotId}`;
-            
+
             marketItem.appendChild(marketItemImage);
             marketItem.appendChild(marketItemQuantity);
 
@@ -1057,7 +1158,7 @@ function DrawMarketOverlay() {
             itemToSellLabel.htmlFor = `item-to-sell-select`;
             itemToSellLabel.innerText = "Article à vendre : ";
             emptySlotItem.appendChild(itemToSellLabel);
-            
+
             const itemToSell = document.createElement("select");
             itemToSell.id = `item-to-sell-select`;
             ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool"].forEach((resource) => {
@@ -1178,6 +1279,7 @@ function DrawMarketOverlay() {
     });
 
     DrawPlayerActions();
+    DrawPlayerBuildingsInformations();
 
     console.log("# Drawing market overlay OK");
 }

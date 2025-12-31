@@ -138,6 +138,10 @@ function fetchGameActions() {
     return fetchAllActionsFromAPI();
 }
 
+function fetchGameBuildings() {
+    return fetchAllBuildingsFromAPI();
+}
+
 function postGameActions(actions) {
     instanceId = getCookie("currentInstanceId");
     return postGameActionsToAPI(actions, instanceId);

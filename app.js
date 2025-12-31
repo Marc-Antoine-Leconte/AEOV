@@ -16,6 +16,8 @@ var homeRouter = require('./server/routes/home');
 var instanceRouter = require('./server/routes/instance');
 var gameRouter = require('./server/routes/game');
 var apiRouter = require('./server/routes/api');
+var resourcesRouter = require('./server/routes/resources');
+
 const { error } = require('console');
 
 var app = express(); 
@@ -47,7 +49,8 @@ app.use(bodyParser.json());
 app.use('/', indexRouter);
 app.use('/player', playerRouter);
 app.use(verifyJWT);
-app.use('/api/', apiRouter)
+app.use('/resources', resourcesRouter)
+app.use('/api', apiRouter)
 app.use('/home', homeRouter);
 app.use('/instance', instanceRouter);
 app.use('/game', gameRouter);

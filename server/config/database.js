@@ -5,6 +5,7 @@ const instancePlayerModel = require('../models/instancePlayer')
 const playerModel = require('../models/player')
 const actionModel = require('../models/action')
 const locationModel = require('../models/location')
+const buildingModel = require('../models/building')
 
 const options_devenv = {
     options: {
@@ -41,6 +42,7 @@ db.Instance = instanceModel(sequelize);
 db.InstancePlayer = instancePlayerModel(sequelize);
 db.Player = playerModel(sequelize);
 db.Action = actionModel(sequelize);
+db.Building = buildingModel(sequelize);
 db.Location = locationModel(sequelize);
 
 db.Instance.hasMany(db.InstancePlayer, { foreignKey: 'instanceId' });
