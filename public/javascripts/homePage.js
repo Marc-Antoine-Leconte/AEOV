@@ -45,9 +45,15 @@ async function onCreateInstanceButtonClick() {
     const instanceCreationErrorMessage = document.getElementById("instance-creation-error-message");
     instanceCreationErrorMessage.hidden = true;
     
-    alert('Create Instance button clicked!');
     const instanceNameInput = document.getElementById("new-instance-name");
-    const instanceName = instanceNameInput.value || "Une super partie !";
+    const instanceName = instanceNameInput.value;
+
+    if (!instanceName || instanceName.trim() == "") {
+        console.log('# Invalid instance name');
+        instanceCreationErrorMessage.innerHTML = "Le nom de l'instance ne peut pas être vide.";
+        instanceCreationErrorMessage.hidden = false;
+        return;
+    }
     
     createInstance(instanceName, "pvp").then((createdInstance) => { 
         if (createdInstance.message) {

@@ -35,9 +35,8 @@ function onSubscribeButtonClick() {
     }
 
     subscribePlayer(userNameInput.value, userPwdInput.value).then((data) => {
-        if (data && !data.errors && !data.error && data.id) {
+        if (data.name && !data.errors && !data.error) {
             setCookie("currentPlayerName", data.name, 1);
-            setCookie("currentPlayerId", data.id, 1);
             redirectToUrl("/home");
             return
         } else {
@@ -64,12 +63,6 @@ function hideHeader() {
 }
 
 function InitSubscribePage() {
-    // const currentId = getCookie("currentPlayerId");
-    // if (currentId && currentId != "" && !isNaN(currentId)) {
-    //     console.log('Player is already connected, redirecting to home page...');
-    //     redirectToUrl("/home");
-    //     return;
-    // }
     console.log('Player is not connected, staying on subscribe page...');
     
     hideHeader();

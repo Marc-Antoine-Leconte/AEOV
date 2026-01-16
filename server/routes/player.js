@@ -52,7 +52,7 @@ router.post('/authenticate', validatePlayer, async function (req, res) {
     const authenticatedUser = await authenticatePlayer(req, res, false);
 
     if (!authenticatedUser) {
-        res.status(404).json({
+        return res.status(404).json({
             statusCode: 404,
             message: "Player not found"
         });
@@ -69,7 +69,7 @@ router.post('/authenticate', validatePlayer, async function (req, res) {
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
     await updatePlayerTokenByServer({ body: { refreshToken: req.refreshToken, id: authenticatedUser.id } }, res, false);
 
-    res.status(200).json(getPrivatePlayerData(authenticatedUser, null));
+    return res.status(200).json(getPrivatePlayerData(authenticatedUser, null));
 });
 
 router.get('/logout', async function (req, res) {
