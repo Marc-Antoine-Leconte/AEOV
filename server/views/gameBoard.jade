@@ -2,6 +2,7 @@ extends layout
 
 block content  
   link(rel="stylesheet", href="css/gameBoardPage.css")
+  link(rel="stylesheet", href="css/wikiComponents.css")
 
   div(id="game-board-instance-data-error-message", hidden=true)
 
@@ -116,6 +117,7 @@ block content
       ul(id="game-log-messages")
 
   script(src='/javascripts/tools/helpers.js')
+  script(src='/javascripts/component/wikiComponents.js')
   script(src='/javascripts/gameBoardNavigation.js')
   script(src='/javascripts/gameMechanics.js')
   script(src='/javascripts/drawGameBoard.js')
