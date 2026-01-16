@@ -71,6 +71,7 @@ function DrawPlayerResources() {
         "gold",
         "diamond",
         "iron",
+        "leather",
         "armor",
         "weapon",
         "horse",
@@ -275,7 +276,7 @@ function DrawActionList(actions, className, disabled = false) {
 
         const actionItem = document.createElement("button");
         actionItem.className = className + "-item";
-        actionItem.innerHTML = action.name;
+        actionItem.innerHTML = action.title;
 
         const requirements = { ...action.requiredBuildings, ...action.requiredResources };
         actionItem.addEventListener('click', () => executeAction(action.id, requirements, action.effects, () => {
@@ -356,25 +357,42 @@ function DrawPlayerActions() {
     console.log('# Drawing player actions OK');
 }
 
-function DrawBuildingInformationList(buildings) {
-    const className = "overlay-buildings";
-    var buildingListContainer = document.getElementById(className);
+function DrawWiki(buildings, actions) {
+    const wikiContainerId = "overlay-wiki";
+    var buildingListContainer = document.getElementById(wikiContainerId);
     if (!buildingListContainer) {
         const buildingsContainerComp = document.getElementById("overlay-informations");
         buildingListContainer = document.createElement("div");
-        buildingListContainer.id = className;
+        buildingListContainer.id = wikiContainerId;
         buildingsContainerComp.appendChild(buildingListContainer);
     }
     buildingListContainer.innerHTML = '';
 
-    console.log('# Drawing building list:', className);
+    console.log('# Drawing building list:', wikiContainerId);
+
+    const buildingTitle = document.createElement("h2");
+    buildingTitle.innerText = "Wiki bâtiments";
+    buildingListContainer.appendChild(buildingTitle);
 
     Object.entries(buildings).forEach(([id, building]) => {
         DrawWikiBuildingComponent({
-            baseClassName: className,
-            parentId: className,
+            baseClassName: wikiContainerId + "-building",
+            parentId: wikiContainerId,
             componentId: id,
             building: building
+        });
+    });
+
+    const actionTitle = document.createElement("h2");
+    actionTitle.innerText = "Wiki actions";
+    buildingListContainer.appendChild(actionTitle);
+
+    Object.entries(actions).forEach(([id, action]) => {
+        DrawWikiActionComponent({
+            baseClassName: wikiContainerId + "-action",
+            parentId: wikiContainerId,
+            componentId: id,
+            action: action
         });
     });
 }
@@ -382,8 +400,9 @@ function DrawBuildingInformationList(buildings) {
 function DrawPlayerBuildingsInformations() {
     console.log('# Drawing player buildings...');
     const buildings = currentInstance.buildings;
+    const actions = currentInstance.actions;
 
-    DrawBuildingInformationList(buildings);
+    DrawWiki(buildings, actions);
 }
 
 function DrawGameBoard() {
@@ -1091,7 +1110,7 @@ function DrawMarketOverlay() {
 
             const itemToSell = document.createElement("select");
             itemToSell.id = `item-to-sell-select`;
-            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool"].forEach((resource) => {
+            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
                 const option = document.createElement("option");
                 option.value = resource;
                 option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
@@ -1123,7 +1142,7 @@ function DrawMarketOverlay() {
             emptySlotItem.appendChild(itemCurrency);
 
             itemCurrency.id = `item-price-select`;
-            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool"].forEach((resource) => {
+            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
                 const option = document.createElement("option");
                 option.value = resource;
                 option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);

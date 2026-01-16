@@ -12,6 +12,14 @@ function model(sequelize) {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
+        title: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING(512),
+            allowNull: true,
+        },
         requiredBuildings: {
             type: DataTypes.STRING(100),
             allowNull: true,

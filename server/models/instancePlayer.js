@@ -43,6 +43,11 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 100,
         },
+        leather: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
         diamond: {
             type: DataTypes.INTEGER,
             allowNull: false,

@@ -14,11 +14,13 @@ function DrawWikiHeaderComponent(params) {
     headerComponent.title = title;
 
     // Image
-    const headerComponentImg = document.createElement("img");
-    headerComponentImg.src = imgSrc;
-    headerComponentImg.alt = imgAlt;
-    headerComponentImg.className = baseClassName + "-image" + " wiki-item-header-img";
-    headerComponent.appendChild(headerComponentImg);
+    if (imgSrc) {
+        const headerComponentImg = document.createElement("img");
+        headerComponentImg.src = imgSrc;
+        headerComponentImg.alt = imgAlt;
+        headerComponentImg.className = baseClassName + "-image" + " wiki-item-header-img";
+        headerComponent.appendChild(headerComponentImg);
+    }
 
     // Title
     const headerComponentTitle = document.createElement("span");
@@ -128,4 +130,90 @@ function DrawWikiBuildingComponent(params) {
 
     DrawWikiHeaderComponent(headerParams);
     DrawWikiBuildingBodyComponent(bodyParams);
+}
+
+//
+// Drawing a wiki body for a action
+//
+function DrawWikiActionBodyComponent(params) {
+    const { baseClassName, parentId, action } = params;
+
+    // Parent component
+    const parentComponent = document.getElementById(parentId);
+
+    // BODY CONTAINER
+    const bodyComponent = document.createElement("div");
+    bodyComponent.className = baseClassName + " wiki-item-body";
+    bodyComponent.id = parentId + "-body";
+
+    // Description Container
+    const descriptionComponent = document.createElement("div");
+    descriptionComponent.className = baseClassName + "-description";
+
+    var html = "";
+    html += "<h4 class='wiki-item-description-title'>Type : </h4> " + action.type + "<br/>";
+    html += "<h4 class='wiki-item-description-title'>Description:</h4>" + action.description;
+
+    descriptionComponent.innerHTML = html;
+    bodyComponent.appendChild(descriptionComponent);
+
+    // Effects Container
+    const effectsComponent = document.createElement("div");
+    effectsComponent.className = baseClassName + "-effects";
+    effectsComponent.innerHTML = "<h4 class='wiki-item-description-title'>Ressources obtenues :</h4><ul class='wiki-item-description-list'>" + Object.entries(action.effects).map(([resource, quantity]) => {
+        if (resource == 'building') {
+            return `<li class="${baseClassName}-effect"><img src="/images/buildings/${quantity.toLowerCase()}_1.png" title="${quantity}" />${quantity} x 1</li>`;
+        }
+        return `<li class="${baseClassName}-effect"><img src="/images/resources/${resource.toLowerCase()}.png" title="${resource}" /> x ${quantity}</li>`;
+    }).join("") + "</ul>";
+    bodyComponent.appendChild(effectsComponent);
+
+    // Required Buildings Container
+    const costsComponent = document.createElement("div");
+    costsComponent.className = baseClassName + "-costs";
+    costsComponent.innerHTML = "<h4 class='wiki-item-description-title'>Bâtiments nécessaires :</h4><ul class='wiki-item-description-list'>" + Object.entries(action.requiredBuildings).map(([buildingName, level]) => {
+        return `<li class="${baseClassName}-required-buildings"><img src="/images/buildings/${buildingName.toLowerCase()}_1.png" title="${buildingName}" /> ${buildingName} niv. ${level}</li>`;
+    }).join("") + "</ul>";
+    bodyComponent.appendChild(costsComponent);
+
+    // Required resources
+    const upgradeCostsComponent = document.createElement("div");
+    upgradeCostsComponent.className = baseClassName + "-upgrade-costs";
+    upgradeCostsComponent.innerHTML = "<h4 class='wiki-item-description-title'>Coût de l'action :</h4><ul class='wiki-item-description-list'>" + Object.entries(action.requiredResources).map(([resource, quantity]) => {
+        return `<li class="${baseClassName}-required-resources"><img src="/images/resources/${resource.toLowerCase()}.png" title="${resource}" /> x ${quantity}</li>`;
+    }).join("") + "</ul>";
+    bodyComponent.appendChild(upgradeCostsComponent);
+
+    parentComponent.appendChild(bodyComponent);
+}
+
+//
+// Drawing a wiki item for a action
+//
+function DrawWikiActionComponent(params) {
+    const { baseClassName, parentId, componentId, action } = params;
+    const itemClassName = baseClassName + "-item";
+    const itemId = `${itemClassName}-${componentId}`;
+
+    const actionItem = document.createElement("div");
+    actionItem.className = itemClassName + " wiki-item collapsed";
+    actionItem.id = itemId;
+    document.getElementById(parentId).appendChild(actionItem);
+
+    const headerParams = {
+        baseClassName: baseClassName + "-header",
+        parentId: itemId,
+        title: action.title,
+        //imgSrc: "/images/actions/" + action.name.toLowerCase() + ".png",
+        imgAlt: action.name
+    };
+
+    const bodyParams = {
+        baseClassName: baseClassName + "-body",
+        parentId: itemId,
+        action: action
+    };
+
+    DrawWikiHeaderComponent(headerParams);
+    DrawWikiActionBodyComponent(bodyParams);
 }
