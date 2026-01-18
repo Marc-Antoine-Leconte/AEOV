@@ -738,12 +738,27 @@ router.post('/endTurn', async function (req, res, next) {
   var gameParameters = JSON.parse(instance.parameters);
   console.log('Game parameters: ', gameParameters);
   var winners = [];
+  
+  // Check victory conditions
+
+  // Max points victory
   if (gameParameters.victoryCondition == 'maxPoints') {
     winners = allPlayerInstances.filter(element => element.treasure >= gameParameters.maxPoints);
-  } else if (gameParameters.victoryCondition == 'armyHegemony') {
+  }
+  
+  // Army hegemony victory
+  if (gameParameters.victoryCondition == 'armyHegemony') {
     const standingPlayers = allPlayerInstances.filter(element => element.army > 0 );
     if (standingPlayers.length == 1) {
       winners = standingPlayers;
+    }
+  }
+
+  // Max points in max turns
+  if (gameParameters.victoryCondition == 'maxPointsInTurns') {
+    if (instance.currentTurn >= gameParameters.maxTurns) {
+      const maxPoints = Math.max(...allPlayerInstances.map(p => p.treasure));
+      winners = allPlayerInstances.filter(element => element.treasure >= maxPoints);
     }
   }
 
@@ -852,6 +867,11 @@ router.post('/endTurn', async function (req, res, next) {
 
     await updateInstancePlayerByServer({ ...req, body: element.dataValues }, res, false);
   });
+
+  // Update instance turn
+  var updatedInstance = { ...(instance.dataValues ? instance.dataValues : instance) };
+  updatedInstance.rounds = updatedInstance.rounds + 1;
+  await updateInstance(req, res, updatedInstance);
 
   return res.status(200).json({ ok: true });
 });

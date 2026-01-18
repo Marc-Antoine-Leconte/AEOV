@@ -233,9 +233,11 @@ function DrawInstanceData() {
     var html = "";
     const instanceParameters = JSON.parse(data.parameters);
     if (instanceParameters.victoryCondition == "maxPoints") {
-        html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> points de victoire gagne la partie.";
+        html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> trésors gagne la partie.";
     } else if (instanceParameters.victoryCondition == "armyHegemony") {
         html += "Le joueur qui est le seul à posséder une armée gagne la partie";
+    } else if (instanceParameters.victoryCondition == "maxPointsInTurns") {
+        html += "Le joueur qui a le plus de trésors au bout de <b>" + (instanceParameters.maxTurns ?? 50) + "</b> tours gagne la partie.";
     }
     instanceVictoryConditionComp.innerHTML = html;
     instanceStatusComp.innerHTML = data.gameState;
@@ -463,7 +465,7 @@ function DrawGameParamsEditor() {
     // option 1 - max points
     const optionMaxPoints = document.createElement("option");
     optionMaxPoints.value = "maxPoints";
-    optionMaxPoints.innerText = "Atteindre un nombre de points de victoire";
+    optionMaxPoints.innerText = "Atteindre un nombre de trésors défini";
     if (instanceParameters.victoryCondition == "maxPoints") {
         optionMaxPoints.selected = true;
     }
@@ -477,6 +479,15 @@ function DrawGameParamsEditor() {
         optionArmyHegemony.selected = true;
     }
     victoryConditionInput.appendChild(optionArmyHegemony);
+
+    // option 3 - maxPointsInTurns
+    const optionMaxPointsInTurns = document.createElement("option");
+    optionMaxPointsInTurns.value = "maxPointsInTurns";
+    optionMaxPointsInTurns.innerText = "Avoir le plus de trésors après un nombre de tours défini";
+    if (instanceParameters.victoryCondition == "maxPointsInTurns") {
+        optionMaxPointsInTurns.selected = true;
+    }
+    victoryConditionInput.appendChild(optionMaxPointsInTurns);
 
     // On change listener
     victoryConditionInput.addEventListener('change', (event) => {
@@ -497,9 +508,9 @@ function DrawGameParamsEditor() {
     // Max Points (if victory condition is max points)
     if (instanceParameters.victoryCondition == "maxPoints") {
         // title
-        const victoryConditionTitle = document.createElement("span");
-        victoryConditionTitle.innerText = "nombre de points à atteindre : ";
-        gameParamsContainer.appendChild(victoryConditionTitle);
+        const maxPointsTitle = document.createElement("span");
+        maxPointsTitle.innerText = "nombre de trésors à atteindre : ";
+        gameParamsContainer.appendChild(maxPointsTitle);
 
         // select
         const maxPointsSelect = document.createElement("select");
@@ -526,6 +537,43 @@ function DrawGameParamsEditor() {
             });
         });
         gameParamsContainer.appendChild(maxPointsSelect);
+    }
+
+    // Max Points (if victory condition is max points)
+    if (instanceParameters.victoryCondition == "maxPointsInTurns") {
+        // title
+        const maxTurnsTitle = document.createElement("span");
+        maxTurnsTitle.innerText = "nombre de tours maximum : ";
+        gameParamsContainer.appendChild(maxTurnsTitle);
+
+        // select
+        const maxTurnsSelect = document.createElement("select");
+        if (!instanceParameters.maxTurns) {
+            instanceParameters.maxTurns = 50;
+        }
+        Object.entries([25, 50, 100, 200, 500]).forEach(([key, value]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.innerText = value;
+            if (instanceParameters.maxTurns == value) {
+                option.selected = true;
+            }
+            maxTurnsSelect.appendChild(option);
+        });
+        maxTurnsSelect.addEventListener('change', (event) => {
+            const newMaxTurns = parseInt(event.target.value);
+            instanceParameters.maxTurns = newMaxTurns;
+            updateInstanceParameters(JSON.stringify(instanceParameters)).then((data) => {
+                if (data.error || data.message) {
+                    console.log('# Error updating instance parameters:', data.message);
+                } else {
+                    currentInstance.data.parameters = JSON.stringify(instanceParameters);
+                    DrawInstanceData();
+                    DrawGameParamsEditor();
+                }
+            });
+        });
+        gameParamsContainer.appendChild(maxTurnsSelect);
     }
 
     console.log('# Drawing game parameters editor OK');
