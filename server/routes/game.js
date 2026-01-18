@@ -737,23 +737,29 @@ router.post('/endTurn', async function (req, res, next) {
   // Check for game end
   var gameParameters = JSON.parse(instance.parameters);
   console.log('Game parameters: ', gameParameters);
+  var winners = [];
   if (gameParameters.victoryCondition == 'maxPoints') {
-    const winners = allPlayerInstances.filter(element => element.treasure >= gameParameters.maxPoints);
-
-    if (winners.length > 0) {
-      var newInstance = { ...(instance.dataValues ? instance.dataValues : instance) };
-      if (winners.length > 1) {
-        console.log('Game ended with a tie between players: ', winners.map(w => w.playerId));
-        gameParameters.winner = winners.map(w => w.id).join(',');
-      } else {
-        console.log('Game ended, winner is player: ', winners[0].playerId);
-        gameParameters.winner = winners[0].id;
-      }
-      newInstance.gameState = 'completed';
-      newInstance.parameters = JSON.stringify(gameParameters);
-      await updateInstance(req, res, newInstance);
-      return res.status(200).json({ ok: true });
+    winners = allPlayerInstances.filter(element => element.treasure >= gameParameters.maxPoints);
+  } else if (gameParameters.victoryCondition == 'armyHegemony') {
+    const standingPlayers = allPlayerInstances.filter(element => element.army > 0 );
+    if (standingPlayers.length == 1) {
+      winners = standingPlayers;
     }
+  }
+
+  if (winners.length > 0) {
+    var newInstance = { ...(instance.dataValues ? instance.dataValues : instance) };
+    if (winners.length > 1) {
+      console.log('Game ended with a tie between players: ', winners.map(w => w.playerId));
+      gameParameters.winner = winners.map(w => w.id).join(',');
+    } else {
+      console.log('Game ended, winner is player: ', winners[0].playerId);
+      gameParameters.winner = winners[0].id;
+    }
+    newInstance.gameState = 'completed';
+    newInstance.parameters = JSON.stringify(gameParameters);
+    await updateInstance(req, res, newInstance);
+    return res.status(200).json({ ok: true });
   }
 
   // Update players

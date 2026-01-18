@@ -234,6 +234,8 @@ function DrawInstanceData() {
     const instanceParameters = JSON.parse(data.parameters);
     if (instanceParameters.victoryCondition == "maxPoints") {
         html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> points de victoire gagne la partie.";
+    } else if (instanceParameters.victoryCondition == "armyHegemony") {
+        html += "Le joueur qui est le seul à posséder une armée gagne la partie";
     }
     instanceVictoryConditionComp.innerHTML = html;
     instanceStatusComp.innerHTML = data.gameState;
@@ -468,13 +470,13 @@ function DrawGameParamsEditor() {
     victoryConditionInput.appendChild(optionMaxPoints);
 
     // option 2 - armyHegemony
-    // const optionArmyHegemony = document.createElement("option");
-    // optionArmyHegemony.value = "armyHegemony";
-    // optionArmyHegemony.innerText = "Détruire toutes les armées adverses";
-    // if (instanceParameters.victoryCondition == "armyHegemony") {
-    //     optionArmyHegemony.selected = true;
-    // }
-    // victoryConditionInput.appendChild(optionArmyHegemony);
+    const optionArmyHegemony = document.createElement("option");
+    optionArmyHegemony.value = "armyHegemony";
+    optionArmyHegemony.innerText = "Détruire toutes les armées adverses";
+    if (instanceParameters.victoryCondition == "armyHegemony") {
+        optionArmyHegemony.selected = true;
+    }
+    victoryConditionInput.appendChild(optionArmyHegemony);
 
     // On change listener
     victoryConditionInput.addEventListener('change', (event) => {
