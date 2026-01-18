@@ -221,6 +221,7 @@ function DrawInstanceData() {
 
     const instanceNameComp = document.getElementById("game-board-instance-name");
     const instanceModeComp = document.getElementById("game-board-instance-mode");
+    const instanceVictoryConditionComp = document.getElementById("game-board-instance-victory-condition");
     const instanceOwnerComp = document.getElementById("game-board-owner");
     const instanceStatusComp = document.getElementById("game-board-status");
     const instanceCurrentTurnComp = document.getElementById("game-board-current-turn");
@@ -229,6 +230,12 @@ function DrawInstanceData() {
 
     instanceNameComp.innerHTML = data.name;
     instanceModeComp.innerHTML = data.mode;
+    var html = "";
+    const instanceParameters = JSON.parse(data.parameters);
+    if (instanceParameters.victoryCondition == "maxPoints") {
+        html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> points de victoire gagne la partie.";
+    }
+    instanceVictoryConditionComp.innerHTML = html;
     instanceStatusComp.innerHTML = data.gameState;
     instanceCurrentTurnComp.innerHTML = data.rounds;
     instanceTotalPlayersComp.innerHTML = currentInstance.playerList.length + "/" + data.maxPlayers;
@@ -426,6 +433,100 @@ function onStartGameButtonClick() {
         ownerStartGameSocket();
         fetchAndDrawBoardScreen();
     });
+}
+
+function DrawGameParamsEditor() {
+    console.log('# Drawing game parameters editor...');
+    var instanceParameters = JSON.parse(currentInstance.data.parameters);
+
+    // Game Parameters Container
+    const gameParamsContainer = document.getElementById("game-board-instance-parameters-container");
+    gameParamsContainer.hidden = false;
+    gameParamsContainer.innerHTML = '';
+
+    // title
+    const parameterTitle = document.createElement("h2");
+    parameterTitle.innerText = "Paramètres de la partie";
+    gameParamsContainer.appendChild(parameterTitle);
+
+    // Victory Condition
+    const victoryConditionTitle = document.createElement("span");
+    victoryConditionTitle.innerText = "Condition de victoire : ";
+    gameParamsContainer.appendChild(victoryConditionTitle);
+
+    // Victory condition select
+    const victoryConditionInput = document.createElement("select");
+    victoryConditionInput.value = instanceParameters.victoryCondition;
+
+    // option 1 - max points
+    const optionMaxPoints = document.createElement("option");
+    optionMaxPoints.value = "maxPoints";
+    optionMaxPoints.innerText = "Atteindre un nombre de points de victoire";
+    if (instanceParameters.victoryCondition == "maxPoints") {
+        optionMaxPoints.selected = true;
+    }
+    victoryConditionInput.appendChild(optionMaxPoints);
+
+    // option 2 - armyHegemony
+    // const optionArmyHegemony = document.createElement("option");
+    // optionArmyHegemony.value = "armyHegemony";
+    // optionArmyHegemony.innerText = "Détruire toutes les armées adverses";
+    // if (instanceParameters.victoryCondition == "armyHegemony") {
+    //     optionArmyHegemony.selected = true;
+    // }
+    // victoryConditionInput.appendChild(optionArmyHegemony);
+
+    // On change listener
+    victoryConditionInput.addEventListener('change', (event) => {
+        const newValue = event.target.value;
+        instanceParameters.victoryCondition = newValue;
+        updateInstanceParameters(JSON.stringify(instanceParameters)).then((data) => {
+            if (data.error || data.message) {
+                console.log('# Error updating instance parameters:', data.message);
+            } else {
+                currentInstance.data.parameters = JSON.stringify(instanceParameters);
+                DrawInstanceData();
+                DrawGameParamsEditor();
+            }
+        });
+    });
+    gameParamsContainer.appendChild(victoryConditionInput);
+
+    // Max Points (if victory condition is max points)
+    if (instanceParameters.victoryCondition == "maxPoints") {
+        // title
+        const victoryConditionTitle = document.createElement("span");
+        victoryConditionTitle.innerText = "nombre de points à atteindre : ";
+        gameParamsContainer.appendChild(victoryConditionTitle);
+
+        // select
+        const maxPointsSelect = document.createElement("select");
+        Object.entries([25, 50, 100, 200, 500, 1000]).forEach(([key, value]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.innerText = value;
+            if (instanceParameters.maxPoints == value) {
+                option.selected = true;
+            }
+            maxPointsSelect.appendChild(option);
+        });
+        maxPointsSelect.addEventListener('change', (event) => {
+            const newMaxPoints = parseInt(event.target.value);
+            instanceParameters.maxPoints = newMaxPoints;
+            updateInstanceParameters(JSON.stringify(instanceParameters)).then((data) => {
+                if (data.error || data.message) {
+                    console.log('# Error updating instance parameters:', data.message);
+                } else {
+                    currentInstance.data.parameters = JSON.stringify(instanceParameters);
+                    DrawInstanceData();
+                    DrawGameParamsEditor();
+                }
+            });
+        });
+        gameParamsContainer.appendChild(maxPointsSelect);
+    }
+
+    console.log('# Drawing game parameters editor OK');
 }
 
 function setStartGameButtonListener() {
@@ -1307,12 +1408,117 @@ function DrawInstanceWaitingScreen() {
 
     waitingScreen.style.display = "flex";
 
+    DrawGameParamsEditor();
+
     setReadyButtonListener();
     setStartGameButtonListener();
 }
 
+function DrawWinningScreen() {
+    const endingScreen = document.getElementById("game-board-end-screen");
+
+    const instanceStatus = currentInstance.data;
+
+    if (!instanceStatus || instanceStatus?.gameState != 'completed') {
+        console.log('# No need to display ending screen');
+        endingScreen.style.display = "none";
+        return;
+    }
+
+    endingScreen.style.display = "flex";
+
+    const instanceParams = JSON.parse(instanceStatus.parameters);
+    console.log('instanceParams => ', instanceParams);
+    const winnerList = instanceParams.winner.toString().split(",").map(id => {
+        const player = currentInstance.playerList.find(p => p.instancePlayerId.toString() === id.trim());
+        return player;
+    });
+
+    var playerIsWinner = false;
+    if (winnerList.find(p => p.isUser)) {
+        playerIsWinner = true;
+    }
+
+    const endingTitle = document.createElement("h2");
+    endingTitle.innerHTML = playerIsWinner ? "Victoire !" : "Défaite !";
+    endingScreen.appendChild(endingTitle);
+
+    const endingMessage = document.createElement("p");
+    var html = "La victoire a été remportée par " + (winnerList.length > 1 ? "les joueurs " : "le joueur ") + winnerList.map(p => "<b>" + p.playerName + "</b>").join(", ");
+    endingMessage.innerHTML = html;
+    endingScreen.appendChild(endingMessage);
+
+    const playerListComp = document.createElement("div");
+    playerListComp.className = "player-list-container";
+    endingScreen.appendChild(playerListComp);
+
+    Object.entries(currentInstance.playerList).forEach(([index, element]) => {
+        const playerItem = document.createElement("div");
+        playerItem.className = "player-item-container " + (winnerList.find(p => p.instancePlayerId === element.instancePlayerId) ? "player-winner-item" : "player-loser-item");
+
+        const playerImgContainer = document.createElement("div");
+        playerImgContainer.className = "player-item-image-container";
+        playerImgContainer.id = `player-item-${element.playerName}`;
+
+        const playerImg = document.createElement("img");
+        playerImg.className = "player-item-image";
+        playerImg.style.borderColor = element.color;
+        const src = element.civilization ? "/images/" + element.civilization + "-army.jpg" : "/images/icons/no-icon-picture.png";
+        playerImg.src = src;
+        playerImg.title = `${element.civilization}`;
+        playerImgContainer.appendChild(playerImg);
+        playerItem.appendChild(playerImgContainer);
+
+        const playerInfoContainer = document.createElement("div");
+        playerInfoContainer.className = "player-item-info-container";
+
+        const playerNameContainer = document.createElement("div");
+        playerNameContainer.className = "player-item-name-container";
+
+        const playerNameComp = document.createElement("span");
+        playerNameComp.className = "player-item-name";
+        playerNameComp.innerHTML = element.playerName;
+        playerNameContainer.appendChild(playerNameComp);
+
+        if (element.isOwner) {
+            const administratorImg = document.createElement("img");
+            administratorImg.className = "player-item-administrator-image";
+            administratorImg.src = "/images/icons/crown.png";
+            playerNameContainer.appendChild(administratorImg);
+        }
+        playerInfoContainer.appendChild(playerNameContainer);
+
+        const playerStatusComp = document.createElement("span");
+
+        playerStatusComp.className = "player-item-status";
+        var html = "<ul>";
+        html += "<li>" + element.treasure + " <img src='/images/resources/treasure.png' alt='Treasure' class='player-resource-icon'/></li>";
+        html += "<li>" + element.army + " <img src='/images/resources/army.png' alt='Army' class='player-resource-icon'/></li>";
+        html += "</ul>";
+        playerStatusComp.innerHTML = html;
+        playerInfoContainer.appendChild(playerStatusComp);
+
+        playerItem.appendChild(playerInfoContainer);
+        playerListComp.appendChild(playerItem);
+    });
+
+    const backButton = document.createElement("button");
+    backButton.className = "back-to-menu-base-button";
+    backButton.id = "back-to-menu-base-button";
+    backButton.innerText = "Retour au menu";
+    backButton.addEventListener('click', async () => {
+        await disconnectSocket();
+        deleteCookie("currentInstanceId");
+        redirectToUrl("/home");
+    });
+    endingScreen.appendChild(backButton);
+
+    console.log('# Displaying winning screen OK');
+}
+
 function DrawGameBoardScreen() {
     DrawInstanceData();
+    DrawWinningScreen();
     DrawStartGameButton();
     DrawInstanceWaitingScreen();
     DrawControls();

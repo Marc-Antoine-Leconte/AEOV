@@ -4,6 +4,7 @@ const allInstancesPath = "/instance/list";
 const playerInstancesPath = "/instance/list/user";
 const newInstancePath = "/instance/new";
 const joinInstancePath = "/instance/join";
+const updateInstancePath = "/instance/update";
 const instancePath = "/instance";
 const playerAuthenticationPath = "/player/authenticate";
 const playerCreationPath = "/player/create";
@@ -81,6 +82,11 @@ async function createInstanceFromAPI({instanceName, mode = "pvp", maxPlayers = 8
 async function joinInstanceFromAPI(instanceId) {
   const url = `${currentProtocol}${currentUrl}${joinInstancePath}`;
   return await postDataToAPI(url, { instanceId });
+}
+
+async function updateInstanceParametersFromAPI(newParameters, instanceId) {
+  const url = `${currentProtocol}${currentUrl}${updateInstancePath}`;
+  return await postDataToAPI(url, { parameters: newParameters, instanceId });
 }
 
 async function redirectToUrl(newPath) {

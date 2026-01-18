@@ -162,6 +162,11 @@ function buyItemOnMarket(slotId, instancePlayerId) {
     return buyItemOnMarketFromAPI(slotId, instancePlayerId, instanceId);
 }
 
+function updateInstanceParameters(newParameters) {
+    instanceId = getCookie("currentInstanceId");
+    return updateInstanceParametersFromAPI(newParameters, instanceId);
+}
+
 function DisplayUserInfo() {
     const userNameComp = document.getElementById("user-name");
     const userIdComp = document.getElementById("user-id");

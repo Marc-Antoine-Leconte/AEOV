@@ -3,7 +3,7 @@ var router = express.Router();
 
 const { validateInstance } = require('../middleware/instanceValidation');
 
-const { getAllAvailableInstances, createInstance, getInstanceById, getAllInstances } = require('../controllers/instanceController');
+const { getAllAvailableInstances, createInstance, updateInstance, getInstanceById, getAllInstances } = require('../controllers/instanceController');
 const { getPlayerById } = require('../controllers/playerController');
 const { createInstancePlayer, getCountInstancePlayersByInstanceId, getInstancePlayerByPlayerAndInstance, getInstancePlayersByPlayerId } = require('../controllers/instancePlayerController');
 
@@ -111,6 +111,76 @@ router.post('/join', async function (req, res) {
 router.get('/', async function (req, res) {
     console.log('# GET instance--- req.query => ', req.query)
    await getInstanceById(req, res, true, true);
+});
+
+router.post('/update',  async function (req, res) {
+    console.log('UPDATE INSTANCE req.body => ', req.body)
+    const { parameters } = req.body;
+
+    const player = await getPlayerById(req, res, false);
+    if (!player) {
+        console.log('Player not found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player not found"
+        });
+    }
+
+    const instance = await getInstanceById(req, res, false);
+    if (!instance) {
+        console.log('Instance not found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Instance not found"
+        });
+    }
+    
+    const instancePlayer = await getInstancePlayerByPlayerAndInstance(req, res, false);
+    if (!instancePlayer) {
+        console.log('Player not in instance');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player not in instance"
+        });
+    }
+
+    if (instance.ownerId !== player.id) {
+        console.log('Player is not the owner of the instance');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player is not the owner of the instance"
+        });
+    }
+
+    if (instance.gameState != 'waiting') {
+        console.log('Instance is already started');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Instance is already started"
+        });
+    }
+
+    var newInstanceData = instance.dataValues ? instance.dataValues : instance;
+    newInstanceData.parameters = parameters;
+
+    try {
+        const instanceUpdated = await updateInstance(req, res, newInstanceData);
+        if (!instanceUpdated) {
+            console.log('Error updating instance parameters');
+            return res.status(500).json({
+                statusCode: 500,
+                message: "Error updating instance parameters"
+            });
+        }
+        console.log('Instance parameters updated successfully');
+        return res.status(200).json(instanceUpdated);
+    } catch (error) {
+        console.error('Error updating instance parameters:', error);
+        return res.status(500).json({
+            statusCode: 500,
+            message: "Error updating instance parameters"
+        });
+    }
 });
 
 module.exports = router;

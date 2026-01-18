@@ -31,9 +31,9 @@ const instanceSchema = Joi.object({
 
 const validateInstance = (req, res, next) => {
     console.log('$$ validateInstance req.body => ', req.body);
-    const { mode, instanceName, maxPlayers, playerId } = req.body;
+    const { mode, instanceName, maxPlayers, playerId, parameters } = req.body;
     const ownerId = playerId;
-    const { error } = instanceSchema.validate({ mode: mode, name: instanceName, maxPlayers: maxPlayers, ownerId: ownerId });
+    const { error } = instanceSchema.validate({ mode: mode, name: instanceName, maxPlayers: maxPlayers, ownerId: ownerId, parameters: parameters });
 
     if (error) {
         console.log('validateInstance error => ', error);

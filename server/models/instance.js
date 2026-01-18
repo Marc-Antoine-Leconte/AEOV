@@ -42,6 +42,11 @@ function model(sequelize) {
         playerRotation: {
             type: DataTypes.STRING(100),
             allowNull: true,
+        },
+        parameters: {
+            type: DataTypes.STRING(1000),
+            allowNull: false,
+            defaultValue: JSON.stringify({"victoryCondition": "maxPoints","maxPoints": 100,"winner": null})
         }
     };
 

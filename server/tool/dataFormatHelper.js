@@ -22,6 +22,31 @@ export const getPublicInstancePlayerData = (instancePlayerData, instanceData, cu
     return result;
 }
 
+export const getPublicInstancePlayerScoreData = (instancePlayerData, instanceData, currentPlayerData) => {
+    const dataValues = instancePlayerData.dataValues ? instancePlayerData.dataValues : instancePlayerData;
+
+    console.log('getPublicInstancePlayerScoreData - dataValues => ', dataValues);
+    console.log('getPublicInstancePlayerScoreData - currentPlayerData => ', currentPlayerData);
+    const result = {
+        playerName: dataValues.name,
+        civilization: dataValues.civilization,
+        color: dataValues.color,
+        isOwner: (dataValues.playerId == instanceData.ownerId),
+        isCurrentPlayer: (dataValues.id == instanceData.currentPlayerId),
+        isUser: (dataValues.playerId == currentPlayerData.id),
+        buildings: dataValues.buildings,
+        armyPosition: dataValues.armyPosition,
+        endTurn: dataValues.endTurn,
+        army: dataValues.army,
+        food: dataValues.food,
+        market: dataValues.market,
+        marketIsOpen: dataValues.marketIsOpen,
+        instancePlayerId: dataValues.id,
+        treasure: dataValues.treasure,
+    }
+    return result;
+}
+
 export const getPublicInstancePlayerDataList = (instancePlayerDataList, instanceData, currentPlayerData) => {
     return instancePlayerDataList.map((element) => getPublicInstancePlayerData(element, instanceData, currentPlayerData));
 }

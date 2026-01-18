@@ -3,6 +3,7 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     display: grid;
     place-items: center;
@@ -343,7 +344,7 @@ body {
     width: 80vw;
     margin-left: 20px;
     margin-right: 20px;
-    border:#000000 10px solid;
+    border: #000000 10px solid;
 }
 
 .game-board-player-resources-item {
@@ -551,7 +552,7 @@ body {
     z-index: 100;
 }
 
-#game-board-connection-container {
+#game-board-connection-container, #game-board-instance-parameters-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -561,7 +562,7 @@ body {
 }
 
 #game-board-connection-container select {
-   width: 30%;
+    width: 30%;
 }
 
 #game-board-loading-message {
@@ -575,4 +576,68 @@ body {
     top: -300px;
     height: 1200px;
     width: auto;
+}
+
+#game-board-end-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px;
+}
+
+#game-board-end-screen h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-family: "UnZialish";
+    color: gold;
+}
+
+#game-board-end-screen p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+#game-board-end-screen .player-list-container {
+    width: 80%;
+    max-height: 300px;
+    overflow-y: auto;
+    border: solid black 2px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#game-board-end-screen .player-item-container {
+    padding: 10px;
+    border-bottom: solid black 1px;
+}
+
+.player-resource-icon {
+    max-height: 20px;
+    max-width: 20px;
+    vertical-align: middle;
+}
+
+.player-winner-item {
+    background-color: #d4edda;
+}
+
+.player-loser-item {
+    background-color: #f8d7da;
+}
+
+.back-to-menu-base-button {
+    margin-top: 20px;
+    padding: 20px 30px;
+    font-size: 20px;
+    background-color: #00B7FF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#game-board-end-screen ul {
+    list-style-type: none;
 }

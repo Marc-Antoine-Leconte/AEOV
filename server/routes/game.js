@@ -6,7 +6,7 @@ const { getAllActions } = require('../controllers/actionController');
 const { getAllBuildings } = require('../controllers/buildingController');
 const { createLocation, getLocationsByInstanceId, updateLocationByInstanceAndPoint } = require('../controllers/locationController');
 const { stringListToMap, mapToString } = require('../tool/helper');
-const { getPublicInstancePlayerData, getPublicInstancePlayerDataList } = require('../tool/dataFormatHelper');
+const { getPublicInstancePlayerData, getPublicInstancePlayerDataList, getPublicInstancePlayerScoreData } = require('../tool/dataFormatHelper');
 
 var router = express.Router();
 
@@ -225,7 +225,11 @@ router.post('/info', async function (req, res, next) {
 
     const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
 
-    playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    if (instance.gameState == 'completed') {
+      playersData[id] = getPublicInstancePlayerScoreData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    } else {
+      playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    }
     id++;
   }
 
@@ -299,7 +303,11 @@ router.post('/playersInfo', async function (req, res, next) {
 
     const playerData = await getPlayerById({ body: { playerId: element.playerId } }, res, false);
 
-    playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    if (instance.gameState == 'completed') {
+      playersData[id] = getPublicInstancePlayerScoreData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    } else {
+      playersData[id] = getPublicInstancePlayerData({ ...playerData.dataValues, ...element.dataValues }, instance, player);
+    }
     id++;
   }
 
@@ -431,7 +439,7 @@ router.post('/play', async function (req, res, next) {
     console.log('||||| Requirement => ', requirement);
     console.log('||||| Effects => ', effects);
 
-
+    // Check requirements
     let tooMuchRequirement = false;
     Object.entries(requirement).forEach(([key, value]) => {
       if (!value || !key || tooMuchRequirement)
@@ -439,6 +447,23 @@ router.post('/play', async function (req, res, next) {
 
       console.log('||||| Checking requirement ', key, ' => ', value);
       console.log('||||| virtualBuildingList[key] => ', virtualBuildingList[key]);
+
+      // do not allow to have 0 population
+      if (key == "population") {
+        if (instancePlayer.population <= value) {
+          tooMuchRequirement = true;
+          return;
+        }
+      }
+
+      // do not allow to have 0 maxPopulation
+      if (key == "maxPopulation") {
+        if (instancePlayer.maxPopulation <= value) {
+          tooMuchRequirement = true;
+          return;
+        }
+      }
+
       if (virtualBuildingList[key] != null
         && virtualBuildingList[key].level != null
         && virtualBuildingList[key].level >= value) {
@@ -708,6 +733,30 @@ router.post('/endTurn', async function (req, res, next) {
   }
 
   // All players have ended their turn, reset for next turn
+
+  // Check for game end
+  var gameParameters = JSON.parse(instance.parameters);
+  console.log('Game parameters: ', gameParameters);
+  if (gameParameters.victoryCondition == 'maxPoints') {
+    const winners = allPlayerInstances.filter(element => element.treasure >= gameParameters.maxPoints);
+
+    if (winners.length > 0) {
+      var newInstance = { ...(instance.dataValues ? instance.dataValues : instance) };
+      if (winners.length > 1) {
+        console.log('Game ended with a tie between players: ', winners.map(w => w.playerId));
+        gameParameters.winner = winners.map(w => w.id).join(',');
+      } else {
+        console.log('Game ended, winner is player: ', winners[0].playerId);
+        gameParameters.winner = winners[0].id;
+      }
+      newInstance.gameState = 'completed';
+      newInstance.parameters = JSON.stringify(gameParameters);
+      await updateInstance(req, res, newInstance);
+      return res.status(200).json({ ok: true });
+    }
+  }
+
+  // Update players
   allPlayerInstances.forEach(async (element) => {
     const elementData = element.dataValues ? element.dataValues : element;
 

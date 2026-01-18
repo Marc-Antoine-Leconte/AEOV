@@ -27,6 +27,9 @@ block content
               span(id="game-board-instance-mode-title") <b>Mode de la partie : </b>
               span(id="game-board-instance-mode")
             li
+              span(id="game-board-instance-victory-condition-title") <b>Condition de victoire : </b>
+              span(id="game-board-instance-victory-condition")
+            li
               span(id="game-board-owner-title") <b>Administrateur : </b>
               span(id="game-board-owner")
             li
@@ -70,6 +73,9 @@ block content
         option(value="aqua") Aqua
 
       button(type='button', class="base-button", id='ready-button') Prêt à jouer
+
+      div(id="game-board-instance-parameters-container", hidden=true)
+
       button(type='button', class="base-button", id='start-game-button') Démarrer la partie
 
     div(id="game-board", hidden=true)
@@ -111,6 +117,8 @@ block content
       div(id="game-board-controls", hidden=true)
         button(type='button', id='end-turn-button') Terminer le tour
         button(type='button', id='visit-market-action-button') Marché
+
+    div(id="game-board-end-screen", hidden=true)
 
     div(id="game-log", hidden=true)
       h2 Journal d'évènements
