@@ -33,7 +33,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         "script-src": ["'self'", process.env.CSP_SRC_ENCRYPTION],
-        "connect-src": ["'self'", "https://internet-up.ably-realtime.com", "https://main.realtime.ably.net", "wss://main.realtime.ably.net"],
+        "connect-src": ["'self'", "https://internet-up.ably-realtime.com", "https://main.realtime.ably.net", "wss://main.realtime.ably.net", "wss://ws-up.ably-realtime.com/"],
       },
     },
   }),

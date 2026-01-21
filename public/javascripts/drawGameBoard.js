@@ -1476,6 +1476,9 @@ function DrawWinningScreen() {
     }
 
     endingScreen.style.display = "flex";
+    endingScreen.innerHTML = '';
+    
+    console.log("# Displaying winning screen...");
 
     const instanceParams = JSON.parse(instanceStatus.parameters);
     console.log('instanceParams => ', instanceParams);

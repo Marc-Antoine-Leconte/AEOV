@@ -11,7 +11,7 @@ const joinInstanceSocket = async (instanceId) => {
 
     await ablyClient.connection.once("connected");
     
-    channelName = "instance:" + instanceId
+    channelName = "instance_" + instanceId
     instanceChannel = ablyClient.channels.get(channelName);
 
     // REGULAR INSTANCE UPDATE
@@ -35,9 +35,9 @@ const joinInstanceSocket = async (instanceId) => {
         }
     });
 
-    instanceChannel.connection.on('failed', function () { console.log('✗ Connection failed from Ably.'); })
+    instanceChannel.on('failed', () => { console.log('✗ Connection failed from Ably.'); })
     instanceChannel.on('attached', (stateChange) => {
-        console.log('channel ' + channel.name + ' is now attached');
+        console.log('channel ' + instanceChannel.name + ' is now attached');
         console.log('Message continuity on this channel ' + (stateChange.resumed ? 'was' : 'was not') + ' preserved');
     });
 
