@@ -3,13 +3,32 @@ var router = express.Router();
 
 const { validateInstance } = require('../middleware/instanceValidation');
 
-const { getAllAvailableInstances, createInstance, updateInstance, getInstanceById, getAllInstances } = require('../controllers/instanceController');
+const { getAllAvailableInstances, createInstance, updateInstance, getInstanceById, getAllInstances, deleteInstanceById } = require('../controllers/instanceController');
 const { getPlayerById } = require('../controllers/playerController');
 const { createInstancePlayer, getCountInstancePlayersByInstanceId, getInstancePlayerByPlayerAndInstance, getInstancePlayersByPlayerId } = require('../controllers/instancePlayerController');
+const { getPublicInstanceDataList } = require('../tool/dataFormatHelper');
 
 /* GET all instances */
 router.get('/list', async function (req, res) {
-    await getAllAvailableInstances(req, res);
+    const player = await getPlayerById(req, res, false);
+    if (!player) {
+        console.log('Player not found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player not found"
+        });
+    }
+
+    const allInstances = await getAllAvailableInstances(req, res, false);
+    if (!allInstances) {
+        console.log('No instances found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "No instances found"
+        });
+    }
+
+    res.json(getPublicInstanceDataList(allInstances, player));
 });
 
 /* GET all instances for a user */
@@ -41,7 +60,7 @@ router.post('/list/user', async function (req, res) {
         });
     }
 
-    const allInstancePlayersMap = allInstancePlayers.reduce(function(map, obj) {
+    const allInstancePlayersMap = allInstancePlayers.reduce(function (map, obj) {
         map[obj.instanceId] = true;
         return map;
     }, {});
@@ -50,7 +69,7 @@ router.post('/list/user', async function (req, res) {
         return allInstancePlayersMap[instance.id];
     });
 
-    res.json(instancesToDisplay);
+    res.json(getPublicInstanceDataList(instancesToDisplay, player));
 });
 
 /* CREATE a new instances */
@@ -81,7 +100,7 @@ router.post('/join', async function (req, res) {
             message: "Instance not found"
         });
     }
-    
+
     const instancePlayer = await getInstancePlayerByPlayerAndInstance(req, res, false);
     if (instancePlayer) {
         return res.status(200).send({ ...instancePlayer.dataValues, instanceName: instance.name });
@@ -110,10 +129,10 @@ router.post('/join', async function (req, res) {
 /* GET instance by InstanceId */
 router.get('/', async function (req, res) {
     console.log('# GET instance--- req.query => ', req.query)
-   await getInstanceById(req, res, true, true);
+    await getInstanceById(req, res, true, true);
 });
 
-router.post('/update',  async function (req, res) {
+router.post('/update', async function (req, res) {
     console.log('UPDATE INSTANCE req.body => ', req.body)
     const { parameters } = req.body;
 
@@ -134,7 +153,7 @@ router.post('/update',  async function (req, res) {
             message: "Instance not found"
         });
     }
-    
+
     const instancePlayer = await getInstancePlayerByPlayerAndInstance(req, res, false);
     if (!instancePlayer) {
         console.log('Player not in instance');
@@ -179,6 +198,64 @@ router.post('/update',  async function (req, res) {
         return res.status(500).json({
             statusCode: 500,
             message: "Error updating instance parameters"
+        });
+    }
+});
+
+router.post('/delete', async function (req, res) {
+    console.log('DELETE INSTANCE req.body => ', req.body)
+
+    const player = await getPlayerById(req, res, false);
+    if (!player) {
+        console.log('Player not found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player not found"
+        });
+    }
+
+    const instance = await getInstanceById(req, res, false);
+    if (!instance) {
+        console.log('Instance not found');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Instance not found"
+        });
+    }
+
+    const instancePlayer = await getInstancePlayerByPlayerAndInstance(req, res, false);
+    if (!instancePlayer) {
+        console.log('Player not in instance');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player not in instance"
+        });
+    }
+
+    if (instance.ownerId !== player.id) {
+        console.log('Player is not the owner of the instance');
+        return res.status(404).json({
+            statusCode: 404,
+            message: "Player is not the owner of the instance"
+        });
+    }
+
+    try {
+        const deletionResult = await deleteInstanceById(req, res, false);
+        if (!deletionResult) {
+            console.log('Error deleting instance');
+            return res.status(400).json({
+                statusCode: 400,
+                message: "Error deleting instance"
+            });
+        }
+        console.log('Instance deleted successfully');
+        return res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting instance:', error);
+        return res.status(500).json({
+            statusCode: 500,
+            message: "Error deleting instance"
         });
     }
 });

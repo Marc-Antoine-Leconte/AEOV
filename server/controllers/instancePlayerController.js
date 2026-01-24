@@ -294,25 +294,23 @@ class InstancePlayerController {
         }
     }
 
-    deleteInstancePlayerByInstanceAndPlayer = async (req, res, allowTransmit = true) => {
+    deleteInstancePlayerByInstanceId = async (req, res, allowTransmit = true) => {
         try {
-            const instancePlayer = await InstancePlayer.findOne({
+            const instancePlayer = await InstancePlayer.destroy({
                 where: {
                     instanceId: req.body.instanceId,
-                    playerId: req.body.playerId
                 }
             });
             if (instancePlayer) {
-                await instancePlayer.destroy();
                 if (allowTransmit) {
-                res.status(204).send();
+                    res.status(204).send();
                 }
                 return true;
             } else {
                  if (allowTransmit) {
                     res.status(404).json({
                         statusCode: 404,
-                        message: "InstancePlayer not found"
+                        message: "InstancePlayer not destroyed"
                     });
                 }
                 return;

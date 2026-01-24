@@ -31,9 +31,11 @@ const instanceSchema = Joi.object({
 
 const validateInstance = (req, res, next) => {
     console.log('$$ validateInstance req.body => ', req.body);
-    const { mode, instanceName, maxPlayers, playerId, parameters } = req.body;
+    const updateSchema = instanceSchema.fork(['mode', 'name', 'maxPlayers', 'ownerId'], (schema) => schema.optional());
+
+    const { mode, instanceName, maxPlayers, playerId } = req.body;
     const ownerId = playerId;
-    const { error } = instanceSchema.validate({ mode: mode, name: instanceName, maxPlayers: maxPlayers, ownerId: ownerId, parameters: parameters });
+    const { error } = updateSchema.validate({ mode: mode, name: instanceName, maxPlayers: maxPlayers, ownerId: ownerId });
 
     if (error) {
         console.log('validateInstance error => ', error);
@@ -43,12 +45,13 @@ const validateInstance = (req, res, next) => {
                 message: "Validation failed",
                 errors: error.details.map(detail => detail.message)
             });
+        return error;
     }
     next();
 }
 
 const validateInstanceUpdate = (req, res, next) => {
-    const updateSchema = instanceSchema.fork(['mode', 'name'], (schema) => schema.optional());
+    const updateSchema = instanceSchema.fork(['mode', 'name', 'parameters'], (schema) => schema.optional());
     const { error } = updateSchema.validate(req.body);
 
     if (error) {
@@ -57,6 +60,7 @@ const validateInstanceUpdate = (req, res, next) => {
             message: "Validation failed",
             errors: error.details.map(d => d.message)
         });
+        return error;
     }
     next();
 }

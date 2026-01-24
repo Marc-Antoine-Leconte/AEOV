@@ -98,6 +98,23 @@ function joinInstance(instanceId) {
     });
 }
 
+function deleteInstance(instanceId, callBack) {
+    console.log('Deleting instance:', instanceId);
+    
+    deleteInstanceFromAPI(instanceId).then((data) => {
+        if (data.message || data.error) {
+            alert("Une erreur est survenue au moment de supprimer l'instance : " + data.message);
+            return
+        } else {
+            alert("La partie a bien été supprimée");
+            console.log('# delete instance Success', data);
+            if (callBack) {
+                callBack();
+            }
+        }
+    });
+}
+
 function fetchInstance(instanceId) {
     return fetchInstanceFromAPI(instanceId)
 }

@@ -41,6 +41,18 @@ function onJoinInstanceButtonClick() {
     joinInstance(selectedInstance);
 }
 
+async function onDeleteInstanceButtonClick(selectedInstance) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette instance ? Cette action est irréversible.")) {
+        return;
+    }
+
+    console.log('deleting instance id ', selectedInstance)
+    deleteInstance(selectedInstance, () => {
+        DisplayInstanceList();
+        DisplayPlayerInstanceList();
+    });
+}
+
 async function onCreateInstanceButtonClick() {
     const instanceCreationErrorMessage = document.getElementById("instance-creation-error-message");
     instanceCreationErrorMessage.hidden = true;
@@ -107,7 +119,22 @@ function DisplayInstanceList() {
             button.textContent = instance.name + "#" + instance.id;
             button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
+            const optionsContainer = document.createElement("div");
+            optionsContainer.className = "instance-options-container";
+
+            if (instance.isOwnedByPlayer) {
+                const deleteButton = document.createElement("img");
+                deleteButton.type = "button";
+                deleteButton.className = "delete-instance-button";
+                deleteButton.id = "delete-instance-"+instance.id;
+                deleteButton.src = "/images/icons/trash.png";
+                deleteButton.alt = "Supprimer";
+                deleteButton.addEventListener('click', () => onDeleteInstanceButtonClick(instance.id));
+                optionsContainer.appendChild(deleteButton);
+            }
+
             listItem.appendChild(button);
+            listItem.appendChild(optionsContainer);
             instanceList.appendChild(listItem);
         });
     });
@@ -154,7 +181,22 @@ function DisplayPlayerInstanceList() {
             button.textContent = instance.name + "#" + instance.id;
             button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
+            const optionsContainer = document.createElement("div");
+            optionsContainer.className = "instance-options-container";
+
+            if (instance.isOwnedByPlayer) {
+                const deleteButton = document.createElement("img");
+                deleteButton.type = "button";
+                deleteButton.className = "delete-instance-button";
+                deleteButton.id = "delete-instance-"+instance.id;
+                deleteButton.src = "/images/icons/trash.png";
+                deleteButton.alt = "Supprimer";
+                deleteButton.addEventListener('click', () => onDeleteInstanceButtonClick(instance.id));
+                optionsContainer.appendChild(deleteButton);
+            }
+
             listItem.appendChild(button);
+            listItem.appendChild(optionsContainer);
             instanceList.appendChild(listItem);
         });
     });

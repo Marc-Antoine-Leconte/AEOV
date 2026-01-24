@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    /* align-items: center; */
 }
 
 #join-game-section {
@@ -46,6 +46,26 @@ h1 {
 
 .instance-list-item {
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.instance-options-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    min-width: 5%;
+    border: solid black 1px;
+}
+
+.delete-instance-button {
+    max-width: 20px;
+    max-height: 20px;
+    cursor: pointer;
 }
 
 #join-selected-instance-button {

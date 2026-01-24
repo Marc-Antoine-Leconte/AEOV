@@ -107,15 +107,20 @@ router.post('/start', async function (req, res, next) {
     });
   }
 
+  var playerNotReady = false;
   instancePlayers.forEach(element => {
     if (element.civilization == null || element.color == null) {
-      console.log('All players must be ready before starting the game');
-      return res.status(400).json({
-        statusCode: 400,
-        message: "All players must be ready before starting the game"
-      });
+      playerNotReady = true;
     }
   });
+
+  if (playerNotReady) {
+    console.log('All players must be ready before starting the game');
+    return res.status(400).json({
+      statusCode: 400,
+      message: "All players must be ready before starting the game"
+    });
+  }
 
   if (instancePlayers.length < 2) {
     console.log('The game needs at least 2 players to start');
@@ -738,17 +743,17 @@ router.post('/endTurn', async function (req, res, next) {
   var gameParameters = JSON.parse(instance.parameters);
   console.log('Game parameters: ', gameParameters);
   var winners = [];
-  
+
   // Check victory conditions
 
   // Max points victory
   if (gameParameters.victoryCondition == 'maxPoints') {
     winners = allPlayerInstances.filter(element => element.treasure >= gameParameters.maxPoints);
   }
-  
+
   // Army hegemony victory
   if (gameParameters.victoryCondition == 'armyHegemony') {
-    const standingPlayers = allPlayerInstances.filter(element => element.army > 0 );
+    const standingPlayers = allPlayerInstances.filter(element => element.army > 0);
     if (standingPlayers.length == 1) {
       winners = standingPlayers;
     }

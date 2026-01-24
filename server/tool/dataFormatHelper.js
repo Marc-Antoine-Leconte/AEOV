@@ -59,3 +59,25 @@ export const getPrivatePlayerData = (playerData, accessToken) => {
     }
     return result;
 }
+
+export const getPublicInstanceData = (instanceData, currentPlayerData) => {
+    const dataValues = instanceData.dataValues ? instanceData.dataValues : instanceData;
+    const playerDataValues = currentPlayerData.dataValues ? currentPlayerData.dataValues : currentPlayerData;
+
+    console.log('getPublicInstanceData - dataValues => ', dataValues);
+    const result = {
+        id: dataValues.id,
+        mode: dataValues.mode,
+        name: dataValues.name,
+        gameState: dataValues.gameState,
+        maxPlayers: dataValues.maxPlayers,
+        isOwnedByPlayer: (dataValues.ownerId == playerDataValues.id),
+        rounds: dataValues.rounds,
+        parameters: dataValues.parameters
+    }
+    return result;
+}
+
+export const getPublicInstanceDataList = (instanceDataList, currentPlayerData) => {
+    return instanceDataList.map((element) => getPublicInstanceData(element, currentPlayerData));
+}

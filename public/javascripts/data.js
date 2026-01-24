@@ -5,6 +5,7 @@ const playerInstancesPath = "/instance/list/user";
 const newInstancePath = "/instance/new";
 const joinInstancePath = "/instance/join";
 const updateInstancePath = "/instance/update";
+const deleteInstancePath = "/instance/delete";
 const instancePath = "/instance";
 const playerAuthenticationPath = "/player/authenticate";
 const playerCreationPath = "/player/create";
@@ -87,6 +88,11 @@ async function joinInstanceFromAPI(instanceId) {
 async function updateInstanceParametersFromAPI(newParameters, instanceId) {
   const url = `${currentProtocol}${currentUrl}${updateInstancePath}`;
   return await postDataToAPI(url, { parameters: newParameters, instanceId });
+}
+
+async function deleteInstanceFromAPI(instanceId) {
+  const url = `${currentProtocol}${currentUrl}${deleteInstancePath}`;
+  return await postDataToAPI(url, { instanceId });
 }
 
 async function redirectToUrl(newPath) {

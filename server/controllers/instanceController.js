@@ -1,11 +1,15 @@
 const { Instance } = require('../config/database');
+const { param } = require('../routes');
 const { createInstancePlayer } = require('./instancePlayerController');
+const { getPublicInstanceData } = require('../tool/dataFormatHelper');
+const { getInstancePlayersByInstanceId, deleteInstancePlayerByInstanceId } = require('./instancePlayerController');
+const { getLocationsByInstanceId, deleteLocationByInstanceId } = require('./locationController');
 
 class InstanceController {
-  getAllInstances = async (req, res, allowTransmit = true) => {
-     console.log('@getAllInstances req => ', req.body);
+    getAllInstances = async (req, res, allowTransmit = true) => {
+        console.log('@getAllInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll({ attributes: {exclude: ['ownerId', 'currentPlayerId']} });
+            const instances = await Instance.findAll({ attributes: { exclude: ['currentPlayerId'] } });
             if (allowTransmit)
                 res.json(instances);
             return instances;
@@ -22,9 +26,9 @@ class InstanceController {
     }
 
     getAllAvailableInstances = async (req, res, allowTransmit = true) => {
-     console.log('@getAllAvailableInstances req => ', req.body);
+        console.log('@getAllAvailableInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll({attributes: {exclude: ['ownerId', 'currentPlayerId']}, where: { gameState: 'waiting' } });
+            const instances = await Instance.findAll({ attributes: { exclude: ['currentPlayerId'] }, where: { gameState: 'waiting' } });
             if (allowTransmit)
                 res.json(instances);
             return instances;
@@ -47,7 +51,7 @@ class InstanceController {
         try {
             var instance;
             if (filtered)
-                instance= await Instance.findByPk({attributes: {exclude: ['ownerId', 'currentPlayerId']}, where: { id: instanceId } });
+                instance = await Instance.findByPk({ attributes: { exclude: ['currentPlayerId'] }, where: { id: instanceId } });
             else
                 instance = await Instance.findByPk(instanceId);
             if (!instance) {
@@ -76,7 +80,7 @@ class InstanceController {
     }
 
     createInstance = async (req, res, allowTransmit = true) => {
-         console.log('@createInstance req => ', req.body);
+        console.log('@createInstance req => ', req.body);
         try {
             const instanceData = {
                 mode: req.body.mode,
@@ -94,21 +98,23 @@ class InstanceController {
                             statusCode: 400,
                             message: "Instance cannot be created"
                         });
-                    }
+                }
+                return;
             }
 
             console.log('---createdInstance => ', createdInstance);
 
-            var createdInstancePlayer = await createInstancePlayer({ ...req, body: {...req.body, instanceId: createdInstance.id, playerId: createdInstance.ownerId }}, res, false);
+            var createdInstancePlayer = await createInstancePlayer({ ...req, body: { ...req.body, instanceId: createdInstance.id, playerId: createdInstance.ownerId } }, res, false);
             if (!createdInstancePlayer) {
                 console.log('InstancePlayer cannot be created');
             }
 
+            const publicCreatedInstance = getPublicInstanceData(createdInstance, { id: createdInstance.ownerId });
+
             if (allowTransmit) {
-                res.status(201)
-                    .json(createdInstance);
+                res.status(201).json(publicCreatedInstance);
             }
-            return createdInstance;
+            return publicCreatedInstance;
         } catch (error) {
             console.log(error);
             if (allowTransmit) {
@@ -138,22 +144,38 @@ class InstanceController {
         }
     }
 
-    deleteInstance = async (req, res, allowTransmit = true) => {
-         console.log('@deleteInstanceById req => ', req.body);
+    deleteInstanceById = async (req, res, allowTransmit = true) => {
+        console.log('@deleteInstanceById req => ', req.body);
         try {
-            const id = req.params.id;
-            const instance = await Instance.findByPk(id);
+            if (!req?.body?.instanceId) {
+                if (allowTransmit) {
+                    res.status(404).json({
+                        statusCode: 404,
+                        message: "InstanceId not provided"
+                    });
+                }
+                return;
+            }
+
+            const id = req.body.instanceId;
+            const instance = await Instance.destroy({ where: { id } });
+
             if (!instance) {
                 if (allowTransmit) {
                     res.status(404).json({
                         statusCode: 404,
                         message: "Instance not found"
-                        });
-                    }
+                    });
+                }
                 return;
             }
-            instance.destroy();
-            instance.save();
+
+            // delete instance players
+            //deleteInstancePlayerByInstanceId({body: {instanceId: id }}, res, false);
+
+            // delete locations
+            //deleteLocationByInstanceId({body: {instanceId: id }}, res, false);
+
             if (allowTransmit) {
                 res.status(204).send();
             }

@@ -78,6 +78,7 @@ const validateInstancePlayer = (req, res, next) => {
                 message: "Validation failed",
                 errors: error.details.map(detail => detail.message)
             });
+        return error;
     }
 
     next();
@@ -93,6 +94,7 @@ const validateInstancePlayerUpdate = (req, res, next) => {
             message: "Validation failed",
             errors: error.details.map(d => d.message)
         });
+        return error;
     }
     next();
 }

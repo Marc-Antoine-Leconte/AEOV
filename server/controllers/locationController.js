@@ -138,9 +138,8 @@ class LocationController {
     deleteLocationByInstanceId = async (req, res, allowTransmit = true) => {
         console.log('@deleteLocationByInstanceId req => ', req.body);
         try {
-            const id = req.params.id;
-            const locations = await Location.findAll({ where: { instanceId: req.body.instanceId } });
-            if (!instance) {
+            const locations = await Location.destroy({ where: { instanceId: req.body.instanceId } });
+            if (!locations) {
                 if (allowTransmit) {
                     res.status(404).json({
                         statusCode: 404,
@@ -149,11 +148,6 @@ class LocationController {
                 }
                 return;
             }
-            
-            locations.forEach(location => {
-                location.destroy();
-                location.save();
-            });
             
             if (allowTransmit) {
                 res.status(204).send();
