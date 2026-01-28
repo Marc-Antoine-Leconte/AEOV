@@ -128,7 +128,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 4vw;
+    padding: 10px;
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -147,7 +147,8 @@ body {
 }
 
 .slot-item {
-    width: 30%;
+    flex:1;
+    max-width: 33%;
     height: 18vw;
     background-color: #ffffffb3;
     border-radius: 3px;
@@ -164,10 +165,6 @@ body {
     height: 3vw;
 }
 
-.slot-item input {
-    width: 90%;
-}
-
 .slot-item button {
     margin-top: 5px;
     padding: 5px 10px;
@@ -179,14 +176,39 @@ body {
     cursor: pointer;
 }
 
+.delete-market-item-button {
+    background-color: red !important;
+}
+
 .slot-item button:disabled {
     background-color: grey;
     cursor: not-allowed;
 }
 
+.slot-item select {
+    padding: 1px;
+    margin: 0px;
+    font-size: small;
+}
+
+.slot-item input {
+    padding: 1px;
+    margin: 0px;
+    width: 90%;
+    max-width: 50%;
+}
+
+.market-editable-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 5px 0px;
+    gap: 5px;
+}
+
 .market-lock {
     position: absolute;
-    right: 5vw;
+    right: 15px;
     width: 2vw;
     height: 2vw;
 }

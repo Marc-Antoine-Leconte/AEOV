@@ -881,7 +881,7 @@ router.post('/endTurn', async function (req, res, next) {
   return res.status(200).json({ ok: true });
 });
 
-/* GET all possible actions for a player. */
+/* POST market update. */
 router.post('/marketUpdate', async function (req, res, next) {
   const { instanceId, playerId } = req.body;
   console.log('# Update market for player');
@@ -914,11 +914,15 @@ router.post('/marketUpdate', async function (req, res, next) {
   }
 
   const currentMarketItems = JSON.parse(playerInstance.market || "[]");
-  const newMarketItems = JSON.parse(req.body.market || "[]");
+  var newMarketItems = JSON.parse(req.body.market || "[]");
+  const playerBuildingList = stringListToMap(playerInstance.buildings);
 
-  const maxSize = 3;
+  var maxAvailableMarketSlots = 0;
+  if (playerBuildingList['market']) {
+    maxAvailableMarketSlots += 3 + parseInt(playerBuildingList["market"]) - 1;
+  }
 
-  if (newMarketItems.length > maxSize) {
+  if (newMarketItems.length > maxAvailableMarketSlots) {
     console.log('New market items exceed maximum size');
     return res.status(400).json({
       statusCode: 400,
@@ -926,9 +930,36 @@ router.post('/marketUpdate', async function (req, res, next) {
     });
   }
 
-  return await updateInstancePlayerMarket(req, res, false);
+  for (var i = 0; i < maxAvailableMarketSlots; i++) {
+    const currentItem = currentMarketItems[i];
+    const newItem = newMarketItems[i];
+
+    // Removing an item from the market, give it back to the player
+    if (currentItem && currentItem.item && currentItem.quantity && (!newItem || newItem.item != currentItem.item)) {
+      playerInstance[currentItem.item] = (parseInt(playerInstance[currentItem.item]) || 0) + parseInt(currentItem.quantity);
+    }
+
+    // Adding a new item to the market, take it from the player and check he owns it
+    if (newItem && newItem.item && newItem.quantity && (!currentItem || currentItem.item != newItem.item)) {
+      if (playerInstance[newItem.item] < newItem.quantity) {
+        console.log('Not enough items to put on market');
+        return res.status(400).json({
+          statusCode: 400,
+          message: "Not enough items to put on market"
+        });
+      }
+      playerInstance[newItem.item] = (parseInt(playerInstance[newItem.item]) || 0) - parseInt(newItem.quantity);
+    }
+  }
+
+  const updatedPlayer = await updateInstancePlayerByServer({ body: { ...playerInstance } }, res, false);
+  console.log('Updated player for market update => ', updatedPlayer);
+
+  return await updateInstancePlayerMarket({ body: { ...req.body, market: JSON.stringify(newMarketItems) } }, res, false);
 });
 
+
+/* POST market buy. */
 router.post('/marketBuy', async function (req, res, next) {
   const { slotId, instancePlayerId, playerId, instanceId } = req.body;
   console.log('# Buy item from market');

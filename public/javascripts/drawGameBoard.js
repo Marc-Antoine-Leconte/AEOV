@@ -231,18 +231,21 @@ function DrawInstanceData() {
     instanceNameComp.innerHTML = data.name;
     instanceModeComp.innerHTML = data.mode;
     var html = "";
-    const instanceParameters = JSON.parse(data.parameters);
-    if (instanceParameters.victoryCondition == "maxPoints") {
-        html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> trésors gagne la partie.";
-    } else if (instanceParameters.victoryCondition == "armyHegemony") {
-        html += "Le joueur qui est le seul à posséder une armée gagne la partie";
-    } else if (instanceParameters.victoryCondition == "maxPointsInTurns") {
-        html += "Le joueur qui a le plus de trésors au bout de <b>" + (instanceParameters.maxTurns ?? 50) + "</b> tours gagne la partie.";
+
+    if (data.parameters) {
+        const instanceParameters = JSON.parse(data.parameters);
+        if (instanceParameters.victoryCondition == "maxPoints") {
+            html += "Le premier joueur arrivé à <b>" + instanceParameters.maxPoints + "</b> trésors gagne la partie.";
+        } else if (instanceParameters.victoryCondition == "armyHegemony") {
+            html += "Le joueur qui est le seul à posséder une armée gagne la partie";
+        } else if (instanceParameters.victoryCondition == "maxPointsInTurns") {
+            html += "Le joueur qui a le plus de trésors au bout de <b>" + (instanceParameters.maxTurns ?? 50) + "</b> tours gagne la partie.";
+        }
+        instanceVictoryConditionComp.innerHTML = html;
+        instanceStatusComp.innerHTML = data.gameState;
+        instanceCurrentTurnComp.innerHTML = data.rounds;
+        instanceTotalPlayersComp.innerHTML = currentInstance.playerList.length + "/" + data.maxPlayers;
     }
-    instanceVictoryConditionComp.innerHTML = html;
-    instanceStatusComp.innerHTML = data.gameState;
-    instanceCurrentTurnComp.innerHTML = data.rounds;
-    instanceTotalPlayersComp.innerHTML = currentInstance.playerList.length + "/" + data.maxPlayers;
 
     const playerList = currentInstance.playerList;
 
@@ -1036,7 +1039,7 @@ function toggleMarketLock(instancePlayerId) {
     currentInstance.playerList[playerIndex].marketIsOpen = newMarketStatus;
 }
 
-function AddItemToMarket(item, price, quantity, currency, instancePlayerId) {
+function AddItemToMarket(item, price, quantity, currency, instancePlayerId, slotId) {
     if (currentInstance.currentPlayer[item] < quantity) {
         console.error('# Not enough items to add to market');
         return false;
@@ -1056,7 +1059,7 @@ function AddItemToMarket(item, price, quantity, currency, instancePlayerId) {
     const playerIndex = currentInstance.playerList.findIndex(p => p.instancePlayerId === instancePlayerId);
     var marketItems = JSON.parse(currentInstance.playerList[playerIndex].market);
     var itemObject = { item, price, quantity, currency }
-    marketItems.push(itemObject);
+    marketItems[slotId] = itemObject;
     currentInstance.playerList[playerIndex].market = JSON.stringify(marketItems);
     return true;
 }
@@ -1113,7 +1116,6 @@ function DrawMarketOverlay() {
     } else {
         currentUserIndex = currentInstance.screen.selectedCity - 1;
     }
-
     console.log('currentUserIndex => ', currentUserIndex);
 
     const marketPlayer = currentInstance.playerList[currentUserIndex];
@@ -1142,6 +1144,7 @@ function DrawMarketOverlay() {
     const cityDescription = document.getElementById("market-description");
     cityDescription.innerText = "coley coley coley ...";
 
+    // Draw player's markets
     Object.entries(marketPlayerList).forEach(([index, player]) => {
         var playerMarketDiv = document.createElement("div");
         playerMarketDiv.className = "player-market";
@@ -1169,7 +1172,7 @@ function DrawMarketOverlay() {
         // Draw slots with items
         for (let slotId = 0; slotId < maxAvailableMarketSlots; slotId++) {
             const slot = marketItems[slotId];
-            if (!slot || slotCount >= maxAvailableMarketSlots) {
+            if (slotCount >= maxAvailableMarketSlots) {
                 continue;
             }
             slotCount += 1;
@@ -1178,7 +1181,7 @@ function DrawMarketOverlay() {
             slotItem.className = "slot-item" + (editionMode ? " editable-slot-item" : " non-editable-slot-item");
             slotItem.id = `slot-${slotId}`;
 
-            if (editionMode) {
+            if (editionMode && slot != null) {
                 const deleteButton = document.createElement("button");
                 deleteButton.className = "delete-market-item-button";
                 deleteButton.innerText = "X";
@@ -1186,49 +1189,161 @@ function DrawMarketOverlay() {
                 deleteButton.addEventListener('click', () => {
                     const marketItems = JSON.parse(player.market);
                     const marketItem = marketItems[slotId];
-                    marketItems.splice(slotId, 1);
+                    if (marketItem && marketItem.item) {
+                        currentInstance.currentPlayer[marketItem.item] += parseInt(marketItem.quantity);
+                    }
+
+                    marketItems[slotId] = null;
                     player.market = JSON.stringify(marketItems);
-                    currentInstance.currentPlayer[marketItem.item] += parseInt(marketItem.quantity);
+
                     DrawGameBoardScreen();
                 });
+            }
+
+            if (slot == null) {
+                const emptySlotLabel = document.createElement("span");
+                emptySlotLabel.innerText = "Emplacement vide";
+                slotItem.appendChild(emptySlotLabel);
+                playerMarketDiv.appendChild(slotItem);
+
+                if (editionMode) {
+                    const addItemButton = document.createElement("button");
+                    addItemButton.innerText = "+";
+                    addItemButton.addEventListener('click', () => {
+                        const marketItems = JSON.parse(player.market);
+                        const marketItem = marketItems[slotId];
+                        if (marketItem && marketItem.item) {
+                            currentInstance.currentPlayer[marketItem.item] += parseInt(marketItem.quantity);
+                        }
+
+                        marketItems[slotId] = { item: undefined, price: 0, quantity: 0, currency: undefined };
+                        player.market = JSON.stringify(marketItems);
+
+                        DrawGameBoardScreen();
+                    });
+                    slotItem.appendChild(addItemButton);
+                }
             }
 
             const marketItem = document.createElement("div");
             marketItem.className = "market-item";
             marketItem.id = `market-${slotId}`;
 
-            const marketItemImage = document.createElement("img");
-            marketItemImage.src = `/images/resources/${slot.item.toLowerCase()}.png`;
-            marketItemImage.alt = slot.item;
-            marketItemImage.id = `market-item-image-${slotId}`;
+            // Filled slot
+            if (slot && slot.item !== undefined) {
+                const marketItemImage = document.createElement("img");
+                marketItemImage.src = `/images/resources/${slot.item.toLowerCase()}.png`;
+                marketItemImage.alt = slot.item;
+                marketItemImage.id = `market-item-image-${slotId}`;
 
-            const marketItemQuantity = document.createElement("span");
-            marketItemQuantity.innerHTML = " x " + slot.quantity;
-            marketItemQuantity.alt = slot.item;
-            marketItemQuantity.id = `market-item-quantity-${slotId}`;
+                const marketItemQuantity = document.createElement("span");
+                marketItemQuantity.innerHTML = " x " + slot.quantity;
+                marketItemQuantity.alt = slot.item;
+                marketItemQuantity.id = `market-item-quantity-${slotId}`;
 
-            marketItem.appendChild(marketItemImage);
-            marketItem.appendChild(marketItemQuantity);
+                marketItem.appendChild(marketItemImage);
+                marketItem.appendChild(marketItemQuantity);
 
-            const marketPriceItem = document.createElement("div");
-            marketPriceItem.className = "market-price-item";
-            marketPriceItem.id = `market-price-${slotId}`;
+                const marketPriceItem = document.createElement("div");
+                marketPriceItem.className = "market-price-item";
+                marketPriceItem.id = `market-price-${slotId}`;
 
-            const marketPriceItemImage = document.createElement("img");
-            marketPriceItemImage.src = `/images/resources/${slot.currency.toLowerCase()}.png`;
-            marketPriceItemImage.alt = slot.item;
+                const marketPriceItemImage = document.createElement("img");
+                marketPriceItemImage.src = `/images/resources/${slot.currency.toLowerCase()}.png`;
+                marketPriceItemImage.alt = slot.item;
 
-            const marketPriceItemQuantity = document.createElement("span");
-            marketPriceItemQuantity.innerHTML = " x " + slot.price;
-            marketPriceItemQuantity.alt = slot.item;
+                const marketPriceItemQuantity = document.createElement("span");
+                marketPriceItemQuantity.innerHTML = " x " + slot.price;
+                marketPriceItemQuantity.alt = slot.item;
 
-            marketPriceItem.appendChild(marketPriceItemImage);
-            marketPriceItem.appendChild(marketPriceItemQuantity);
+                marketPriceItem.appendChild(marketPriceItemImage);
+                marketPriceItem.appendChild(marketPriceItemQuantity);
 
-            slotItem.appendChild(marketItem);
-            slotItem.appendChild(marketPriceItem);
+                slotItem.appendChild(marketItem);
+                slotItem.appendChild(marketPriceItem);
+            }
 
-            if (!editionMode && !player.isUser) {
+            // Empty slot
+            if (slot && slot.item === undefined && editionMode) {
+                console.log('Adding empty slot');
+
+                // item and quantity
+                const itemToSellLabel = document.createElement("label");
+                itemToSellLabel.htmlFor = `item-to-sell-select`;
+                itemToSellLabel.innerText = "Article et quantité à vendre : ";
+                slotItem.appendChild(itemToSellLabel);
+
+                const itemAndQuantityDiv = document.createElement("div");
+                itemAndQuantityDiv.className = "market-editable-line";
+                slotItem.appendChild(itemAndQuantityDiv);
+
+                const itemToSell = document.createElement("select");
+                itemToSell.id = `item-to-sell-select`;
+                ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
+                    const option = document.createElement("option");
+                    option.value = resource;
+                    option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
+                    option.style.backgroundImage = `url('/images/resources/${resource.toLowerCase()}.png')`;
+                    itemToSell.appendChild(option);
+                });
+                itemAndQuantityDiv.appendChild(itemToSell);
+
+                const itemQuantity = document.createElement("input");
+                itemQuantity.type = "number";
+                itemQuantity.id = `item-quantity-input`;
+                itemQuantity.min = 1;
+                itemQuantity.value = 1;
+                itemAndQuantityDiv.appendChild(itemQuantity);
+
+                // currency and price
+                const currencyLabel = document.createElement("label");
+                currencyLabel.htmlFor = `item-price-input`;
+                currencyLabel.innerText = "Prix unitaire : ";
+                slotItem.appendChild(currencyLabel);
+
+                const currencyAndPriceDiv = document.createElement("div");
+                currencyAndPriceDiv.className = "market-editable-line";
+                slotItem.appendChild(currencyAndPriceDiv);
+
+                const itemCurrency = document.createElement("select");
+                itemCurrency.id = `item-price-input`;
+                currencyAndPriceDiv.appendChild(itemCurrency);
+
+                itemCurrency.id = `item-price-select`;
+                ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
+                    const option = document.createElement("option");
+                    option.value = resource;
+                    option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
+                    option.style.backgroundImage = `url('/images/resources/${resource.toLowerCase()}.png')`;
+                    if (resource == "gold") {
+                        option.selected = true;
+                    }
+                    itemCurrency.appendChild(option);
+                });
+
+                const itemPrice = document.createElement("input");
+                itemPrice.type = "number";
+                itemPrice.id = `item-price-input`;
+                itemPrice.min = 1;
+                itemPrice.value = 1;
+                currencyAndPriceDiv.appendChild(itemPrice);
+
+                // add button
+                const addButton = document.createElement("button");
+                addButton.innerText = "Ajouter l'article";
+                addButton.addEventListener('click', () => {
+                    const selectedItem = itemToSell.value;
+                    const price = itemPrice.value;
+                    const quantity = itemQuantity.value;
+                    const currency = itemCurrency.value;
+                    if (AddItemToMarket(selectedItem, price, quantity, currency, player.instancePlayerId, slotId)) {
+                        DrawGameBoardScreen();
+                    }
+                });
+                slotItem.appendChild(addButton);
+            }
+
+            if (slot && !editionMode && !player.isUser) {
                 const buyButton = document.createElement("button");
                 buyButton.innerText = "Acheter 1 élément";
                 buyButton.title = `Acheter 1 ${slot.item} pour ${slot.price} ${slot.currency}`;
@@ -1244,90 +1359,6 @@ function DrawMarketOverlay() {
             }
 
             playerMarketDiv.appendChild(slotItem);
-        }
-
-        // Draw empty slot
-        if (slotCount < maxAvailableMarketSlots && editionMode) {
-            console.log('Adding empty slot');
-            const emptySlotItem = document.createElement("div");
-            emptySlotItem.className = "slot-item empty-slot-item";
-            emptySlotItem.id = `empty-slot`;
-
-            // item to sell
-            const itemToSellLabel = document.createElement("label");
-            itemToSellLabel.htmlFor = `item-to-sell-select`;
-            itemToSellLabel.innerText = "Article à vendre : ";
-            emptySlotItem.appendChild(itemToSellLabel);
-
-            const itemToSell = document.createElement("select");
-            itemToSell.id = `item-to-sell-select`;
-            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
-                const option = document.createElement("option");
-                option.value = resource;
-                option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
-                itemToSell.appendChild(option);
-            });
-            emptySlotItem.appendChild(itemToSell);
-
-            // quantity
-            const quantityLabel = document.createElement("label");
-            quantityLabel.htmlFor = `item-quantity-input`;
-            quantityLabel.innerText = "Quantité : ";
-            emptySlotItem.appendChild(quantityLabel);
-
-            const itemQuantity = document.createElement("input");
-            itemQuantity.type = "number";
-            itemQuantity.id = `item-quantity-input`;
-            itemQuantity.min = 1;
-            itemQuantity.value = 1;
-            emptySlotItem.appendChild(itemQuantity);
-
-            // currency
-            const currencyLabel = document.createElement("label");
-            currencyLabel.htmlFor = `item-price-input`;
-            currencyLabel.innerText = "Objet échangeable : ";
-            emptySlotItem.appendChild(currencyLabel);
-
-            const itemCurrency = document.createElement("select");
-            itemCurrency.id = `item-price-input`;
-            emptySlotItem.appendChild(itemCurrency);
-
-            itemCurrency.id = `item-price-select`;
-            ["wood", "stone", "food", "gold", "diamond", "iron", "armor", "weapon", "horse", "treasure", "tool", "leather"].forEach((resource) => {
-                const option = document.createElement("option");
-                option.value = resource;
-                option.innerText = resource.charAt(0).toUpperCase() + resource.slice(1);
-                itemCurrency.appendChild(option);
-            });
-            emptySlotItem.appendChild(itemCurrency);
-
-            // price
-            const priceLabel = document.createElement("label");
-            priceLabel.htmlFor = `item-price-input`;
-            priceLabel.innerText = "Prix : ";
-            emptySlotItem.appendChild(priceLabel);
-
-            const itemPrice = document.createElement("input");
-            itemPrice.type = "number";
-            itemPrice.id = `item-price-input`;
-            itemPrice.min = 0;
-            itemPrice.value = 0;
-            emptySlotItem.appendChild(itemPrice);
-
-            // add button
-            const addButton = document.createElement("button");
-            addButton.innerText = "Ajouter l'article";
-            addButton.addEventListener('click', () => {
-                const selectedItem = itemToSell.value;
-                const price = itemPrice.value;
-                const quantity = itemQuantity.value;
-                const currency = itemCurrency.value;
-                if (AddItemToMarket(selectedItem, price, quantity, currency, player.instancePlayerId)) {
-                    DrawGameBoardScreen();
-                }
-            });
-            emptySlotItem.appendChild(addButton);
-            playerMarketDiv.appendChild(emptySlotItem);
         }
 
         // empty market message
@@ -1393,7 +1424,7 @@ function DrawPlayerArmy() {
         return;
     }
 
-    playerList.forEach((element, index) => {
+    Object.values(playerList).forEach((element, index) => {
         if (!element.civilization) {
             return;
         }
@@ -1477,7 +1508,7 @@ function DrawWinningScreen() {
 
     endingScreen.style.display = "flex";
     endingScreen.innerHTML = '';
-    
+
     console.log("# Displaying winning screen...");
 
     const instanceParams = JSON.parse(instanceStatus.parameters);
