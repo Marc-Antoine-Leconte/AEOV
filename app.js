@@ -18,8 +18,6 @@ var gameRouter = require('./server/routes/game');
 var apiRouter = require('./server/routes/api');
 var resourcesRouter = require('./server/routes/resources');
 
-const { error } = require('console');
-
 var app = express(); 
 
 // view engine setup

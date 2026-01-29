@@ -116,7 +116,7 @@ function DisplayInstanceList() {
             button.className = "select-instance-button";
             button.id = "list-instance-"+instance.id;
             button.value = instance.name;
-            button.textContent = instance.name + "#" + instance.id;
+            button.innerHTML = "<b>" + instance.name + "#" + instance.id + "</b><br/><i>" + instance.playerCount + "/" + instance.maxPlayers + "</i> | <i>" + (instance.gameState == "waiting" ? "En attente de joueur" : instance.gameState == "inProgress" ? "Partie en cours" : "Partie terminée") + "</i>";
             button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
             const optionsContainer = document.createElement("div");
@@ -173,12 +173,12 @@ function DisplayPlayerInstanceList() {
             const listItem = document.createElement("div");
             listItem.className = "instance-list-item";
 
-            const button = document.createElement("button");
+            const button = document.createElement("div");
             button.type = "button";
             button.className = "select-player-instance-button select-instance-button";
             button.id = "player-list-instance-"+instance.id;
             button.value = instance.name;
-            button.textContent = instance.name + "#" + instance.id;
+            button.innerHTML = "<b>" + instance.name + "#" + instance.id + "</b><br/><i>" + instance.playerCount + "/" + instance.maxPlayers + "</i> | <i>" + (instance.gameState == "waiting" ? "En attente de joueur" : instance.gameState == "inProgress" ? "Partie en cours" : "Partie terminée") + "</i>";
             button.addEventListener('click', () => onSelectInstanceButtonClick(instance.id));
 
             const optionsContainer = document.createElement("div");

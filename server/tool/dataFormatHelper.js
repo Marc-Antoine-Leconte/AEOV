@@ -73,7 +73,8 @@ export const getPublicInstanceData = (instanceData, currentPlayerData) => {
         maxPlayers: dataValues.maxPlayers,
         isOwnedByPlayer: (dataValues.ownerId == playerDataValues.id),
         rounds: dataValues.rounds,
-        parameters: dataValues.parameters
+        parameters: dataValues.parameters,
+        playerCount: dataValues.playerCount,
     }
     return result;
 }

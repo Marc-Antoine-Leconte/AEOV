@@ -11,7 +11,7 @@ const instanceSchema = Joi.object({
         .max(30)
         .required(),
     gameState: Joi.string()
-        .valid('waiting', 'in-progress', 'completed'),
+        .valid('waiting', 'inProgress', 'completed'),
     currentPlayerId: Joi.number()
         .integer()
         .min(1),

@@ -8,10 +8,6 @@ const locationModel = require('../models/location')
 const buildingModel = require('../models/building')
 
 const options_devenv = {
-    options: {
-        encrypt: true,
-        trustServerCertificate: true, // For local development
-    },
     connectTimeout: process.env.DB_CONNECT_TIMEOUT
 };
 

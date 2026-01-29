@@ -1,15 +1,26 @@
 const { Instance } = require('../config/database');
-const { param } = require('../routes');
 const { createInstancePlayer } = require('./instancePlayerController');
 const { getPublicInstanceData } = require('../tool/dataFormatHelper');
-const { getInstancePlayersByInstanceId, deleteInstancePlayerByInstanceId } = require('./instancePlayerController');
-const { getLocationsByInstanceId, deleteLocationByInstanceId } = require('./locationController');
+
+const db = require('../config/database');
 
 class InstanceController {
     getAllInstances = async (req, res, allowTransmit = true) => {
         console.log('@getAllInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll({ attributes: { exclude: ['currentPlayerId'] } });
+            const instances = await Instance.findAll({
+                attributes: {
+                    exclude: ['currentPlayerId'],
+                    include: [[
+                        db.Sequelize.literal(`(
+                            SELECT COUNT(*)
+                            FROM instancePlayer
+                            WHERE
+                                instancePlayer.instanceId = instance.id
+                            )`),
+                        'playerCount',]]
+                },
+            });
             if (allowTransmit)
                 res.json(instances);
             return instances;
@@ -28,7 +39,20 @@ class InstanceController {
     getAllAvailableInstances = async (req, res, allowTransmit = true) => {
         console.log('@getAllAvailableInstances req => ', req.body);
         try {
-            const instances = await Instance.findAll({ attributes: { exclude: ['currentPlayerId'] }, where: { gameState: 'waiting' } });
+            const instances = await Instance.findAll({
+                attributes: {
+                    exclude: ['currentPlayerId'],
+                    include: [[
+                        db.Sequelize.literal(`(
+                            SELECT COUNT(*)
+                            FROM instancePlayer
+                            WHERE
+                                instancePlayer.instanceId = instance.id
+                            )`),
+                        'playerCount',]]
+                },
+                where: { gameState: 'waiting' },
+            });
             if (allowTransmit)
                 res.json(instances);
             return instances;
