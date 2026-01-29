@@ -45,12 +45,6 @@ function hideHeader() {
 }
 
 function InitConnectionPage() {
-    // const currentId = getCookie("currentPlayerId");
-    // if (currentId && currentId != "" && !isNaN(currentId)) {
-    //     console.log('Player is already connected, redirecting to home page...');
-    //     redirectToUrl("/home");
-    //     return;
-    // }
     console.log('Player is not connected, staying on connection page...');
     
     hideHeader();
