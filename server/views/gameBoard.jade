@@ -115,8 +115,9 @@ block content
         button(id="zoom-out-button") -
 
       div(id="game-board-controls", hidden=true)
-        button(type='button', id='end-turn-button') Terminer le tour
-        button(type='button', id='visit-market-action-button') Marché
+        button(type='button', class='game-board-controls-button', id='visit-market-action-button') Marché
+        button(type='button', class='game-board-controls-button', id='visit-city-action-button') Ma ville
+        button(type='button', class='game-board-controls-button', id='end-turn-button') Terminer le tour
 
     div(id="game-board-end-screen", hidden=true)
 

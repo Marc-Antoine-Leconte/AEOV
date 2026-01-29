@@ -463,10 +463,24 @@ body {
     width: 100%;
     display: flex;
     position: relative;
-    bottom: 20px;
+    bottom: 30px;
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+.game-board-controls-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #00B7FF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.game-board-controls-button#end-turn-button {
+    background-color: red;
 }
 
 #game-board-container {

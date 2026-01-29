@@ -18,11 +18,37 @@ function onEndTurnButtonClick() {
     });
 }
 
+function RedrawOverlayScreen() {
+    DrawMarketOverlay();
+    DrawCityOverlay();
+}
+
 function onVisitMarketButtonClick(index = null) {
     console.log('Visit Market button clicked');
     currentInstance.screen.layout = 'market';
     currentInstance.screen.selectedCity = index;
-    DrawMarketOverlay();
+    RedrawOverlayScreen();
+}
+
+function onVisitCityButtonClick() {
+    console.log('Visit City button clicked');
+    currentInstance.screen.layout = 'city';
+
+    const playerList = currentInstance.playerList;
+    var index = null;
+    Object.entries(playerList).forEach(([id, player]) => {
+        if (player.isUser) {
+            index = parseInt(id) + 1;
+        }
+    });
+
+    if (index == null) {
+        console.error('# No player found for current user');
+        return;
+    }
+
+    currentInstance.screen.selectedCity = index;
+    RedrawOverlayScreen();
 }
 
 function setEndTurnButtonListener() {
@@ -33,6 +59,11 @@ function setEndTurnButtonListener() {
 function setVisitMarketButtonListener() {
     const visitMarketBtn = document.getElementById("visit-market-action-button");
     visitMarketBtn.addEventListener('click', () => onVisitMarketButtonClick(null));
+}
+
+function setVisitCityButtonListener() {
+    const visitCityBtn = document.getElementById("visit-city-action-button");
+    visitCityBtn.addEventListener('click', () => onVisitCityButtonClick());
 }
 
 function DrawControls() {
@@ -49,6 +80,7 @@ function DrawControls() {
 
     setEndTurnButtonListener();
     setVisitMarketButtonListener();
+    setVisitCityButtonListener();
 }
 
 function DrawPlayerResources() {
