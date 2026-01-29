@@ -794,7 +794,7 @@ function DrawPinPoints() {
             {
                 currentInstance.screen.layout = 'city';
                 currentInstance.screen.selectedCity = index + 1;
-                DrawCityOverlay();
+                RedrawOverlayScreen();
             }
         });
 
@@ -880,7 +880,7 @@ function DrawPinPoints() {
             {
                 currentInstance.screen.layout = 'location';
                 currentInstance.screen.selectedLocation = location.pointId;
-                DrawCityOverlay();
+                RedrawOverlayScreen();
             }
         });
 
@@ -1040,11 +1040,11 @@ function DrawCityOverlay() {
         buildingName.innerText = building + " (Niv " + count + ")";
         buildingItem.appendChild(buildingName);
 
-        if (cityData.userIsOwner) {
-            const upgradeButton = document.createElement("button");
-            upgradeButton.innerText = "Améliorer";
-            buildingItem.appendChild(upgradeButton);
-        }
+        // if (cityData.userIsOwner) {
+        //     const upgradeButton = document.createElement("button");
+        //     upgradeButton.innerText = "Améliorer";
+        //     buildingItem.appendChild(upgradeButton);
+        // }
 
         if (building == "wall") {
             wallContainer.appendChild(buildingItem);
@@ -1643,16 +1643,14 @@ function DrawGameBoardScreen() {
     DrawGameBoard();
     DrawPinPoints();
     DrawPlayerArmy();
-    DrawCityOverlay();
-    DrawMarketOverlay();
+    RedrawOverlayScreen();
 }
 
 function DrawPlayersDataScreen() {
     DrawPlayerResources();
     DrawPlayerList();
     DrawPlayerArmy();
-    DrawCityOverlay();
-    DrawMarketOverlay();
+    RedrawOverlayScreen();
 }
 
 DrawGameBoardScreen();

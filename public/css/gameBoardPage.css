@@ -227,8 +227,9 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 4vw;
-    gap: 1vw;
+    align-content: flex-start;
+    padding: 2vw;
+    column-gap: 1vw;
 }
 
 #building-wall-container {
